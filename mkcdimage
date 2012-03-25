@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# Script to create a bootable CD image file containing rEFInd.
+# Usage:
+#
+#   ./mkcdimage {version}
+#
+# where {version} is the rEFInd version number.
+#
+# This script relies on the mcopy utility.
+#
+# The script creates an image file from the binary package
+# stored in ../snapshots/{version}/refind-bin-{version}.zip
+# The resulting CD image file is stored in
+# ../snapshots/{version}/refind-cd-{version}.iso
+
+StartDir=`pwd`
+Version=$1
+
+# Unzip the binary archive file....
+cd ../snapshots/$Version
+rm -rf temp
+mkdir temp
+cd temp
+unzip ../refind-bin-$Version.zip
+
+# Create hard links to the files so that they'll be suitable for an
+# EFI-boot CD...
+mkdir -p refind-bin-$Version/EFI/boot
+cd refind-bin-$Version/EFI/boot
+ln ../../refind/refind_ia32.efi ./bootia32.efi
+ln ../../refind/refind_x64.efi ./bootx64.efi
+ln ../../refind/refind.conf-sample ./refind.conf
+mkdir icons
+cd icons
+ln ../../../refind/icons/* ./
+cd ../../..
+
+# Get the size of the binaries to go in the El Torito image in kB
+ToritoSize=`du -s EFI | cut -f 1`
+let ToritoSize=($ToritoSize)/28
+let ToritoSize=($ToritoSize)*32
+
+# Prepare a FAT filesystem image and populate it with the
+# EFI boot files....
+dd if=/dev/zero of=refind-bin-$Version.img bs=1024 count=$ToritoSize
+mkdosfs -n "rEFInd.ET" refind-bin-$Version.img
+mcopy -irefind-bin-$Version.img -s EFI ::/
+
+# Make the ISO-9660 image file....
+mkisofs -A "Bootable rEFInd" -V "rEFInd $Version" -volset "rEFInd $Version" \
+    -J -r -v -x ./lost+found -o ../../refind-cd-$Version.iso \
+    -b refind-bin-$Version.img -c boot.cat -no-emul-boot -boot-load-size 4 \
+    -eltorito-alt-boot -efi-boot refind-bin-$Version.img \
+    -no-emul-boot ./
+
+cd ../../
+rm -r temp/

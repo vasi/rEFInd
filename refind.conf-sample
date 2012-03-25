@@ -1,0 +1,163 @@
+#
+# refind.conf
+# Configuration file for the rEFInd boot menu
+#
+
+# Timeout in seconds for the main menu screen. Setting the timeout to 0
+# disables automatic booting (i.e., no timeout).
+#
+timeout 20
+
+# Disable menu options for increased security. These are intended for a lab
+# environment where the administrator doesn't want users to mess with the
+# operating system. List the names for the options you want to hide from
+# the boot menu. Currently supported:
+#  shell       - remove the EFI shell
+#  tools       - remove all EFI tools (shell and gptsync)
+#  singleuser  - remove the submenu options to boot Mac OS X in single-user
+#                 or verbose modes
+#  hwtest      - remove the submenu option to run Apple Hardware Test
+#  all         - all of the above
+#
+#disable shell singleuser
+#disable all
+
+# Use a custom title banner instead of the rEFInd icon and name. The file
+# path is relative to the directory where refind.efi is located. The color
+# in the top left corner of the image is used as the background color
+# for the menu screens. Currently uncompressed BMP images with color
+# depths of 24, 8, 4 or 1 bits are supported.
+#
+#banner hostname.bmp
+
+# Custom images for the selection background. There is a big one (144 x 144)
+# for the OS icons, and a small one (64 x 64) for the function icons in the
+# second row. If only a small image is given, that one is also used for
+# the big icons by stretching it in the middle. If only a big one is given,
+# the built-in default will be used for the small icons.
+#
+# Like the banner option above, these options take a filename of
+# an uncompressed BMP image file.
+#
+#selection_big   selection-big.bmp
+#selection_small selection-small.bmp
+
+# Hide various user interface elements. Here you can list the names of
+# interface elements to hide. Currently supported:
+#  banner    - the rEFInd title banner
+#  shell     - the EFI shell icon
+#  tools     - all EFI tools (shell and gptsync)
+#  funcs     - built-in functions (about, restart)
+#    ('tools' and 'funcs' together hide the complete second row of icons.)
+#  label     - text label in the menu
+#  badges    - all volume badges (same as 'hidebadges all'); this setting
+#               is not recommended because it won't let you distinguish
+#               installed OSes and bootable CDs/DVDs.
+#  all       - all of the above, except for 'badges'
+#
+# Note: The 'shell' and 'tools' options are equivalent to the 'disable'
+# options with the same names.
+#
+#hideui tools funcs hdbadges
+#hideui all
+
+# Use text mode only. When enabled, this option forces rEFInd into text mode.
+#
+#textonly
+
+# Which types of boot loaders to search:
+#  internal      - internal EFI disk-based boot loaders
+#  external      - external EFI disk-based boot loaders
+#  optical       - EFI optical discs (CD, DVD, etc.)
+#  hdbios        - BIOS disk-based boot loaders
+#  biosexternal  - BIOS external boot loaders (USB, eSATA, etc.)
+#  cd            - BIOS optical-disc boot loaders
+#  manual        - use stanzas later in this configuration file
+# Default is internal,external,optical
+scanfor internal,external,optical
+
+# Set the default menu selection.  The available arguments match the
+# keyboard accelerators available within rEFInd.  You may select the default
+# loader using a one-character abbreviation for the OS name ("M" = Mac OS X,
+# "L" = Linux, "W" = Windows).  You may also specify a digit between 1 and
+# 9, in which case the Nth loader in the menu will be the default.  You can
+# also select a rEFInd tool entry ("S" = EFI Shell, "P" = Partitioning Tool,
+# "U" = shutdown).  This is intended as a quick fix to change the default
+# boot choice until full configurability arrives.
+#
+#default_selection 1
+
+# Sample manual configuration stanzas. Each begins with the "menuentry"
+# keyword followed by a name that's to appear in the menu (use quotes
+# if you want the name to contain a space) and an open curly brace
+# ("{"). Each entry ends with a close curly brace ("}"). Common
+# keywords within each stanza include:
+#
+#  loader    - identifies the boot loader file
+#  initrd    - Specifies an initial RAM disk file
+#  icon      - specifies a custom boot loader icon
+#  ostype    - OS type code to determine boot options available by
+#              pressing Insert. Valid values are "MacOS", "Linux",
+#              "Windows", and "XOM". Case-sensitive.
+#  graphics  - set to "on" to enable graphics-mode boot (useful
+#              mainly for MacOS) or "off" for text-mode boot.
+#              Default is auto-detected from loader filename.
+#  options   - sets options to be passed to the boot loader; use
+#              quotes if more than one option should be passed or
+#              if any options use characters that might be changed
+#              by rEFInd parsing procedures (=, /, #, or tab).
+#  disabled  - use alone or set to "yes" to disable this entry.
+#
+# Note that you can use either DOS/Windows/EFI-style backslashes (\)
+# or Unix-style forward slashes (/) as directory separators. Either
+# way, all file references are on the ESP from which rEFInd was
+# launched.
+# Use of quotes around parameters causes them to be interpreted as
+# one keyword, and for parsing of special characters (spaces, =, /,
+# and #) to be disabled. This is useful mainly with the "options"
+# keyword. Use of quotes around parameters that specify filenames is
+# permissible, but you must then use backslashes instead of slashes,
+# except when you must pass a forward slash to the loader, as when
+# passing a root= option to a Linux kernel.
+
+# Below are several sample boot stanzas. All are disabled by default.
+# Find one similar to what you need, copy it, remove the "disabled" line,
+# and adjust the entries to suit your needs.
+
+# A sample entry for a Linux 3.3 kernel with its new EFI boot stub
+# support. This includes Linux-specific boot options and specification
+# of an initial RAM disk. Note uses of Linux-style forward slashes,
+# even in the initrd specification. Also note that a leading slash is
+# optional in file specifications.
+menuentry Linux {
+	loader EFI/Linux/bzImage-3.3.0-rc7
+	initrd EFI/Linux/initrd-3.3.0.img
+	icon EFI/refind/icons/os_linux.icns
+	options "ro root=UUID=5f96cafa-e0a7-4057-b18f-fa709db5b837"
+	disabled
+}
+
+# A sample entry for loading Ubuntu using its standard name for
+# its GRUB 2 boot loader. Note uses of Linux-style forward slashes
+menuentry Ubuntu {
+	loader /EFI/ubuntu/grubx64.efi
+	icon /EFI/refined/icons/os_linux.icns
+	disabled
+}
+
+# A minimal ELILO entry, which probably offers nothing that
+# auto-detection can't accomplish.
+menuentry "ELILO" {
+	loader \EFI\elilo\elilo.efi
+	disabled
+}
+
+# Like the ELILO entry, this one offers nothing that auto-detection
+# can't do; but you might use it if you want to disable auto-detection
+# but still boot Windows....
+menuentry "Windows 7" {
+	loader \EFI\Microsoft\Boot\bootmgfw.efi
+	disabled
+}
+
+# EOF
