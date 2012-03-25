@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>The rEFInd Boot Manager: The Future of rEFInd</title>
+  <link href="../Styles/styles.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <h1>The rEFInd Boot Manager:<br />The Future of rEFInd</h1>
+
+  <p class="subhead">by Roderick W. Smith, <a
+href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
+
+  <p>Originally written: 3/14/2012; last Web page update: 3/23/2012, referencing rEFInd 0.2.2</p>
+
+
+<p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
+
+<table border="1">
+<tr>
+<td>Donate $1.00</td>
+<td>Donate $2.50</td>
+<td>Donate $5.00</td>
+<td>Donate $10.00</td>
+<td>Donate another value</td>
+</tr>
+<tr>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="1.00">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="2.50">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="5.00">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="10.00">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="lc" value="US">
+<input type="hidden" name="no_note" value="0">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHostedGuest">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="Donate with PayPal" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
+</td></tr>
+</table> 
+
+<hr />
+
+<p>This page is part of the documentation for the rEFInd boot manager. If a Web search has brought you here, you may want to start at the <a href="index.html">main page.</a></p>
+
+<hr />
+
+<p>rEFInd is far from perfect. It's based on rEFIt, which has an <a href="https://sourceforge.net/tracker/?group_id=161917&atid=821764">list of active bugs</a> on its project page on Sourceforge. I have not studied this bug list in detail for rEFInd's first release, although I've probably fixed a few of those bugs because I encountered them myself. Other bugs I may never fix because I lack the necessary hardware for testing.</p>
+
+<p>This page exists to document some of rEFInd's known bugs and limitations, as well as features I hope to add in the future. Some of the items on this list are things that you may be able to help with, so if you'd like to contribute, feel free to drop me a line!</p>
+
+<p>Without further ado, then, and in no particular order:</p>
+
+<ul>
+
+<li>Testing! rEFIt was complex enough that changes such as the ones I've made have the potential to disrupt the program's operation in unexpected ways. I can only test on a handful of systems with a limited number of configurations. Therefore, if you try rEFInd and run into bugs, please report them to me!</li>
+
+<li>I have little talent with graphics manipulation programs, so rEFInd's boot logo, such as it is, is pretty weak. If you have artistic talent and would like to create a rEFInd logo, please feel free to send it to me. I won't make any final decision about changes until at least June 30 of 2012.</li>
+
+<li>rEFIt's original design, and hence rEFInd's design, enables easy
+theming by replacing icon files. If you'd like to design a new theme for
+rEFInd, feel free to submit it. I might or might not replace the icons it
+uses now (most of which come from the Oxygen Icons package), but I may
+provide a way to make selecting a theme from one of several installed
+themes easy, and provide links to themes on this Web site (or even host
+them on the project's Sourceforge page). Note that rEFInd currently
+supports only BMP format and ICNS format graphics files, and the former
+aren't very useful for icons because they lack transparency support. ICNS
+is an Apple format, and many Mac tools support it. In Linux, you can
+convert PNG images to ICNS format by using the <a
+href="http://icns.sourceforge.net/">libicns</a> library's <tt>png2icns</tt>
+program. I'm not sure what you'd use in Windows to create ICNS files.</li>
+
+<li>The code could be more flexible in its handling of the sizes of various graphical elements, and particularly drawn text. Prior to version 0.2.2, submenu text was invisible on UEFI-based PCs with 800x600 and smaller displays because of an inability to properly crop the graphics fields that hold the text. With version 0.2.2, I've put a band-aid on this problem by reducing the field size so that it now works on 800x600 displays, but smaller displays still suffer from this problem. This is just an example of the inflexibility of certain layout issues within rEFInd.</li>
+
+<li>I want to be able to specify the volume on which a boot loader resides in <tt>refind.conf</tt>. (As it is, manually-defined options can only launch boot loader files on the same volume as rEFInd.)</li>
+
+<li>It would be useful to be able to specify paths to boot loaders and/or initial RAM disks relative to the rEFInd directory (or the boot loader's directory, in the case of initrds).</li>
+
+<li>I don't like the <tt>disable</tt> and <tt>hideui</tt> options in <tt>refind.conf</tt>. I'd like to replace them with a positive option listing for utilities, similar to <tt>scanfor</tt> (which in fact replaces other "hide" options in rEFIt).</li>
+
+<li>There's currently no way to create a manual boot stanza for a BIOS-booted OS. This isn't a big priority for me personally, but I can see how it could be for some people.</li>
+
+<li>The Page Up and Page Down keys work in a rather strange way&mdash;a result of an admittedly quick fix on my part to a problem with a data structure that makes implementation of scrolling harder than it ought to be.</li>
+
+<li>I'd like to find a way to enable users to enter customizations for boot options and then save them to the <tt>refind.conf</tt> file.</li>
+
+<li>It should be possible to override specific auto-detected boot loader settings&mdash;say, to disable one specific boot loader or change its icon.</li>
+
+<li>A way to read boot options set via <tt>efibootmgr</tt>, <tt>bless</tt>, or similar options from NVRAM to add to the boot set would be useful.</li>
+
+<li>A way to examine and change the NVRAM settings could be useful. This would enable a CD-based boot of rEFInd to fix a broken disk boot. Perhaps this could be done via a separate tool that could be launched much like the shell or <tt>gptsync</tt>.</li>
+
+<li>I'd like to find a way to get rEFInd to launch BIOS boot loaders on UEFI-based systems. This option currently works only on Macs&mdash;or at least, I've not gotten it to work on any of my UEFI-based PCs.</li>
+
+<li>I'd like to find a way to have rEFInd re-scan removable media when they're inserted.</li>
+
+<li>The code is in need of review to search for memory leaks and similar problems.</p>
+
+</ul>
+
+<hr />
+
+<p>copyright &copy; 2012 by Roderick W. Smith</p>
+
+<p>This document is licensed under the terms of the <a href="FDL-1.3.txt">GNU Free Documentation License (FDL), version 1.3.</a></p>
+
+<p>If you have problems with or comments about this Web page, please e-mail me at <a href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com.</a> Thanks.</p>
+
+<p><a href="index.html">Go to the main rEFInd page</a></p>
+
+<p><a href="using.html">Learn about problems with and the future of rEFInd</a></p>
+
+  <p><a href="http://www.rodsbooks.com/">Return</a> to my main Web page.</p>
+</body>
+</html>

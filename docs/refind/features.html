@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>The rEFInd Boot Manager: rEFInd Features</title>
+  <link href="../Styles/styles.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <h1>The rEFInd Boot Manager:<br />rEFInd Features</h1>
+
+  <p class="subhead">by Roderick W. Smith, <a
+href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
+
+  <p>Originally written: 3/14/2012; last Web page update: 3/23/2012, referencing rEFInd 0.2.2</p>
+
+
+<p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
+
+<table border="1">
+<tr>
+<td>Donate $1.00</td>
+<td>Donate $2.50</td>
+<td>Donate $5.00</td>
+<td>Donate $10.00</td>
+<td>Donate another value</td>
+</tr>
+<tr>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="1.00">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="2.50">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="5.00">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="10.00">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="lc" value="US">
+<input type="hidden" name="no_note" value="0">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHostedGuest">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="Donate with PayPal" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
+</td></tr>
+</table> 
+
+<hr />
+
+<p>This page is part of the documentation for the rEFInd boot manager. If a Web search has brought you here, you may want to start at the <a href="index.html">main page.</a></p>
+
+<hr />
+
+<p>rEFInd is a fork of the <a href="http://refit.sourceforge.net">rEFIt</a> boot manager. As such, it has many features in common with rEFIt. These include the following:</p>
+
+<ul>
+
+<li>Support for both text-mode and graphical operation.</li>
+
+<li>Auto-detection of EFI and BIOS boot loaders.</li>
+
+<li>User-configurable graphics and icons&mdash;you can set your own background, set new icons, and so on.</li>
+
+<li>Launch EFI boot loaders or, on Macs, launch BIOS-based boot loaders. (I have yet to get the BIOS-launching feature to work on a UEFI-based PC, but it might work on a model I don't own.)</li>
+
+<li>Launch options for an EFI shell, disk partitioner, and other optional external components. (See the <a href="installing.html">Installing rEFInd</a> section for information on how to obtain and install these components.)</li>
+
+<li>Set OS-specific boot options, such as to launch Mac OS X with verbose text-mode debug messages.</li>
+
+</ul>
+
+<p>I've used rEFIt on a couple of computers for over a year, but I've found that it has some frustrating limitations. It tends to flood the screen with non-functional BIOS boot options, for instance; and it has a number of bugs on UEFI-based systems. I therefore expanded on rEFIt, giving rEFInd features that improve on or go beyond those of rEFIt, such as:</p>
+
+<ul>
+
+<li>User-configurable methods of detecting boot loaders:
+
+    <ul>
+    <li>Auto-detection of EFI boot loaders, independently on internal hard disks, external hard disks, and optical discs.</li>
+    <li>Auto-detection of BIOS boot loaders, independently on internal hard disks, external hard disks, and optical discs.</li>
+    <li>Manually via the configuration file</li>
+    </ul>
+
+    You can select which of these methods to use to construct the rEFInd main boot menu. Although rEFIt supports auto-detection, it does not support manual configuration; and rEFIt's options to enable, disable, and prioritize individual boot loader detection methods are primitive compared to those in rEFInd.</li>
+
+<li>The ability to fine-tune options passed to EFI boot loaders, via manual configuration.</li>
+
+<li>Proper handling of more OS options than can fit on the screen. (rEFIt displays an empty list in graphical mode when it detects too many OSes.)</li>
+
+<li>Additional OS icons (all of which are Linux distributions, at least so far). This can make it easier to find a specific distribution in the boot list if you've installed multiple Linux distributions.</li>
+
+<li>The ability to auto-detect Linux initial RAM disk files and to read Linux kernel options from a <tt>linux.conf</tt> file. These features support (nearly) automatic handling of Linux kernels with embedded EFI stub loader support (a new feature with Linux 3.3.0).</li>
+
+<li>Fixes to display problems on many UEFI-based PCs.</li>
+
+<li>Workarounds to file detection bugs in at least one type of UEFI firmware.</li>
+
+<li>Improved detection of itself, to keep rEFInd out of its own boot menu.</li>
+
+</ul>
+
+<p>On the flip side, at least for Mac users, rEFInd comes with less sophisticated Mac installation tools than does rEFIt, in favor of more OS-agnostic packaging. Also, rEFInd doesn't support loading EFI drivers; that job should be done in other ways when using rEFInd.</p>
+
+<p>If these features sound useful, then read on and try rEFInd. If not, you may need to look elsewhere. My <a href="http://www.rodsbooks.com/efi-bootloaders/index.html">Managing EFI Boot Loaders for Linux</a> page may be useful to you in this case.</p>
+
+<hr />
+
+<p>copyright &copy; 2012 by Roderick W. Smith</p>
+
+<p>This document is licensed under the terms of the <a href="FDL-1.3.txt">GNU Free Documentation License (FDL), version 1.3.</a></p>
+
+<p>If you have problems with or comments about this Web page, please e-mail me at <a href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com.</a> Thanks.</p>
+
+<p><a href="index.html">Go to the main rEFInd page</a></p>
+
+<p><a href="getting.html">Learn how to obtain rEFInd</a></p>
+
+  <p><a href="http://www.rodsbooks.com/">Return</a> to my main Web page.</p>
+</body>
+</html>

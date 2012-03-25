@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>The rEFInd Boot Manager: Configuring the Boot Manager</title>
+  <link href="../Styles/styles.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <h1>The rEFInd Boot Manager:<br />Configuring the Boot Manager</h1>
+
+  <p class="subhead">by Roderick W. Smith, <a
+href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
+
+  <p>Originally written: 3/14/2012; last Web page update: 3/23/2012, referencing rEFInd 0.2.2</p>
+
+
+<p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
+
+<table border="1">
+<tr>
+<td>Donate $1.00</td>
+<td>Donate $2.50</td>
+<td>Donate $5.00</td>
+<td>Donate $10.00</td>
+<td>Donate another value</td>
+</tr>
+<tr>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="1.00">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="2.50">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="5.00">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="10.00">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="lc" value="US">
+<input type="hidden" name="no_note" value="0">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHostedGuest">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="Donate with PayPal" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
+</td></tr>
+</table> 
+
+<hr />
+
+<p>This page is part of the documentation for the rEFInd boot manager. If a Web search has brought you here, you may want to start at the <a href="index.html">main page.</a></p>
+
+<hr />
+
+<p>Many casual users will be able to use rEFInd without making further changes; in its default configuration, the boot manager automatically detects all the EFI boot loader programs you have on your ESP (or your OS X boot partition, in the case of Macs) and displays icons for them. Sometimes, though, you may want to tweak rEFInd's configuration. Sometimes you can obtain your desired results by adjusting the filenames of your boot loaders. Other times, you can edit rEFInd's configuration file, <tt>refind.conf</tt>, which resides in the same directory as its binary file (<tt>refind.efi</tt> or whatever you've renamed it).</p>
+
+<p>Broadly speaking, rEFInd's configuration file is broken down into two sections: <i>global options</i> and <i>OS stanzas.</i> The global options section sets options that apply globally&mdash;to set the timeout period, enable graphics or text mode, and so on. OS stanzas are optional, but if present, they enable you to add new boot options or replace the auto-detected options with customized ones. Both sections include configuration lines and comment lines, the latter being denoted by a leading hash mark (<tt>#</tt>). rEFInd ignores comment lines, so you can add explanatory text. The default configuration file includes numerous comments explaining each of the options.</p>
+
+<h2>Hiding EFI Boot Loaders</h2>
+
+<div class="sidebar">
+
+<p>ESPs use the FAT filesystem, which is case-insensitive. Unfortunately, at least one EFI implementation (Gigabyte's <a href="http://www.rodsbooks.com/gb-hybrid-efi/">Hybrid EFI</a>) contains a bug that causes string comparisons that should be case-insensitive to actually be done in a case-sensitive way. This can cause files that are present to appear to be missing. rEFInd includes code to work around this bug in some situations, but not in all of them. If boot loaders appear to be missing, try changing the case on their filenames or on the <tt>EFI</tt> directory in the ESP. (It's coded as uppercase in rEFInd; but EFI loader filename extensions are coded as lowercase <tt>.efi</tt>. I made these choices because they seem to be the most common uses on real-world installations.)</p>
+
+</div>
+
+<p>Before delving into the configuration file, you should be aware of what you can do by renaming files. By default, rEFInd scans all the filesystems it can read for boot loaders. It scans most of the subdirectories of the <tt>EFI</tt> directory on every filesystem it can access for files with names that end in <tt>.efi</tt>. (rEFIt gives special treatment to the <tt>TOOLS</tt> subdirectory, where it looks for system tools rather than boot loaders.)</p>
+
+<p>If you're like me, you may sometimes want to hide a boot loader from rEFInd's menu for a brief period&mdash;say, because you're testing a variety of configurations but you don't want them all to clutter the menu at once. You might also want to hide a boot loader if you want to override its default settings using a custom entry in <tt>refind.conf</tt> and you don't want an automatic search to duplicate that entry. You can easily hide a boot loader by removing or changing its <tt>.efi</tt> filename extension&mdash;for instance, changing <tt>grub.efi</tt> to <tt>grub</tt>.</p>
+
+<p>Another way to hide a boot loader is to move it into rEFInd's own directory. In order to keep rEFInd from showing up in its own menu, it ignores boot loaders in its own directory. This obviously includes the rEFInd binary file itself, but also anything else you might store there.</p>
+
+<h2>Adjusting the Global Configuration</h2>
+
+<p>You can adjust many of rEFInd's options by editing its <tt>refind.conf</tt> file. You can use any text editor you like for the job, but be sure it saves the file in plain ASCII text, not in a word processing format. (In theory, a UTF-16 encoding should also work, but I've not tried that myself.) Note that the EFI shell includes its own editor. If you need to make a change before you launch an OS, you can launch a shell, change to the rEFInd directory, and type <b><tt>edit refind.conf</tt></b> to edit the file. This EFI editor is quite primitive, but it gets the job done. After editing, you'll need to reboot for rEFInd to read the changed configuration file.</p>
+
+<p>Global configuration file options consist of a name token followed by one or more parameters, as in:</p>
+
+<pre class="listing">
+timeout 20
+</pre>
+
+<p>This example's name token is <tt>timeout</tt> and its parameter is <tt>20</tt>. The net effect of this line is to set the timeout period to 20 seconds&mdash;rEFInd will wait 20 seconds before launching the default boot loader. Some options can take multiple parameters. These may be separated by commas, spaces, or tabs. The global options are summarized in the Table 1.</p>
+
+<table border="1" cellpadding="1" cellspacing="2" summary="Table 1: Global options in <tt>refind.conf</tt>"><a name="table1"><caption><b>Table 1: Global options in <tt>refind.conf</tt></b></caption></a>
+<tr>
+   <th>Token</th>
+   <th>Possible parameters</th>
+   <th>Explanation</th>
+</tr>
+<tr>
+   <td><tt>timeout</tt></td>
+   <td>numeric value</td>
+   <td>Sets the timeout period in seconds. If <tt>0</tt>, the timeout is disabled&mdash;rEFInd waits indefinitely for user input.</td>
+</tr>
+<tr>
+   <td><tt>disable</tt></td>
+   <td><tt>shell</tt>, <tt>tools</tt>, <tt>singleuser</tt>, <tt>hwtest</tt>, or <tt>all</tt></td>
+   <td>Removes the specified menu options for improved security. <tt>shell</tt> removes the EFI shell, <tt>tools</tt> removes all the EFI tools, <tt>singleuser</tt> removes the single-user option from the Mac OS sub-menu, <tt>hwtest</tt> removes the Mac OS hardware test option, and <tt>all</tt> removes all of these options. You can specify multiple parameters with this option. The default is to set none of these options.</td>
+</tr>
+<tr>
+   <td><tt>banner</tt></td>
+   <td>filename</td>
+   <td>Specifies a custom banner file to replaced the rEFInd banner image. The file should be a BMP image with a color depth of 24, 8, 4, or 1 bits. The file path is relative to the directory where <tt>refind.efi</tt> is stored.</td>
+</tr>
+<tr>
+   <td><tt>selection_big</tt></td>
+   <td>filename</td>
+   <td>Specifies a graphics file that can be used to highlight the OS selection icons. This should be a 144x144 image in BMP format.</td>
+</tr>
+<tr>
+   <td><tt>selection_small</tt></td>
+   <td>filename</td>
+   <td>Like <tt>selection_big</tt>, this sets an alternate highlight graphic, but for the smaller utility tags on the second row.</td>
+</tr>
+<tr>
+   <td><tt>hideui</tt></td>
+   <td><tt>banner</tt>, <tt>shell</tt>, <tt>tools</tt>, <tt>funcs</tt>, <tt>label</tt>, or <tt>all</tt></td>
+   <td>Hides the specified user interface elements: The rEFInd logo, the EFI shell icon, all the tools, built-in functions (restart and about), text labels, and all of the above, respectively. Some of these parameters are redundant with <tt>disable</tt> parameters. The default is to set none of these options.</td>
+</tr>
+<tr>
+   <td><tt>textonly</tt></td>
+   <td>None</td>
+   <td>rEFInd defaults to a graphical mode; however, if you prefer to do without the flashy graphics, you can run it in text mode by including this option.</td>
+</tr>
+<tr>
+   <td><tt>scanfor</tt></td>
+   <td><tt>internal</tt>, <tt>external</tt>, <tt>optical</tt>, <tt>hdbios</tt>, <tt>biosexternal</tt>, <tt>cd</tt>, and <tt>manual</tt></td>
+   <td>Tells rEFInd what methods to use to locate boot loaders. The <tt>internal</tt>, <tt>external</tt>, and <tt>optical</tt> parameters tell rEFInd to scan for EFI boot loaders on internal, external, and optical (CD, DVD, and Blu-ray) devices, respectively. The <tt>hdbios</tt>, <tt>biosexternal</tt>, and <tt>cd</tt> parameters are similar, but scan for BIOS boot loaders. (Note that the BIOS options are likely to be useless on UEFI PCs.) The <tt>manual</tt> parameter tells rEFInd to scan the configuration file for manual settings. You can specify multiple parameters to have the program scan for multiple boot loader types. When you do so, the order determines the order in which the boot loaders appear in the menu. The default is <tt>internal, external, optical</tt>.</td>
+</tr>
+<tr>
+   <td><tt>default_selection</tt></td>
+   <td>A substring of a boot loader's title</td>
+   <td>Sets the default boot OS based on the loader's title, which appears in the main menu when you select the loader; the text reads <tt>Boot <i>Title</i> from <i>Disk</i></tt>. You can enter any substring of <tt><i>Title</i></tt> as the <tt>default_selection</tt>, so long as it's two or more characters in length. Be sure you enter a unique substring, though; rEFInd stops searching when it finds the first match. One-character entries are matched against the first character of the title, except for digits, which refer to the numeric order of the boot loader entries. (Note: In version 0.2.0, only the first character of this entry was used, and was matched against the first character of the title.)</td>
+</tr>
+</table>
+
+<p>As an example, consider the following <tt>refind.conf</tt> file:</p>
+
+<pre class="listing">
+# Sample refind.conf file
+timeout 5
+banner custom.bmp
+scanfor manual,external,optical
+default_selection L
+</pre>
+
+<p>This example sets a timeout of 5 seconds; loads a custom graphic file called <tt>custom.bmp</tt> from the directory in which <tt>refind.efi</tt> resides; uses manual boot loader configuration but also scans for external EFI boot loaders and EFI boot loaders on optical discs; and sets the default boot loader to Linux. Of course, since this file specifies use of manual boot loader configuration, it's not complete; you'll need to add at least one OS stanza to be able to boot from anything but an external disk or optical drive....</p>
+
+<h2>Creating OS Stanzas</h2>
+
+<p>OS stanzas in rEFInd are similar to those in GRUB Legacy, GRUB 2, or ELILO. You can use them to add configuration options to those that are auto-detected. You cannot modify the auto-detected options, though; if you just want to tweak one OS's configuration, you has several options, none of which is ideal:</p>
+
+<ul>
+
+<li>You can move or rename the boot loader file for the boot loader you want to tweak.</li>
+
+<li>You can disable all auto-detection options and add manual configurations for all your boot loaders, even those that work fine when auto-detected.</li>
+
+<li>You can put up with having duplicate tags in your OS list.</li>
+
+</ul>
+
+<p>Each OS stanza begins with the keyword <tt>menuentry</tt>, a name for the entry, and an open curly brace (<tt>{</tt>). Subsequent lines constitute the bulk of the stanza, which concludes with a line containing nothing but a close curly brace (<tt>}</tt>). Table 2 summarizes the keywords that you can include in a stanza.</p>
+
+<table border="1" cellpadding="1" cellspacing="2" summary="Table 2: OS stanza definitions in <tt>refind.conf</tt>"><a name="table2"><caption><b>Table 2: OS stanza definitions in <tt>refind.conf</tt></b></caption></a>
+<tr>
+   <th>Token</th>
+   <th>Possible parameters</th>
+   <th>Explanation</th>
+</tr>
+<tr>
+   <td><tt>menuentry</tt></td>
+   <td>name for the entry</td>
+   <td>Sets the name that's displayed along with the icon for this entry. If the name should contain a space, it <i>must</i> be enclosed in quotes. Following the name, an open curly brace (<tt>{</tt>) ends the <tt>menuentry</tt> line.</td>
+</tr>
+<tr>
+   <td><tt>loader</tt></td>
+   <td>filename</td>
+   <td>Sets the filename for the boot loader. You may use either Unix-style slashes (<tt>/</tt>) or Windows/EFI-style backslashes (<tt>\</tt>) to separate directory elements. In either case, the references are to files on the ESP from which rEFInd launched; you can't (yet) launch loaders from other locations. This option should normally be the first in the body of an OS stanza; if it's not, some other options may be ignored.</td>
+</tr>
+<tr>
+   <td><tt>initrd</tt></td>
+   <td>filename</td>
+   <td>Sets the filename for a Linux kernel's initial RAM disk (initrd). This option is useful only when booting a Linux kernel that includes an <a href="http://www.rodsbooks.com/efi-bootloaders/efistub.html">EFI stub loader</a>, which enables you to boot a kernel without the benefit of a separate boot loader. When booted in this way, though, you must normally pass an initrd filename to the boot loader. You must specify the complete EFI path to the initrd file with this option, as in <tt>initrd EFI/linux/initrd-3.3.0-rc7.img</tt>. You'll also have to use the <tt>options</tt> line to pass the Linux root filesystem, and perhaps other options (as in <tt>options "root=/dev/sda4 ro"</tt>).</td>
+</tr>
+<tr>
+   <td><tt>icon</tt></td>
+   <td>filename</td>
+   <td>Sets the filename for an icon for the menu. If you omit this item, a default icon will be used, based on rEFInd's auto-detection algorithms.</td>
+</tr>
+<tr>
+   <td><tt>ostype</tt></td>
+   <td><tt>MacOS</tt>, <tt>Linux</tt>, <tt>ELILO</tt>, <tt>Windows</tt>, <tt>XOM</tt></td>
+   <td>Determines the options that are available on a sub-menu obtained by pressing the Insert key with an OS selected in the main menu. If you omit this option, rEFInd selects options using an auto-detection algorithm. Note that this option is case-sensitive.</td>
+</tr>
+<tr>
+   <td><tt>graphics</tt></td>
+   <td><tt>on</tt> or <tt>off</tt></td>
+   <td>Enables or disables a graphical boot mode. This option is important only for Mac OS X.</td>
+</tr>
+<tr>
+   <td><tt>options</tt></td>
+   <td>options passed to the boot loader</td>
+   <td>Pass arbitrary options to your boot loader with this line. Note that if the option string should contain spaces (as it often should) or characters that should not be modified by rEFInd's option parser (such as slashes or commas), it <i>must</i> be enclosed in quotes.</td>
+</tr>
+<tr>
+   <td><tt>disabled</tt></td>
+   <td>None</td>
+   <td>Disable an entry. This is often easier than commenting out an entire entry if you want to temporarily disable it.</td>
+</tr>
+<tr>
+   <td><tt>submenuentry</tt></td>
+   <td>submenu entry name and tokens</td>
+   <td>This keyword identifies a submenu entry, as described in more detail shortly.</td>
+</tr>
+</table>
+
+<p>As an example, consider the following entries:</p>
+
+<pre class="listing">
+menuentry "Ubuntu Linux" {
+    loader /EFI/ubuntu/grubx64.efi
+    disabled
+}
+
+menuentry Gentoo {
+    loader \EFI\linux\bzImage-3.3.0-rc7
+    initrd \EFI\linux\initrd-3.3.0-rc7.img
+    options "root=/dev/sda3 ro"
+    icon \EFI\refind\icons\os_gentoo.icns
+}
+</pre>
+
+<p>This example sets up two entries: one for Ubuntu Linux and one for Gentoo Linux. Note that the two entries use different directory separators, simply to demonstrate the fact that it's possible. The Ubuntu entry sets no icon, since rEFInd will note that the boot loader is stored in the <tt>ubuntu</tt> directory, and it will automatically find the appropriate Ubuntu icon (<tt>os_ubuntu.icns</tt>). This option is, however, disabled, so no matching icon will appear when you reboot unless you first comment out or delete the <tt>disabled</tt> line.</p>
+
+<p>The Gentoo entry passes the filename for an initial RAM disk using the <tt>initrd</tt> line and free-form options using the <tt>option</tt> line. It also sets an icon name, since the path to the kernel doesn't include the distribution's name. Note that the kernel filename does <i>not</i> include a <tt>.efi</tt> extension, which keeps rEFInd from picking up the kernel file in its auto-scans.</p>
+
+<p>You can combine these OS stanzas with the global <tt>refind.conf</tt> options presented earlier. The result would contain just one entry on the rEFInd boot menu, unless rEFInd found other boot options on an external or optical disk.</p>
+
+<p>Presently, an important limitation of rEFInd is that the manual boot loader definitions can only read files on the partition from which rEFInd launched. rEFInd can, however, auto-detect boot loaders on other disks or partitions via the <tt>internal</tt>, <tt>external</tt>, and similar options.</p>
+
+<h2>Creating Submenu Entries</h2>
+
+<p>As described on the <a href="using.html">Using rEFInd</a> page, rEFInd can present a menu of options for certain loader tags when you press the Insert, F2, or + key. rEFInd does this automatically when it detects Mac OS X or ELILO boot loaders, or when you set the OS type via the <tt>ostype</tt> option. The Mac OS X boot loader, in particular, accepts various options that you can use to boot in various ways.</p>
+
+<p>Sometimes, you might want to create your own custom submenu entries, and rEFInd 0.2.1 and later enable you to do this. To create a custom submenu, you use the <tt>submenuentry</tt> keyword <i>inside</i> a <tt>menuentry</tt> stanza. Normally, you'll set the submenu definitions <i>after</i> you've set the main menu options, since the submenu options take the main menu options as defult, and so the main options must be set first. Like a <tt>menuentry</tt> stanza, a <tt>submenuentry</tt> definition begins with the keyword, the name of the item, and an open curly brace (<tt>{</tt>). It continues until a close curly brace (<tt>}</tt>). A submenu definition can use the keywords described in <a href="#table3">Table 3.</a> Except as otherwise noted, using an option of a given name completely overrides the setting in the main stanza.</p>
+
+<table border="1" cellpadding="1" cellspacing="2" summary="Table 3: Submenu keywords in <tt>refind.conf</tt>"><a name="table3"><caption><b>Table 3: Submenu keywords in <tt>refind.conf</tt></b></caption></a>
+<tr>
+   <th>Token</th>
+   <th>Possible parameters</th>
+   <th>Explanation</th>
+</tr>
+<tr>
+   <td><tt>submenuentry</tt></td>
+   <td>name for the entry</td>
+   <td>Sets the name that's displayed for this entry on the submenu page. If the name should contain a space, it <i>must</i> be enclosed in quotes. Following the name, an open curly brace (<tt>{</tt>) ends the <tt>submenuentry</tt> line.</td>
+</tr>
+<tr>
+   <td><tt>loader</tt></td>
+   <td>filename</td>
+   <td>Sets the filename for the boot loader, as described in <a href="#table2">Table 2.</a></td>
+</tr>
+<tr>
+   <td><tt>initrd</tt></td>
+   <td>filename</td>
+   <td>Sets the filename for a Linux kernel's initial RAM disk (initrd), as described in <a href="#table2">Table 2.</a> If you want to eliminate the initrd specification, you should use this keyword alone, with no options. You might do this because your main entry is for a Linux kernel with EFI stub support and this submenu entry launches ELILO, which sets the initrd in its own configuration file.</td>
+</tr>
+<tr>
+   <td><tt>graphics</tt></td>
+   <td><tt>on</tt> or <tt>off</tt></td>
+   <td>Enables or disables a graphical boot mode, as described in <a href="#table2">Table 2.</a></td>
+</tr>
+<tr>
+   <td><tt>options</tt></td>
+   <td>options passed to the boot loader</td>
+   <td>Pass arbitrary options to your boot loader with this line, as described in <a href="#table2">Table 2.</a> As with <tt>initrd</tt>, you can eliminate all options by passing this keyword alone on a line.</td>
+</tr>
+<tr>
+   <td><tt>add_options</tt></td>
+   <td>options passed to the boot loader</td>
+   <td>This token works just like <tt>options</tt>, except that instead of <i>replacing</i> the default options, it causes the specified options to be <i>added to</i> those specified in the main stanza listing's <tt>options</tt> line.</td>
+</tr>
+<tr>
+   <td><tt>disabled</tt></td>
+   <td>None</td>
+   <td>Disable a submenu entry. This is often easier than commenting out an entire entry if you want to temporarily disable it.</td>
+</tr>
+</table>
+
+<p>The following menu entry illustrates the use of submenu entries. This is an expansion on the second entry presented earlier:</p>
+
+<pre class="listing">
+menuentry Gentoo {
+    loader \EFI\linux\bzImage-3.3.0-rc7
+    initrd \EFI\linux\initrd-3.3.0-rc7.img
+    options "root=/dev/sda3 ro"
+    icon \EFI\refind\icons\os_gentoo.icns
+    submenuentry "single-user mode" {
+        add_options "single"
+    }
+    submenuentry "3.3.0 final release kernel" {
+        loader \EFI\linux\bzImage-3.3.0
+        initrd \EFI\linux\initrd-3.3.0.img
+    }
+    submenuentry "boot via ELILO" {
+        loader \EFI\elilo\elilo.efi
+	initrd
+	options
+    }
+}
+</pre>
+
+<p>The main menu item for this entry won't look different with the submenus defined than without them; but if you press the Insert key, you'll see the submenu items:</p>
+
+    <br /><center><img src="manual-submenu.png" align="center" width="372"
+    height="272" alt="Manually defining submenus enables you to customize
+    your boot options." border=2></center><br />
+
+<p>The main menu item appears at the top of the list&mdash;<tt>Run bzImage-3.3.0-rc7</tt> in this example. The three submenus defined in this example's configuration file appear next, enabling you to launch in single-user mode, run the 3.3.0 release kernel, or boot via ELILO, respectively. Submenus also include an item called <tt>Return to Main Menu</tt> that does just as it says. (Alternatively, you can return to the main menu by pressing the Esc key.)</p>
+
+<p>This example illustrates some of the things you can do with submenu entries:</p>
+
+<ul>
+
+<li>You can add kernel options when booting via the EFI stub loader&mdash;to launch single-user mode, to add graphical boot options, or what have you.</li>
+
+<li>You can change kernel options when booting via the EFI stub loader&mdash;to <i>remove</i> graphical boot options, to boot to a different root device, and so on.</li>
+
+<li>You can change your kernel and/or initial RAM disk when booting via the EFI stub loader.</li>
+
+<li>You can give users a choice of boot loaders. In this example, the main option boots via the kernel stub loader, but the submenu gives users the chance to boot via ELILO instead. In fact, you could even boot two entirely different OSes from manually-defined submenu entries, although that could be confusing.</li>
+
+</ul>
+
+<hr />
+
+<p>copyright &copy; 2012 by Roderick W. Smith</p>
+
+<p>This document is licensed under the terms of the <a href="FDL-1.3.txt">GNU Free Documentation License (FDL), version 1.3.</a></p>
+
+<p>If you have problems with or comments about this Web page, please e-mail me at <a href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com.</a> Thanks.</p>
+
+<p><a href="index.html">Go to the main rEFInd page</a></p>
+
+<p><a href="linux.html">Learn about methods of booting Linux with rEFInd</a></p>
+
+  <p><a href="http://www.rodsbooks.com/">Return</a> to my main Web page.</p>
+</body>
+</html>

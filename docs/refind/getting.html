@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>The rEFInd Boot Manager: Getting rEFInd</title>
+  <link href="../Styles/styles.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <h1>The rEFInd Boot Manager:<br />Getting rEFInd</h1>
+
+  <p class="subhead">by Roderick W. Smith, <a
+href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
+
+  <p>Originally written: 3/14/2012; last Web page update: 3/23/2012, referencing rEFInd 0.2.2</p>
+
+<p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
+
+<table border="1">
+<tr>
+<td>Donate $1.00</td>
+<td>Donate $2.50</td>
+<td>Donate $5.00</td>
+<td>Donate $10.00</td>
+<td>Donate another value</td>
+</tr>
+<tr>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="1.00">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="2.50">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="5.00">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td><form name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_xclick">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="amount" value="10.00">
+<input type="image" src="http://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
+
+</td>
+<td>
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="rodsmith@rodsbooks.com">
+<input type="hidden" name="lc" value="US">
+<input type="hidden" name="no_note" value="0">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="item_name" value="rEFInd Boot Manager">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHostedGuest">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="Donate with PayPal" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
+</td></tr>
+</table> 
+
+<hr />
+
+<p>This page is part of the documentation for the rEFInd boot manager. If a Web search has brought you here, you may want to start at the <a href="index.html">main page.</a></p>
+
+<hr />
+
+<p><b>Note:</b> I consider rEFInd to be <i>alpha-quality software!</i> Although rEFIt 0.14, upon which rEFInd is based, is beta-quality, I've changed a great deal of the code, and I'm still learning about it. I'm discovering bugs (old and new) and fixing them every day or two. That said, rEFInd is a usable program in its current form on many systems. If you have problems, feel free to drop me a line.</p>
+
+<p>You can find the rEFInd source code and binary packages at <a href="http://www.sourceforge.net/projects/refind/">its SourceForge page.</a> Note that rEFInd is OS-independent&mdash;it runs before the OS, so you download the same binary package for any OS. You can obtain rEFInd in three different forms:</p>
+
+<ul>
+
+<li><b><a
+    href="http://sourceforge.net/projects/refind/files/0.2.2/refind-src-0.2.2.zip/download">A
+    source code zip file</a></b>&mdash;This is useful if you want to
+    compile the software locally. Note that I use Linux with the <a
+    href="http://sourceforge.net/projects/gnu-efi">GNU-EFI</a> development
+    tools. rEFIt used an Intel/Microsoft toolchain. Backporting rEFInd to
+    that toolchain is theoretically possible, but I've not attempted
+    it.</li>
+
+<li><b><a
+    href="http://sourceforge.net/projects/refind/files/0.2.2/refind-bin-0.2.2.zip/download">A
+    binary zip file</a></b>&mdash;Download this if you want to install
+    rEFInd on an x86 or x86-64 computer and have no need to test rEFInd
+    first by booting it on an optical disc. This zip file package includes
+    both x86 (aka IA32) and x86-64 (aka x64, AMD64, or EM64T) versions of
+    rEFInd. Which you install depends on your architecture, as described on
+    the <a href="installing.html">Installing rEFInd</a> page.</li>
+
+<li><b><a
+    href="http://sourceforge.net/projects/refind/files/0.2.2/refind-cd-0.2.2.zip/download">A
+    CD-R image file</a></b>&mdash;This download contains the same files as
+    the zip file, but you can burn it to a CD-R to test rEFInd without
+    installing it first. If you like it, you can then copy the files from
+    the CD-R to your hard disk. The files are named in such a way that the
+    disc should boot on either 64-bit (x86-64) or 32-bit (x86) EFI
+    computers. Note that there's a bug that causes rEFInd to complain about
+    invalid parameters while scanning various directories. You can safely
+    ignore this message, but you'll need to press a key to dismiss it.</li>
+
+</ul>
+
+<p>If you're using another platform, you can give rEFInd a try; however, you'll need to build it from source code yourself or track down a binary from another source. (Perhaps by the time you read this it will be included in Linux distributions built for unusual CPUs.)</p>
+
+<p>If you download a zip file, you'll need to extract the files with a tool such as <tt>unzip</tt>, which is included with Linux and Mac OS X. Numerous Windows utilities also support this format, such as <a href="http://www.pkware.com/software/pkzip/">PKZIP</a> and <a href="http://www.7-zip.org/">7-Zip.</a></p>
+
+<hr />
+
+<p>copyright &copy; 2012 by Roderick W. Smith</p>
+
+<p>This document is licensed under the terms of the <a href="FDL-1.3.txt">GNU Free Documentation License (FDL), version 1.3.</a></p>
+
+<p>If you have problems with or comments about this Web page, please e-mail me at <a href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com.</a> Thanks.</p>
+
+<p><a href="index.html">Go to the main rEFInd page</a></p>
+
+<p><a href="installing.html">Learn how to install rEFInd</a></p>
+
+  <p><a href="http://www.rodsbooks.com/">Return</a> to my main Web page.</p>
+</body>
+</html>
