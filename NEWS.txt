@@ -1,0 +1,40 @@
+0.2.2 (3/23/2012):
+------------------
+
+- Fixed bug that caused program failure when Linux kernels with EFI stub
+  support were detected with no associated version numbers. rEFInd now
+  permits automatic linking of *ONE* versionless kernel to *ONE*
+  versionless initrd file.
+
+- Fixed bug that caused program hangs when a boot loader filename or label
+  was too long. Such names are now properly truncated and program execution
+  continues.
+
+- Fixed bug that caused no text to appear in submenus on UEFI systems with
+  small screens (800x600). NOTE: Problem still occurs on screens smaller
+  than this, but such systems are very rare.
+
+0.2.1 (3/19/2012):
+------------------
+
+- Added ability to set a "default_selection" that's a title or a substring
+  of one -- the name given to a stanza in a "menuentry" or the boot
+  loader's filename, in most cases, although "Mac OS X", "Windows XP
+  (XoM)", and "Microsoft EFI boot" are also titles.
+
+- Added support for semi-automatic scans of Linux kernels with EFI stub
+  loader support. The program auto-detects matching initial RAM disk files
+  and loads additional options from the "linux.conf" file in the same
+  directory as the kernel.
+
+- Added support for "submenuentry" keyword and associated sub-stanza
+  entries in refind.conf file.
+
+- Renamed icons/os_mint.icns to icons/os_linuxmint.icns to match the
+  filename Linux Mint ACTUALLY uses for its ESP boot loader directory.
+
+
+0.2.0 (3/14/2012):
+------------------
+
+- Initial public release

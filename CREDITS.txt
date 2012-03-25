@@ -1,0 +1,28 @@
+Although I (Roderick W. Smith) am releasing rEFInd in its current form, the
+program is not the work of a single person. Others have contributed to the
+program, both in its original version (rEFIt) and by providing features
+I've incorporated into the current version. Specifically:
+
+* Christoph Pfisterer was the original author of rEFIt. See its Web page,
+  http://refit.sourceforge.net, for this version of the program. Christoph
+  has therefore contributed more to rEFInd than anybody else, myself
+  included; my changes are comparatively small additions to the original
+  rEFIt base.
+
+* The Debian project has made a version of rEFIt available that
+  incorporates a number of patches, all attributed to Julien BLACHE
+  (jblache@debian.org), to enable it to build properly on a Linux system.
+  It was this version of rEFIt that I used as a starting point for creating
+  rEFInd. See http://packages.debian.org/sid/refit for this version of the
+  program.
+
+* I replaced many of the original rEFIt icons with icons taken from the
+  Oxygen Icons project, either from the Oxygen Refit package on its page
+  (http://deviantdark.deviantart.com/art/Oxygen-Refit-70199755) or from the
+  oxygen-icons version 4.7.4 package on my Gentoo Linux development system.
+  These icons are released under the LGPLv3 or GPLv3. If I'm reading the
+  pages correctly, the original creator was David Vignoni (aka
+  "deviantdark" on the deviantart site).
+
+* The Linux Mint icon comes from the Linux Mint 11.1 user guide
+  (http://ftp.heanet.ie/pub/linuxmint.com/docs/user-guide/)

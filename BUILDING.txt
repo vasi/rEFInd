@@ -1,0 +1,98 @@
+From rEFIt to rEFInd
+====================
+
+rEFInd is derived from rEFIt (http://refit.sourceforge.net), but the two
+programs support different build environments. rEFIt was created with
+Intel's EFI Application Toolkit
+(http://www.intel.com/technology/efi/toolkit_overview.htm) or TianoCore's
+EFI Toolkit (https://efi-toolkit.tianocore.org), along with Microsoft's
+Visual C compiler.
+
+Compiling the source code provided on the rEFIt site under Linux never
+worked for me, although the documentation claimed it would. Apparently
+other Linux developers have run into the same problem; Debian provides a
+rEFIt package (http://packages.debian.org/sid/refit) that includes
+extensive patches to enable the program to compile under Linux using the
+GNU-EFI package (http://sourceforge.net/projects/gnu-efi/). Although
+GNU-EFI is less sophisticated than recent versions of TianoCore's toolkit,
+GNU-EFI is my preferred environment because I prefer working in Linux and
+because TianoCore's toolkit relies on obsolete versions of Microsoft's
+Visual C++, and I had trouble tracking that down. For this reason, I used
+Debian's patched version of rEFIt as a starting point in forking rEFInd.
+The main down side to doing this is that a few rEFIt features got lost.
+Most notable among these is the ability to load filesystem drivers. I've
+also dropped ancillary programs, such as the ext2fs driver module and
+gptsync program, from rEFInd. You can still use these tools with rEFInd,
+but you'll need to install them separately; and in the case of filesystem
+drivers, you'll need to configure your EFI to load them before you launch
+rEFInd.
+
+
+Requirements
+============
+
+To compile rEFInd, you'll need the following:
+
+* A Linux installation. Note that this installation does NOT need to be
+  EFI-based. It can be 32- or 64-bit, but unless you use a cross-compiler
+  (which I've not tested), it must be the appropriate bit width for your
+  EFI implementation. (Normally that means 64-bit.) If you don't normally
+  run Linux, you can run it in a VirtualBox or similar virtual machine.
+
+* A standard set of Linux development tools, based on GCC.
+
+* The GNU-EFI package (http://sourceforge.net/projects/gnu-efi/). You
+  can usually install this from a package called "gnu-efi".
+
+It's possible that you could use a non-Linux platform to compile rEFInd. To
+the best of my knowledge, the rEFInd code doesn't rely on anything
+Linux-specific in its build requirements, and GNU-EFI's Sourceforge page
+indicates that it works under Windows and OS X, too. Thus, you may be able
+to compile it on these platforms, but I've not tested it in this way. Under
+Windows, you would need to either create a project or Makefile for your
+non-GCC compiler or use a GCC port, such as MinGW (http://www.mingw.org).
+You'd probably need to adjust the Makefile in the latter case.
+
+
+Compiling rEFInd
+================
+
+With your development system set up, you can compile rEFInd as follows:
+
+1) Download and uncompress the rEFInd source code archive. (If you're
+   reading this file, you've probably already done this task.)
+
+2) Open a Linux shell prompt
+
+3) Change into the archive's main directory. You should see several files
+   including this BUILDING.txt file and several subdirectories such as
+   "refind", "libeg", and "include".
+
+4) Type "make". With any luck, rEFInd will compile without error, leaving
+   the "refind.efi" file in the "refind" subdirectory.
+
+If rEFInd doesn't compile correctly, you'll need to track down the source
+of the problem. Double-check that you've got all the necessary development
+tools installed, including GCC, make, and GNU-EFI. You may also need to
+adjust the Makefile or Make.common file for your system. For instance, on
+Fedora, you must  change the following variables in Make.common as shown:
+
+GNUEFILIB       = /usr/lib64
+EFILIB          = /usr/lib64
+EFICRT0         = /usr/lib64/gnuefi
+
+
+Installing rEFInd
+=================
+
+With rEFInd compiled, you can install it. On a UEFI-based system, you'll
+want to copy files on the ESP as follows:
+
+* Create a directory for rEFInd, such as EFI/refind.
+* Copy refind/refind.efi to the ESP's EFI/refind directory.
+* Copy refind.conf-sample to the EFI/refind directory as refind.conf.
+* Copy the icons subdirectory, including all its files, to EFI/refind.
+
+You'll then need to activate rEFInd in your EFI. This can be done with
+tools such as "efibootmgr" under Linux or "bless" under OS X. See the
+docs/installing.html file for details.
