@@ -117,6 +117,8 @@ program. I'm not sure what you'd use in Windows to create ICNS files.</li>
 
 <li>The code could be more flexible in its handling of the sizes of various graphical elements, and particularly drawn text. Prior to version 0.2.2, submenu text was invisible on UEFI-based PCs with 800x600 and smaller displays because of an inability to properly crop the graphics fields that hold the text. With version 0.2.2, I've put a band-aid on this problem by reducing the field size so that it now works on 800x600 displays, but smaller displays still suffer from this problem. This is just an example of the inflexibility of certain layout issues within rEFInd.</li>
 
+<li>On some (but not all) EFIs, launching a program from rEFInd, exiting that program, and then launching another program from rEFInd results in a system hang. This should obviously be fixed; it makes it hard to use a shell and then launch an OS without rebooting, or to exit from a loader that permits exiting.</li>
+
 <li>I want to be able to specify the volume on which a boot loader resides in <tt>refind.conf</tt>. (As it is, manually-defined options can only launch boot loader files on the same volume as rEFInd.)</li>
 
 <li>It would be useful to be able to specify paths to boot loaders and/or initial RAM disks relative to the rEFInd directory (or the boot loader's directory, in the case of initrds).</li>
