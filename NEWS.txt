@@ -1,3 +1,14 @@
+0.2.3 (?/??/2012):
+------------------
+
+- Because of news that the Linux kernel developers are planning to use the
+  filename linux.conf to hold Linux kernel configuration data for EFI
+  booting, I'm transitioning rEFInd away from that name and to
+  refind_linux.conf to avoid a conflict. This version can use either name,
+  with refind_linux.conf taking precedence if both are present.
+
+- Added logo for Arch Linux.
+
 0.2.2 (3/23/2012):
 ------------------
 

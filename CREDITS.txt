@@ -26,3 +26,7 @@ I've incorporated into the current version. Specifically:
 
 * The Linux Mint icon comes from the Linux Mint 11.1 user guide
   (http://ftp.heanet.ie/pub/linuxmint.com/docs/user-guide/)
+
+* The Arch Linux icon was created by ~IDRGSKYWALKER on Deviant Art
+  (http://idrgskywalker.deviantart.com/art/Arch-Linux-Logo-186211022).
+
