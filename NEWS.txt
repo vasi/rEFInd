@@ -1,4 +1,4 @@
-0.2.3 (?/??/2012):
+0.2.3 (3/26/2012):
 ------------------
 
 - Fixed (maybe) a bug that caused hangs when launching a second program

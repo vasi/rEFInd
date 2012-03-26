@@ -16,7 +16,7 @@ make clean
 # Prepare a place and copy files there....
 mkdir -p ../snapshots/$1/refind-$1/icons
 cp --preserve=timestamps icons/*icns ../snapshots/$1/refind-$1/icons/
-cp -a docs images include libeg refind NEWS.txt BUILDING.txt COPYING.txt LICENSE.txt README.txt Make.common Makefile refind.conf-sample ../snapshots/$1/refind-$1
+cp -a docs images include libeg refind CREDITS.txt NEWS.txt BUILDING.txt COPYING.txt LICENSE.txt README.txt Make.common Makefile refind.conf-sample ../snapshots/$1/refind-$1
 
 # Go there are prepare a souce code zip file....
 cd ../snapshots/$1/
@@ -30,7 +30,7 @@ cp -a icons refind-bin-$1/refind/
 cp --preserve=timestamps refind.conf-sample refind-bin-$1/refind/
 cp refind/refind.efi refind-bin-$1/refind/refind_x64.efi
 cp $StartDir/refind_ia32.efi refind-bin-$1/refind/
-cp -a COPYING.txt LICENSE.txt README.txt docs refind-bin-$1
+cp -a COPYING.txt LICENSE.txt README.txt docs CREDITS.txt refind-bin-$1
 zip -9r ../refind-bin-$1.zip refind-bin-$1
 cd ..
 rm -r refind-$1

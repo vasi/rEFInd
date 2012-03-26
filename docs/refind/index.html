@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/14/2012; last Web page update: 3/23/2012, referencing rEFInd 0.2.2</p>
+  <p>Originally written: 3/14/2012; last Web page update: 3/26/2012, referencing rEFInd 0.2.3</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -89,9 +89,9 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <p>This page describes rEFInd, my fork of the <a href="http://refit.sourceforge.net">rEFIt</a> boot manager for computers based on the <a href="http://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface">Extensible Firmware Interface (EFI) and Unified EFI (UEFI).</a> Like rEFIt, rEFInd is a <i>boot manager,</i> meaning that it presents a menu of options to the user when the computer first starts up, as shown below. rEFInd is not a <i>boot loader,</i> which is a program that loads an OS kernel and hands off control to it. Many popular boot managers, such as <a href="http://www.gnu.org/software/grub/">the Grand Unified Bootloader (GRUB),</a> are also boot loaders, which can blur the distinction in many users' minds. rEFInd, though, relies on a separate boot loader to finish the handoff to an OS; it just presents a pretty menu and gives you options for how to proceed prior to booting an OS. All EFI-capable OSes include boot loaders, so this limitation isn't a problem. If you're using Linux, you should be aware that several EFI boot loaders are available, so choosing between them can be a challenge. See <a href="http://www.rodsbooks.com/efi-bootloaders/index.html">my Web page on this topic</a> for more information.</p>
 
-    <br /><img src="refind.png" align="center" width="905" height="389"
-    alt="rEFInd presents a GUI menu for selecting your boot OS." border=2>
-    <br />
+    <br /><center><img src="refind.png" align="center" width="905"
+    height="389" alt="rEFInd presents a GUI menu for selecting your boot
+    OS." border=2> </center><br />
 
 <p>In theory, EFI implementations should provide boot managers. Unfortunately, in practice these boot managers are often so poor as to be useless. The worst I've personally encountered is on <a href="http://www.rodsbooks.com/gb-hybrid-efi/">Gigabyte's Hybrid EFI,</a> which provides you with no boot options whatsoever, beyond choosing the boot device (hard disk vs. optical disc, for instance). I've heard of others that are just as bad. For this reason, a good EFI boot manager&mdash;either standalone or as part of a boot loader&mdash;is a practical necessity for multi-booting on an EFI computer. That's where rEFIt and rEFInd come into play.</p>
 
@@ -168,6 +168,8 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 <li>The <a href="https://sourceforge.net/p/refind/discussion/">rEFInd discussion forum on Sourceforge</a> provides a way to discuss rEFInd with other users or with me.</li>
 
 <li>You can <a href="mailto:rodsmith@rodsbooks.com">e-mail me</a> with queries or bug reports.</li>
+
+<li><a href="http://forums.macrumors.com/showthread.php?t=696523">This thread</a> on MacRumors details efforts to boot Windows 7 and Windows 8 in EFI mode, rather than using Boot Camp, on 64-bit Macs. It can be done with some models, but is difficult, particularly for Windows 7. Be aware that the thread is long and has many false leads.</li>
 
 </ul></li>
 

@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Last Web page update: 3/23/2012</p>
+  <p>Last Web page update: 3/26/2012</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -92,6 +92,8 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 <p>The following summarizes changes in rEFInd's public releases:</p>
 
 <ul>
+
+<li><b>0.2.3 (3/26/2012)</b>&mdash;I've changed the Linux kernel configuration filename from <tt>linux.conf</tt> to <tt>refind_linux.conf</tt> with this version, to avoid a name collision with a planned future Linux kernel ability to read its options from a file called <tt>linux.conf</tt>. This version also includes a tentative bug fix for a problem that caused rEFInd to hang upon launching the second program (say, a boot loader after using a shell) on some systems; but on some computers, this fix causes an (apparently harmless) error message about "(re)opening our installation volume" upon returning from the first program. I've also added a logo for Arch Linux.</li>
 
 <li><b>0.2.2 (3/23/2012)</b>&mdash;This version fixes three bugs: One caused submenus to not appear on systems with screens of 800x600 or smaller; another caused rEFInd to hang when boot loader names were too long; and the third caused the program to fail when Linux kernels and their initial RAM disk files lacked version numbers.</li>
 

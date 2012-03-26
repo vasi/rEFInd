@@ -54,7 +54,7 @@
 // constants
 
 #define CONFIG_FILE_NAME         L"refind.conf"
-#define LINUX_OPTIONS_FILENAMES  L"refind_linux.conf,linux.conf"
+#define LINUX_OPTIONS_FILENAMES  L"refind_linux.conf,refind-linux.conf,linux.conf"
 #define MAXCONFIGFILESIZE        (128*1024)
 
 #define ENCODING_ISO8859_1  (0)
@@ -596,10 +596,14 @@ REFIT_FILE * ReadLinuxOptionsFile(IN CHAR16 *LoaderPath, IN REFIT_VOLUME *Volume
             File = AllocateZeroPool(sizeof(REFIT_FILE));
             Status = ReadFile(Volume->RootDir, FullFilename, File);
             GoOn = FALSE;
-            if (CheckError(Status, L"while loading the Linux options file"))
+            if (CheckError(Status, L"while loading the Linux options file")) {
+               if (File != NULL)
+                  FreePool(File);
                File = NULL;
-         } // if
-      } else {
+               GoOn = TRUE;
+            } // if error
+         } // if file exists
+      } else { // a filename string is NULL
          GoOn = FALSE;
       } // if/else
       if (OptionsFilename != NULL)
@@ -609,7 +613,7 @@ REFIT_FILE * ReadLinuxOptionsFile(IN CHAR16 *LoaderPath, IN REFIT_VOLUME *Volume
       OptionsFilename = FullFilename = NULL;
    } while (GoOn);
    return (File);
-} // static REFIT_FILE * FindLinuxOptionsFile()
+} // static REFIT_FILE * ReadLinuxOptionsFile()
 
 // Retrieve a single line of options from a Linux kernel options file
 CHAR16 * GetFirstOptionsFromFile(IN CHAR16 *LoaderPath, IN REFIT_VOLUME *Volume) {

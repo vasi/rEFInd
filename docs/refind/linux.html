@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/19/2012; last Web page update: 3/23/2012, referencing rEFInd 0.2.2</p>
+  <p>Originally written: 3/19/2012; last Web page update: 3/26/2012, referencing rEFInd 0.2.3</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -111,21 +111,19 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <ol>
 
-<li>rEFInd looks for boot loaders whose names include the strings <tt>bzImage</tt> or <tt>vmlinuz</tt> and that end in <tt>.efi</tt>. For instance, <tt>bzImage-3.3.0.efi</tt> or <tt>vmlinuz-3.3.0-fc17.efi</tt> would match, and trigger subsequent steps in this procedure. Note that to use this system, you <i>must</i> give your kernel file a <tt>.efi</tt> extension, at least on the ESP!</li>
+<li>rEFInd looks for boot loaders whose names include the strings <tt>bzImage</tt> or <tt>vmlinuz</tt> and that end in <tt>.efi</tt>. For instance, <tt>bzImage-3.3.0.efi</tt> or <tt>vmlinuz-3.3.0-fc17.efi</tt> would match, and trigger subsequent steps in this procedure. Note that to use this system, you <i>must</i> give your kernel file a <tt>.efi</tt> extension, at least on the ESP (or other boot loader partition, for Macs)!</li>
 
-<div class="sidebar">
-
-<p>A kernel whose filename lacks a version string matches an initial RAM disk that also lacks a version string in its filename. Note that you can reliably use only <i>one</i> kernel and initial RAM disk per directory that lack version numbers in their filenames.</p>
-
-</div>
+<p class="sidebar">A kernel whose filename lacks a version string matches an initial RAM disk that also lacks a version string in its filename. Note that you can reliably use only <i>one</i> kernel and initial RAM disk per directory that lack version numbers in their filenames.</p>
 
 <li>rEFInd looks for an initial RAM disk in the same directory as the kernel file. A matching initial RAM disk has a name that begins with <tt>init</tt> and that includes the same version string as the kernel. The version string is defined as the part of the filename from the first digit to the last digit, inclusive. Note that the version string can include non-digits. For instance, the version string for <tt>bzImage-3.3.0.efi</tt> is <tt>3.3.0</tt>, which matches <tt>initramfs-3.3.0.bz</tt>; and <tt>vmlinuz-3.3.0-fc17.efi</tt>'s version string is <tt>3.3.0-fc17</tt>, which matches <tt>initrd-3.3.0-fc17.img</tt>. Many other matches are possible. If an initial RAM disk is identified, rEFInd passes a suitable <tt>initrd=</tt> option to the kernel when it boots.</li>
 
-<li>rEFInd looks for a file called <tt>linux.conf</tt> in the same directory as the kernel file. This file is a practical requirement for booting from an auto-detected kernel. It consists of a series of lines, each of which consists of a label followed by a series of kernel options. The first line sets default options, and subsequent lines set options that are accessible from the main menu tag's submenu screen.</li>
+<p class="sidebar">rEFInd 0.2.1 and 0.2.2 used a filename of <tt>linux.conf</tt> to hold Linux kernel options; however, the Linux kernel developers plan to use this name themselves, so I've switched to <tt>refind_linux.conf</tt> as of rEFInd 0.2.3. For the moment, rEFInd still supports the <tt>linux.conf</tt> filename as a backup to <tt>refind_linux.conf</tt>, but <tt>linux.conf</tt> is now officially deprecated as a rEFInd configuration file, so you should rename your <tt>linux.conf</tt> file to <tt>refind_linux.conf</tt> if you're upgrading.</p>
+
+<li>rEFInd looks for a file called <tt>refind_linux.conf</tt> in the same directory as the kernel file. This file is a practical requirement for booting from an auto-detected kernel. It consists of a series of lines, each of which consists of a label followed by a series of kernel options. The first line sets default options, and subsequent lines set options that are accessible from the main menu tag's submenu screen.</li>
 
 </ol>
 
-<p>The intent of this system is that distribution maintainers can place their kernels, initial RAM disks, and a <tt>linux.conf</tt> file in their own subdirectory on the ESP. rEFInd will detect their kernels and create one main menu entry for each kernel. Each entry will implement as many options as there are lines in the <tt>linux.conf</tt> file. In this way, two or more distributions can each maintain their boot loader entries, without being too concerned for who maintains rEFInd as a whole.</p>
+<p>The intent of this system is that distribution maintainers can place their kernels, initial RAM disks, and a <tt>refind_linux.conf</tt> file in their own subdirectory on the ESP. rEFInd will detect their kernels and create one main menu entry for each kernel. Each entry will implement as many options as there are lines in the <tt>refind_linux.conf</tt> file. In this way, two or more distributions can each maintain their boot loader entries, without being too concerned about who maintains rEFInd as a whole.</p>
 
 <p>As an example, consider the following file configuration:</p>
 
@@ -135,10 +133,10 @@ total 17943
 -rwxr-xr-x 1 root root  4781632 2012-03-18 12:01 bzImage-3.3.0.efi
 -rwxr-xr-x 1 root root   131072 2011-10-14 04:10 grubx64.EFI
 -rwxr-xr-x 1 root root 13459936 2012-03-18 12:02 initrd.img-3.3.0
--rwxr-xr-x 1 root root      266 2012-03-18 19:39 linux.conf
+-rwxr-xr-x 1 root root      266 2012-03-26 19:39 refind_linux.conf
 </pre>
 
-<p>When rEFInd scans this directory, it will find two EFI boot loaders in <tt>EFI/ubuntu</tt>: <tt>grubx64.EFI</tt> and <tt>bzImage-3.3.0.efi</tt>. rEFInd will create two main-menu tags for these two loaders, one of which will launch Ubuntu's standard GRUB and the other of which will launch the 3.3.0 kernel file directly. The <tt>linux.conf</tt> file contains a list of labels and options:</p>
+<p>When rEFInd scans this directory, it will find two EFI boot loaders in <tt>EFI/ubuntu</tt>: <tt>grubx64.EFI</tt> and <tt>bzImage-3.3.0.efi</tt>. rEFInd will create two main-menu tags for these two loaders, one of which will launch Ubuntu's standard GRUB and the other of which will launch the 3.3.0 kernel file directly. The <tt>refind_linux.conf</tt> file contains a list of labels and options:</p>
 
 <pre class="listing">
 "Boot with defaults"         "root=/dev/sda3 ro quiet splash vt.handoff=7"
@@ -153,10 +151,10 @@ total 17943
 
     <br /><center><img src="automatic-submenu.png" align="center"
     width="376" height="279" alt="rEFInd can load Linux boot options from
-    a linux.conf file in the Linux kernel's directory."
+    a refind_linux.conf file in the Linux kernel's directory."
     border=2></center><br />
 
-<p>Note that the first entry shown here takes a name that's set in rEFInd rather than the one specified in the <tt>linux.conf</tt> file. The remaining names match those specified in the file, though.</p>
+<p>Note that the first entry shown here takes a name that's set in rEFInd rather than the one specified in the <tt>refind_linux.conf</tt> file. The remaining names match those specified in the file, though.</p>
 
 <p>From a user's perspective, the submenus defined in this way work just like submenus defined via the <tt>submenuentry</tt> options in <tt>refind.conf</tt>, or like the submenus that rEFInd creates automatically for Mac OS X or ELILO. There are, however, limitations in what you can accomplish with this method:</p>
 
@@ -164,19 +162,19 @@ total 17943
 
 <li>Your kernels must be compiled with EFI stub loader support.</li>
 
-<li>You can't set an option to boot via a different boot loader, such as ELILO or GRUB; all the options apply to a single boot loader&mdash;that is, a single kernel.</li>
+<li>You can't set a submenu option to boot via a different boot loader, such as ELILO or GRUB; all the submenu options apply to a single boot loader&mdash;that is, a single kernel. (rEFInd will still detect other boot loaders and provide separate main-menu tags for them, though.)</li>
 
 <li>If an installation includes two or more kernel files, each one receives its own main-menu entry; you can't combine them together in one menu item. This is essentially a corollary of the preceding limitation. The result can be an overburdened main menu if your system has many kernels.</li>
 
-<li>All the kernels in a given directory use the same <tt>linux.conf</tt> file. If you need to set different options for different kernels, you'll need to place those kernels in different directories.</li>
+<li>All the kernels in a given directory use the same <tt>refind_linux.conf</tt> file. If you need to set different options for different kernels, you'll need to place those kernels in different directories.</li>
 
 <li>You must place your kernels in a directory other than the one that holds the main rEFInd <tt>.efi</tt> file. This is because rEFInd does not scan its own directory for boot loaders.</li>
 
 </ul>
 
-<p>On the whole, this method of configuration has a lot going for it. For distribution maintainers, if you place your Linux kernel files (with EFI stub support) on the ESP, with suitable filenames, matching initial RAM disk files, and a <tt>linux.conf</tt> file, then any rEFInd 0.2.1 or later installation should detect your files, even if the user installs another distribution with another rEFInd that takes over from yours. (If the user, or this other rEFInd installation, disables auto-detection, this won't work.)</p>
+<p>On the whole, this method of configuration has a lot going for it. For distribution maintainers, if you place your Linux kernel files (with EFI stub support) on the ESP, with suitable filenames, matching initial RAM disk files, and a <tt>refind_linux.conf</tt> file, then any rEFInd 0.2.3 or later installation should detect your files, even if the user installs another distribution with another rEFInd that takes over from yours. (If the user, or this other rEFInd installation, disables auto-detection, this won't work.)</p>
 
-<p>For end users, this method is simpler than maintaining manual configurations in <tt>refind.conf</tt> (or equivalents for ELILO or GRUB). To install a new kernel, you need only copy it and its initial RAM disk, under suitable names, to a scanned directory on the ESP. There's no need to touch any configuration file, provided you've already set up <tt>linux.conf</tt> in your kernel's directory. You will, however, have to adjust <tt>linux.conf</tt> if you make certain changes, such as if your root directory identifier changes.</p>
+<p>For end users, this method is simpler than maintaining manual configurations in <tt>refind.conf</tt> (or equivalents for ELILO or GRUB). To install a new kernel, you need only copy it and its initial RAM disk, under suitable names, to a scanned directory on the ESP. There's no need to touch any configuration file, provided you've already set up <tt>refind_linux.conf</tt> in your kernel's directory. You will, however, have to adjust <tt>refind_linux.conf</tt> if you make certain changes, such as if your root directory identifier changes.</p>
 
 <hr/>
 

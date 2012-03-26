@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/14/2012; last Web page update: 3/23/2012, referencing rEFInd 0.2.2</p>
+  <p>Originally written: 3/14/2012; last Web page update: 3/26/2012, referencing rEFInd 0.2.3</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -124,6 +124,8 @@ program. I'm not sure what you'd use in Windows to create ICNS files.</li>
 <li>I don't like the <tt>disable</tt> and <tt>hideui</tt> options in <tt>refind.conf</tt>. I'd like to replace them with a positive option listing for utilities, similar to <tt>scanfor</tt> (which in fact replaces other "hide" options in rEFIt).</li>
 
 <li>There's currently no way to create a manual boot stanza for a BIOS-booted OS. This isn't a big priority for me personally, but I can see how it could be for some people.</li>
+
+<li>Returning from a program (such as an EFI shell or a boot loader that fails) produces an error message about a failure when "(re)opening our installation volume" on some computers. (Among mine, only a 32-bit Mac Mini produces this message.) This <i>seems to be</i> harmless, but I haven't removed the error message because I don't fully understand its cause or why it doesn't appear on most systems. This needs investigating and fixing.</li>
 
 <li>The Page Up and Page Down keys work in a rather strange way&mdash;a result of an admittedly quick fix on my part to a problem with a data structure that makes implementation of scrolling harder than it ought to be.</li>
 
