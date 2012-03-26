@@ -100,5 +100,6 @@ VOID MergeStrings(IN OUT CHAR16 **First, IN CHAR16 *Second, CHAR16 AddChar);
 CHAR16 *FindLastDirName(IN CHAR16 *Path);
 CHAR16 *FindPath(IN CHAR16* FullPath);
 CHAR16 *FindNumbers(IN CHAR16 *InString);
+CHAR16 *FindCommaDelimited(IN CHAR16 *InString, IN UINTN Index);
 
 #endif

@@ -74,7 +74,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.2");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.2.1");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -226,10 +226,8 @@ static CHAR16 * FindInitrd(IN CHAR16 *LoaderPath, IN REFIT_VOLUME *Volume) {
    while ((DirIterNext(&DirIter, 2, L"init*", &DirEntry)) && (InitrdName == NULL)) {
       InitrdVersion = FindNumbers(DirEntry->FileName);
       if (KernelVersion != NULL) {
-//         if (StriSubCmp(KernelVersion, DirEntry->FileName)) {
             if (StriCmp(InitrdVersion, KernelVersion) == 0)
                InitrdName = PoolPrint(L"%s\\%s", Path, DirEntry->FileName);
-//         } // if match found
       } else {
          if (InitrdVersion == NULL)
             InitrdName = PoolPrint(L"%s\\%s", Path, DirEntry->FileName);
@@ -300,7 +298,6 @@ REFIT_MENU_SCREEN *InitializeSubScreen(IN LOADER_ENTRY *Entry) {
          SubEntry = InitializeLoaderEntry(Entry);
          if (SubEntry != NULL) {
             SubEntry->me.Title = L"Boot using default options";
-//            SubEntry->me.Title = (Entry->OSType == 'M') ? L"Boot Mac OS X" : PoolPrint(L"Run %s", FileName);
             if ((SubEntry->InitrdPath != NULL) && (StrLen(SubEntry->InitrdPath) > 0) && (!StriSubCmp(L"initrd", SubEntry->LoadOptions))) {
                Temp = PoolPrint(L"initrd=%s", SubEntry->InitrdPath);
                MergeStrings(&SubEntry->LoadOptions, Temp, L' ');

@@ -53,9 +53,9 @@
 
 // constants
 
-#define CONFIG_FILE_NAME        L"refind.conf"
-#define LINUX_OPTIONS_FILENAME  L"linux.conf"
-#define MAXCONFIGFILESIZE       (128*1024)
+#define CONFIG_FILE_NAME         L"refind.conf"
+#define LINUX_OPTIONS_FILENAMES  L"refind_linux.conf,linux.conf"
+#define MAXCONFIGFILESIZE        (128*1024)
 
 #define ENCODING_ISO8859_1  (0)
 #define ENCODING_UTF8       (1)
@@ -570,25 +570,44 @@ VOID ScanUserConfigured(VOID)
 // Read a Linux kernel options file for a Linux boot loader into memory. The LoaderPath
 // and Volume variables identify the location of the options file, but not its name --
 // you pass this function the filename of the Linux kernel, initial RAM disk, or other
-// file in the target directory, and this function finds the file with the name
-// LINUX_OPTIONS_FILENAME within that directory and loads it.
+// file in the target directory, and this function finds the file with a name in the
+// comma-delimited list of names specified by LINUX_OPTIONS_FILENAMES within that
+// directory and loads it. This function tries multiple files because I originally
+// used the filename linux.conf, but close on the heels of that decision, the Linux
+// kernel developers decided to use that name for a similar purpose, but with a
+// different file format. Thus, I'm migrating rEFInd to use the name refind_linux.conf,
+// but I want a migration period in which both names are used.
+//
 // The return value is a pointer to the REFIT_FILE handle for the file, or NULL if
 // it wasn't found.
 REFIT_FILE * ReadLinuxOptionsFile(IN CHAR16 *LoaderPath, IN REFIT_VOLUME *Volume) {
-   CHAR16       *OptionsFilename = NULL;
+   CHAR16       *OptionsFilename, *FullFilename;
+   BOOLEAN      GoOn = TRUE;
+   UINTN        i = 0;
    REFIT_FILE   *File = NULL;
    EFI_STATUS   Status;
-   
-   OptionsFilename = FindPath(LoaderPath);
-   MergeStrings(&OptionsFilename, LINUX_OPTIONS_FILENAME, L'\\');
-   if (FileExists(Volume->RootDir, OptionsFilename)) {
-      File = AllocateZeroPool(sizeof(REFIT_FILE));
-      Status = ReadFile(Volume->RootDir, OptionsFilename, File);
-      if (CheckError(Status, L"while loading the Linux options file"))
-         File = NULL;
-   }
-   if (OptionsFilename != NULL)
-      FreePool(OptionsFilename);
+
+   do {
+      OptionsFilename = FindCommaDelimited(LINUX_OPTIONS_FILENAMES, i++);
+      FullFilename = FindPath(LoaderPath);
+      if ((OptionsFilename != NULL) && (FullFilename != NULL)) {
+         MergeStrings(&FullFilename, OptionsFilename, '\\');
+         if (FileExists(Volume->RootDir, FullFilename)) {
+            File = AllocateZeroPool(sizeof(REFIT_FILE));
+            Status = ReadFile(Volume->RootDir, FullFilename, File);
+            GoOn = FALSE;
+            if (CheckError(Status, L"while loading the Linux options file"))
+               File = NULL;
+         } // if
+      } else {
+         GoOn = FALSE;
+      } // if/else
+      if (OptionsFilename != NULL)
+         FreePool(OptionsFilename);
+      if (FullFilename != NULL)
+         FreePool(FullFilename);
+      OptionsFilename = FullFilename = NULL;
+   } while (GoOn);
    return (File);
 } // static REFIT_FILE * FindLinuxOptionsFile()
 

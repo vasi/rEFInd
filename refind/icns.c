@@ -76,47 +76,30 @@ EG_IMAGE * BuiltinIcon(IN UINTN Id)
 // Load an icon for an operating system
 //
 
+// Load an OS icon from among the comma-delimited list provided in OSIconName.
 EG_IMAGE * LoadOSIcon(IN CHAR16 *OSIconName OPTIONAL, IN CHAR16 *FallbackIconName, BOOLEAN BootLogo)
 {
     EG_IMAGE        *Image;
-    CHAR16          CutoutName[16];
+    CHAR16          *CutoutName;
     CHAR16          FileName[256];
-    UINTN           StartIndex, Index, NextIndex;
+    UINTN           Index = 0;
 
     if (GlobalConfig.TextOnly)      // skip loading if it's not used anyway
         return NULL;
-    Image = NULL;
 
     // try the names from OSIconName
-    for (StartIndex = 0; OSIconName != NULL && OSIconName[StartIndex]; StartIndex = NextIndex) {
-        // find the next name in the list
-        NextIndex = 0;
-        for (Index = StartIndex; OSIconName[Index]; Index++) {
-            if (OSIconName[Index] == ',') {
-                NextIndex = Index + 1;
-                break;
-            }
-        }
-        if (OSIconName[Index] == 0)
-            NextIndex = Index;
-        
-        // construct full path
-        if (Index > StartIndex + 15)   // prevent buffer overflow
-            continue;
-        CopyMem(CutoutName, OSIconName + StartIndex, (Index - StartIndex) * sizeof(CHAR16));
-        CutoutName[Index - StartIndex] = 0;
-        SPrint(FileName, 255, L"icons\\%s_%s.icns",
-               BootLogo ? L"boot" : L"os", CutoutName);
-        
+    while ((CutoutName = FindCommaDelimited(OSIconName, Index++)) != NULL) {
+        SPrint(FileName, 255, L"icons\\%s_%s.icns", BootLogo ? L"boot" : L"os", CutoutName);
+
         // try to load it
         Image = egLoadIcon(SelfDir, FileName, 128);
         if (Image != NULL)
             return Image;
-    }
+        FreePool(CutoutName);
+    } // while
 
     // try the fallback name
-    SPrint(FileName, 255, L"icons\\%s_%s.icns",
-           BootLogo ? L"boot" : L"os", FallbackIconName);
+    SPrint(FileName, 255, L"icons\\%s_%s.icns", BootLogo ? L"boot" : L"os", FallbackIconName);
     Image = egLoadIcon(SelfDir, FileName, 128);
     if (Image != NULL)
         return Image;
@@ -126,7 +109,7 @@ EG_IMAGE * LoadOSIcon(IN CHAR16 *OSIconName OPTIONAL, IN CHAR16 *FallbackIconNam
         return LoadOSIcon(NULL, FallbackIconName, FALSE);
     
     return DummyImage(128);
-}
+} /* EG_IMAGE * LoadOSIcon() */
 
 //
 // Load an image from a .icns file

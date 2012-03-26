@@ -1127,3 +1127,36 @@ CHAR16 *FindNumbers(IN CHAR16 *InString) {
    } // if (EndOfElement > 0)
    return (Found);
 } // CHAR16 *FindNumbers()
+
+// Find the #Index element (numbered from 0) in a comma-delimited string
+// of elements.
+// Returns the found element, or NULL if Index is out of range of InString
+// is NULL.
+CHAR16 *FindCommaDelimited(IN CHAR16 *InString, IN UINTN Index) {
+   UINTN    StartPos = 0, CurPos = 0;
+   BOOLEAN  Found = FALSE;
+   CHAR16   *FoundString = NULL;
+
+   if (InString != NULL) {
+      // After while() loop, StartPos marks start of item #Index
+      while ((Index > 0) && (CurPos < StrLen(InString))) {
+         if (InString[CurPos] == L',') {
+            Index--;
+            StartPos = CurPos + 1;
+         } // if
+         CurPos++;
+      } // while
+      // After while() loop, CurPos is one past the end of the element
+      while ((CurPos < StrLen(InString)) && (!Found)) {
+         if (InString[CurPos] == L',')
+            Found = TRUE;
+         else
+            CurPos++;
+      } // while
+   } // if
+   if (Index == 0)
+      FoundString = StrDuplicate(&InString[StartPos]);
+   if (FoundString != NULL)
+      FoundString[CurPos - StartPos] = 0;
+   return (FoundString);
+} // CHAR16 *FindCommaDelimited()
