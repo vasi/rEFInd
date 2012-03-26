@@ -103,15 +103,15 @@ EFI_STATUS InitRefitLib(IN EFI_HANDLE ImageHandle)
 VOID UninitRefitLib(VOID)
 {
     UninitVolumes();
-    
+
     if (SelfDir != NULL) {
         refit_call1_wrapper(SelfDir->Close, SelfDir);
         SelfDir = NULL;
     }
-    
+
     if (SelfRootDir != NULL) {
-        refit_call1_wrapper(SelfRootDir->Close, SelfRootDir);
-        SelfRootDir = NULL;
+       refit_call1_wrapper(SelfRootDir->Close, SelfRootDir);
+       SelfRootDir = NULL;
     }
 }
 
@@ -119,10 +119,18 @@ VOID UninitRefitLib(VOID)
 EFI_STATUS ReinitRefitLib(VOID)
 {
     ReinitVolumes();
-    
-    if (SelfVolume != NULL && SelfVolume->RootDir != NULL)
-        SelfRootDir = SelfVolume->RootDir;
-    
+
+    // Below two lines were in rEFIt, but seem to cause problems on
+    // most systems. OTOH, my Mac Mini produces (apparently harmless)
+    // errors about "(re)opening our installation volume" (see the
+    // next function) when returning from programs when these two lines
+    // are removed. On the gripping hand, the Mac SOMETIMES crashes
+    // when launching a second program even with these lines removed.
+    // TODO: Figure out cause of above weirdness and fix it more
+    // reliably!
+    /* if (SelfVolume != NULL && SelfVolume->RootDir != NULL)
+       SelfRootDir = SelfVolume->RootDir; */
+
     return FinishInitRefitLib();
 }
 

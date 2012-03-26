@@ -1,6 +1,14 @@
 0.2.3 (?/??/2012):
 ------------------
 
+- Fixed (maybe) a bug that caused hangs when launching a second program
+  after returning from a first. There are some weird system-to-system
+  differences, though, and this fix causes (apparently harmless) error
+  messages about "(re)opening our installation volume" on at least one
+  system (a 32-bit Mac Mini). I'm committing this change because, imperfect
+  though it is, it's preferable to the earlier version, at least on my
+  small sample of computers.
+
 - Because of news that the Linux kernel developers are planning to use the
   filename linux.conf to hold Linux kernel configuration data for EFI
   booting, I'm transitioning rEFInd away from that name and to

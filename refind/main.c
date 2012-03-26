@@ -74,7 +74,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.2.1");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.2.2");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -82,7 +82,7 @@ static VOID AboutrEFInd(VOID)
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Running on:");
         AddMenuInfoLine(&AboutMenu, PoolPrint(L" EFI Revision %d.%02d",
-            ST->Hdr.Revision >> 16, ST->Hdr.Revision & ((1 << 16) - 1)));
+                        ST->Hdr.Revision >> 16, ST->Hdr.Revision & ((1 << 16) - 1)));
 #if defined(EFI32)
         AddMenuInfoLine(&AboutMenu, L" Platform: x86 (32 bit)");
 #elif defined(EFIX64)
@@ -134,13 +134,13 @@ static EFI_STATUS StartEFIImageList(IN EFI_DEVICE_PATH **DevicePaths,
 
     // set load options
     if (LoadOptions != NULL) {
-      ReturnStatus = Status = refit_call3_wrapper(BS->HandleProtocol, ChildImageHandle, &LoadedImageProtocol, (VOID **) &ChildLoadedImage);
+        ReturnStatus = Status = refit_call3_wrapper(BS->HandleProtocol, ChildImageHandle, &LoadedImageProtocol, (VOID **) &ChildLoadedImage);
         if (CheckError(Status, L"while getting a LoadedImageProtocol handle")) {
             if (ErrorInStep != NULL)
                 *ErrorInStep = 2;
             goto bailout_unload;
         }
-        
+
         if (LoadOptionsPrefix != NULL) {
             FullLoadOptions = PoolPrint(L"%s %s ", LoadOptionsPrefix, LoadOptions);
             // NOTE: That last space is also added by the EFI shell and seems to be significant
@@ -196,9 +196,11 @@ static EFI_STATUS StartEFIImage(IN EFI_DEVICE_PATH *DevicePath,
 
 static VOID StartLoader(IN LOADER_ENTRY *Entry)
 {
+    UINTN ErrorInStep = 0;
+
     BeginExternalScreen(Entry->UseGraphicsMode, L"Booting OS");
     StartEFIImage(Entry->DevicePath, Entry->LoadOptions,
-                  Basename(Entry->LoaderPath), Basename(Entry->LoaderPath), NULL);
+                  Basename(Entry->LoaderPath), Basename(Entry->LoaderPath), &ErrorInStep);
     FinishExternalScreen();
 }
 
