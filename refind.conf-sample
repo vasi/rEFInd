@@ -76,6 +76,15 @@ timeout 20
 # Default is internal,external,optical
 scanfor internal,external,optical
 
+# Set the maximum number of tags that can be displayed on the screen at
+# any time. If more loaders are discovered than this value, rEFInd shows
+# a subset in a scrolling list. If this value is set too high for the
+# screen to handle, it's reduced to the value that the screen can manage.
+# If this value is set to 0 (the default), it's adjusted to the number
+# that the screen can handle.
+#
+#max_tags 0
+
 # Set the default menu selection.  The available arguments match the
 # keyboard accelerators available within rEFInd.  You may select the default
 # loader using a one-character abbreviation for the OS name ("M" = Mac OS X,

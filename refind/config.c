@@ -390,6 +390,8 @@ VOID ReadConfig(VOID)
         } else if ((StriCmp(TokenList[0], L"}") == 0) || (StriCmp(TokenList[0], L"loader") == 0) ||
                    (StriCmp(TokenList[0], L"icon") == 0) || (StriCmp(TokenList[0], L"options") == 0)) {
            // Do nothing; handled by ScanUserConfigured()
+        } else if ((StriCmp(TokenList[0], L"max_tags") == 0) && (TokenCount > 1)) {
+           GlobalConfig.MaxTags = Atoi(TokenList[1]);
         }
 
         FreeTokenLine(&TokenList, &TokenCount);

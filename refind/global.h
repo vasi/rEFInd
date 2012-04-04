@@ -147,7 +147,7 @@ typedef struct {
    UINTN       Timeout;
    UINTN       DisableFlags;
    UINTN       HideUIFlags;
-   BOOLEAN     Quiet;
+   UINTN       MaxTags;     // max. number of entries to show simultaneously in graphics mode
    CHAR16      *BannerFileName;
    CHAR16      *SelectionSmallFileName;
    CHAR16      *SelectionBigFileName;

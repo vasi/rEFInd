@@ -1048,7 +1048,7 @@ VOID MergeStrings(IN OUT CHAR16 **First, IN CHAR16 *Second, CHAR16 AddChar) {
             NewString[Length1] = AddChar;
             NewString[Length1 + 1] = 0;
          } // if (AddChar)
-      } // if (First != NULL)
+      } // if (*First != NULL)
       if (First != NULL)
          StrCat(NewString, Second);
       FreePool(*First);

@@ -23,11 +23,16 @@ rm -rf temp
 mkdir temp
 cd temp
 unzip ../refind-bin-$Version.zip
+cp $StartDir/SHELLS.txt ./refind-bin-$Version
 
-# Create hard links to the files so that they'll be suitable for an
-# EFI-boot CD...
+# Create a boot directory and (temporarily) copy the EFI shell
+# files to it....
 mkdir -p refind-bin-$Version/EFI/boot
 cd refind-bin-$Version/EFI/boot
+cp $StartDir/shell*.efi ./
+
+# Create hard links to the rEFInd files so that they'll be suitable for an
+# EFI-boot CD...
 ln ../../refind/refind_ia32.efi ./bootia32.efi
 ln ../../refind/refind_x64.efi ./bootx64.efi
 ln ../../refind/refind.conf-sample ./refind.conf
@@ -41,18 +46,30 @@ ToritoSize=`du -s EFI | cut -f 1`
 let ToritoSize=($ToritoSize)/28
 let ToritoSize=($ToritoSize)*32
 
+# Move the EFI shell files back to the root where they belong
+# (They were in EFI/boot just so they'd get counted in ToritoSize)
+mv EFI/boot/shell*.efi ./
+
 # Prepare a FAT filesystem image and populate it with the
 # EFI boot files....
 dd if=/dev/zero of=refind-bin-$Version.img bs=1024 count=$ToritoSize
 mkdosfs -n "rEFInd.ET" refind-bin-$Version.img
-mcopy -irefind-bin-$Version.img -s EFI ::/
+mcopy -irefind-bin-$Version.img -s EFI shell*.efi ::/
 
 # Make the ISO-9660 image file....
 mkisofs -A "Bootable rEFInd" -V "rEFInd $Version" -volset "rEFInd $Version" \
     -J -r -v -x ./lost+found -o ../../refind-cd-$Version.iso \
-    -b refind-bin-$Version.img -c boot.cat -no-emul-boot -boot-load-size 4 \
     -eltorito-alt-boot -efi-boot refind-bin-$Version.img \
     -no-emul-boot ./
+    
+# Below is like above, but also creates an El Torito entry for BIOS
+# booting. That's useless, but in case something flakes out without
+# it, I'll preserve this version for a while....
+#mkisofs -A "Bootable rEFInd" -V "rEFInd $Version" -volset "rEFInd $Version" \
+#    -J -r -v -x ./lost+found -o ../../refind-cd-$Version.iso \
+#    -b refind-bin-$Version.img -c boot.cat -no-emul-boot -boot-load-size 4 \
+#    -eltorito-alt-boot -efi-boot refind-bin-$Version.img \
+#    -no-emul-boot ./
 
 cd ../../
 rm -r temp/

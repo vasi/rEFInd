@@ -55,6 +55,13 @@
 // variables
 
 #define MACOSX_LOADER_PATH      L"\\System\\Library\\CoreServices\\boot.efi"
+#if defined (EFIX64)
+#define SHELL_NAMES             L"\\EFI\\tools\\shell.efi,\\shellx64.efi"
+#elif defined (EFI32)
+#define SHELL_NAMES             L"\\EFI\\tools\\shell.efi,\\shellia32.efi"
+#else
+#define SHELL_NAMES             L"\\EFI\\tools\\shell.efi"
+#endif
 
 static REFIT_MENU_ENTRY MenuEntryAbout    = { L"About rEFInd", TAG_ABOUT, 1, 0, 'A', NULL, NULL, NULL };
 static REFIT_MENU_ENTRY MenuEntryReset    = { L"Restart Computer", TAG_RESET, 1, 0, 'R', NULL, NULL, NULL };
@@ -64,7 +71,7 @@ static REFIT_MENU_ENTRY MenuEntryReturn   = { L"Return to Main Menu", TAG_RETURN
 static REFIT_MENU_SCREEN MainMenu       = { L"Main Menu", NULL, 0, NULL, 0, NULL, 0, L"Automatic boot" };
 static REFIT_MENU_SCREEN AboutMenu      = { L"About", NULL, 0, NULL, 0, NULL, 0, NULL };
 
-REFIT_CONFIG        GlobalConfig = { FALSE, 20, 0, 0, FALSE, NULL, NULL, NULL, NULL };
+REFIT_CONFIG        GlobalConfig = { FALSE, 20, 0, 0, 0, NULL, NULL, NULL, NULL };
 
 //
 // misc functions
@@ -74,11 +81,12 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.3");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.3.3");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
         AddMenuInfoLine(&AboutMenu, L"Portions Copyright (c) Intel Corporation and others");
+        AddMenuInfoLine(&AboutMenu, L"Distributed under the terms of the GNU GPLv3 license");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Running on:");
         AddMenuInfoLine(&AboutMenu, PoolPrint(L" EFI Revision %d.%02d",
@@ -614,7 +622,8 @@ static VOID ScanLoaderDir(IN REFIT_VOLUME *Volume, IN CHAR16 *Path)
           if (DirEntry->FileName[0] == '.' ||
               StriCmp(DirEntry->FileName, L"TextMode.efi") == 0 ||
               StriCmp(DirEntry->FileName, L"ebounce.efi") == 0 ||
-              StriCmp(DirEntry->FileName, L"GraphicsConsole.efi") == 0)
+              StriCmp(DirEntry->FileName, L"GraphicsConsole.efi") == 0 ||
+              StriSubCmp(L"shell", DirEntry->FileName))
                 continue;   // skip this
 
           if (Path)
@@ -639,7 +648,6 @@ static VOID ScanEfiFiles(REFIT_VOLUME *Volume) {
    REFIT_DIR_ITER          EfiDirIter;
    EFI_FILE_INFO           *EfiDirEntry;
    CHAR16                  FileName[256];
-//   LOADER_ENTRY            *Entry;
 
    if ((Volume->RootDir != NULL) && (Volume->VolName != NULL)) {
       // check for Mac OS X boot loader
@@ -670,7 +678,7 @@ static VOID ScanEfiFiles(REFIT_VOLUME *Volume) {
       // scan subdirectories of the EFI directory (as per the standard)
       DirIterOpen(Volume->RootDir, L"EFI", &EfiDirIter);
       while (DirIterNext(&EfiDirIter, 1, NULL, &EfiDirEntry)) {
-         if (StriCmp(EfiDirEntry->FileName, L"TOOLS") == 0 || EfiDirEntry->FileName[0] == '.')
+         if (StriCmp(EfiDirEntry->FileName, L"tools") == 0 || EfiDirEntry->FileName[0] == '.')
             continue;   // skip this, doesn't contain boot loaders
          SPrint(FileName, 255, L"EFI\\%s", EfiDirEntry->FileName);
          ScanLoaderDir(Volume, FileName);
@@ -1061,35 +1069,36 @@ static LOADER_ENTRY * AddToolEntry(IN CHAR16 *LoaderPath, IN CHAR16 *LoaderTitle
     return Entry;
 } /* static LOADER_ENTRY * AddToolEntry() */
 
+// Check the disk for add-on tools -- an EFI shell, the dangerous gptsync.efi, and a rescue Linux
+// installation.
 static VOID ScanTool(VOID)
 {
-    CHAR16                  FileName[256];
+    CHAR16                  *FileName;
     LOADER_ENTRY            *Entry;
+    UINTN                   i = 0;
 
     if (GlobalConfig.DisableFlags & DISABLE_FLAG_TOOLS)
         return;
 
     // look for the EFI shell
-    if (!(GlobalConfig.DisableFlags & DISABLE_FLAG_SHELL)) {
-        SPrint(FileName, 255, L"%s\\apps\\shell.efi", SelfDirPath);
-        if (FileExists(SelfRootDir, FileName)) {
-            AddToolEntry(FileName, L"EFI Shell", BuiltinIcon(BUILTIN_ICON_TOOL_SHELL), 'E', FALSE);
-        } else {
-            StrCpy(FileName, L"\\efi\\tools\\shell.efi");
-            if (FileExists(SelfRootDir, FileName)) {
-                AddToolEntry(FileName, L"EFI Shell", BuiltinIcon(BUILTIN_ICON_TOOL_SHELL), 'E', FALSE);
-            }
-        }
-    }
+    while (((FileName = FindCommaDelimited(SHELL_NAMES, i++)) != NULL) && (!(GlobalConfig.DisableFlags & DISABLE_FLAG_SHELL))) {
+       if (FileExists(SelfRootDir, FileName)) {
+          AddToolEntry(FileName, L"EFI Shell", BuiltinIcon(BUILTIN_ICON_TOOL_SHELL), 'E', FALSE);
+       }
+       FreePool(FileName);
+       FileName = NULL;
+    } // while
 
     // look for the GPT/MBR sync tool
-    StrCpy(FileName, L"\\efi\\tools\\gptsync.efi");
+    MergeStrings(&FileName, L"\\efi\\tools\\gptsync.efi", 0);
     if (FileExists(SelfRootDir, FileName)) {
         AddToolEntry(FileName, L"Make Hybrid MBR", BuiltinIcon(BUILTIN_ICON_TOOL_PART), 'P', FALSE);
     }
+    FreePool(FileName);
+    FileName = NULL;
 
     // look for rescue Linux
-    StrCpy(FileName, L"\\efi\\rescue\\elilo.efi");
+    MergeStrings(&FileName, L"\\efi\\rescue\\elilo.efi", 0);
     if (SelfVolume != NULL && FileExists(SelfRootDir, FileName)) {
         Entry = AddToolEntry(FileName, L"Rescue Linux", BuiltinIcon(BUILTIN_ICON_TOOL_RESCUE), '0', FALSE);
         
@@ -1100,7 +1109,8 @@ static VOID ScanTool(VOID)
         else
             Entry->LoadOptions = L"-d 0 mini";
     }
-}
+    FreePool(FileName);
+} /* VOID ScanTool() */
 
 
 #ifdef DEBIAN_ENABLE_EFI110

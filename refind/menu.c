@@ -166,9 +166,8 @@ static VOID InitScroll(OUT SCROLL_STATE *State, IN UINTN ItemCount, IN UINTN Vis
     State->LastSelection = State->CurrentSelection = 0;
     State->MaxIndex = (INTN)ItemCount - 1;
     State->FirstVisible = 0;
-    if (VisibleSpace == 0)
-       State->MaxVisible = UGAWidth / (ROW0_TILESIZE + TILE_XSPACING) - 1;
-    else
+    State->MaxVisible = UGAWidth / (ROW0_TILESIZE + TILE_XSPACING) - 1;
+    if ((VisibleSpace > 0) && (VisibleSpace < State->MaxVisible))
         State->MaxVisible = (INTN)VisibleSpace;
     State->PaintAll = TRUE;
     State->PaintSelection = FALSE;
@@ -729,7 +728,7 @@ VOID MainMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, IN UINT
     switch (Function) {
         
         case MENU_FUNCTION_INIT:
-            InitScroll(State, Screen->EntryCount, 0);
+            InitScroll(State, Screen->EntryCount, GlobalConfig.MaxTags);
             
             // layout
             row0Count = 0;

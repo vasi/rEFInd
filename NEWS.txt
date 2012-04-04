@@ -1,3 +1,25 @@
+0.2.4 (?/??/2012):
+------------------
+
+- Added max_tags option to the refind.conf file, enabling users to reduce
+  the maximum number of OS loader tags that can be displayed at once.
+
+- Updated rEFIt icon, based on the 128x128 volume label from the rEFIt CD
+  image.
+
+- Added x86 and x86-64 EFI shells to the CD image version of the binary,
+  but NOT to the binary zip file. The logic is that the CD image is more
+  likely to be used directly as an emergency disc and so may need this
+  feature, even though the source isn't part of the rEFInd project. (The
+  source is readily available from the TianoCore project.)
+
+- EFI shells may now be stored at /shellx64.efi for x86-64 systems or at
+  /shellia32.efi for x86 systems. The /EFI/tools/shell.efi name is also
+  recognized; however, if both files are present, two EFI shell icons will
+  appear on the main menu. The /efi/{refind-path/apps/shell.efi filename,
+  which was never officially documented but worked as a carryover from
+  rEFIt, is no longer valid.
+
 0.2.3 (3/26/2012):
 ------------------
 
