@@ -1,6 +1,25 @@
 0.2.4 (?/??/2012):
 ------------------
 
+- Created new refind.conf entry: "showtools". This entry takes options of
+  "shell", "gptsync", "about", "exit", "reboot", and "shutdown". This
+  option is in some respects an affirmative version of portions of the old
+  "disable" and "hideui" options; however, it enables users to specify the
+  order in which these options appear on the screen. Also, the "exit"
+  option is new; it terminates the program. The effect is usually to return
+  to whatever tool launched it or to launch a default OS; however, this is
+  somewhat unpredictable. The default therefore omits the "exit" option, as
+  well as "gptsync", which has always been dangerous (but necessary on most
+  MacOS/Windows dual-boot setups on Macs). As part of this reconfiguration,
+  I've eliminated the "rescue Linux" option, which always seemed pointless
+  to me.
+
+- Folded "disable" and "hideui" refind.conf entries into one ("disable"),
+  and reduced the number of options to six: "banner", "label",
+  "singleuser", "hwtest", "arrows", and "all". ("arrows" is new and
+  disables the scroll arrows when a system has too many tags to display
+  simultaneously.)
+
 - Added max_tags option to the refind.conf file, enabling users to reduce
   the maximum number of OS loader tags that can be displayed at once.
 

@@ -325,18 +325,24 @@ VOID ReadConfig(VOID)
         
         if (StriCmp(TokenList[0], L"timeout") == 0) {
             HandleInt(TokenList, TokenCount, &(GlobalConfig.Timeout));
-            
-        } else if (StriCmp(TokenList[0], L"disable") == 0) {
+
+        // Note: I'm using "hideui" as equivalent to "disable" for the moment (as of rEFInd 0.2.4)
+        // because I've folded two options into one and removed some values, so I want to catch
+        // existing configurations as much as possible. The "hideui" equivalency to "disable" will
+        // be removed sooner or later....
+        } else if ((StriCmp(TokenList[0], L"disable") == 0) || (StriCmp(TokenList[0], L"hideui") == 0)) {
             for (i = 1; i < TokenCount; i++) {
                 FlagName = TokenList[i];
-                if (StriCmp(FlagName, L"shell") == 0) {
-                    GlobalConfig.DisableFlags |= DISABLE_FLAG_SHELL;
-                } else if (StriCmp(FlagName, L"tools") == 0) {
-                    GlobalConfig.DisableFlags |= DISABLE_FLAG_TOOLS;
+                if (StriCmp(FlagName, L"banner") == 0) {
+                   GlobalConfig.DisableFlags |= DISABLE_FLAG_BANNER;
+                } else if (StriCmp(FlagName, L"label") == 0) {
+                   GlobalConfig.DisableFlags |= DISABLE_FLAG_LABEL;
                 } else if (StriCmp(FlagName, L"singleuser") == 0) {
                     GlobalConfig.DisableFlags |= DISABLE_FLAG_SINGLEUSER;
                 } else if (StriCmp(FlagName, L"hwtest") == 0) {
                     GlobalConfig.DisableFlags |= DISABLE_FLAG_HWTEST;
+                } else if (StriCmp(FlagName, L"arrows") == 0) {
+                   GlobalConfig.DisableFlags |= DISABLE_FLAG_ARROWS;
                 } else if (StriCmp(FlagName, L"all") == 0) {
                     GlobalConfig.DisableFlags = DISABLE_ALL;
                 } else {
@@ -351,27 +357,27 @@ VOID ReadConfig(VOID)
               else
                  GlobalConfig.ScanFor[i] = ' ';
            }
-        } else if (StriCmp(TokenList[0], L"hideui") == 0) {
-            for (i = 1; i < TokenCount; i++) {
+        } else if (StriCmp(TokenList[0], L"showtools") == 0) {
+            SetMem(GlobalConfig.ShowTools, NUM_TOOLS * sizeof(UINTN), 0);
+            for (i = 1; (i < TokenCount) && (i < NUM_TOOLS); i++) {
                 FlagName = TokenList[i];
-                if (StriCmp(FlagName, L"banner") == 0) {
-                    GlobalConfig.HideUIFlags |= HIDEUI_FLAG_BANNER;
-                } else if (StriCmp(FlagName, L"shell") == 0) {
-                    GlobalConfig.DisableFlags |= DISABLE_FLAG_SHELL;
-                } else if (StriCmp(FlagName, L"tools") == 0) {
-                    GlobalConfig.DisableFlags |= DISABLE_FLAG_TOOLS;
-                } else if (StriCmp(FlagName, L"funcs") == 0) {
-                    GlobalConfig.HideUIFlags |= HIDEUI_FLAG_FUNCS;
-                } else if (StriCmp(FlagName, L"label") == 0) {
-                    GlobalConfig.HideUIFlags |= HIDEUI_FLAG_LABEL;
-                } else if (StriCmp(FlagName, L"all") == 0) {
-                    GlobalConfig.HideUIFlags = HIDEUI_ALL;
-                    GlobalConfig.DisableFlags |= DISABLE_FLAG_SHELL | DISABLE_FLAG_TOOLS;
+                if (StriCmp(FlagName, L"shell") == 0) {
+                    GlobalConfig.ShowTools[i - 1] = TAG_SHELL;
+                } else if (StriCmp(FlagName, L"gptsync") == 0) {
+                    GlobalConfig.ShowTools[i - 1] = TAG_GPTSYNC;
+                } else if (StriCmp(FlagName, L"about") == 0) {
+                   GlobalConfig.ShowTools[i - 1] = TAG_ABOUT;
+                } else if (StriCmp(FlagName, L"exit") == 0) {
+                   GlobalConfig.ShowTools[i - 1] = TAG_EXIT;
+                } else if (StriCmp(FlagName, L"reboot") == 0) {
+                   GlobalConfig.ShowTools[i - 1] = TAG_REBOOT;
+                } else if (StriCmp(FlagName, L"shutdown") == 0) {
+                   GlobalConfig.ShowTools[i - 1] = TAG_SHUTDOWN;
                 } else {
-                    Print(L" unknown hideui flag: '%s'\n", FlagName);
+                    Print(L" unknown showtools flag: '%s'\n", FlagName);
                 }
-            }
-            
+            } // showtools options
+
         } else if (StriCmp(TokenList[0], L"banner") == 0) {
             HandleString(TokenList, TokenCount, &(GlobalConfig.BannerFileName));
 
@@ -396,7 +402,6 @@ VOID ReadConfig(VOID)
 
         FreeTokenLine(&TokenList, &TokenCount);
     }
-
     FreePool(File.Buffer);
 } /* VOID ReadConfig() */
 

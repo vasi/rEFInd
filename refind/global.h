@@ -52,14 +52,20 @@
 
 #define REFIT_DEBUG (0)
 
+// Tag classifications; used in various ways.
 #define TAG_ABOUT    (1)
-#define TAG_RESET    (2)
+#define TAG_REBOOT   (2)
 #define TAG_SHUTDOWN (3)
 #define TAG_TOOL     (4)
 #define TAG_LOADER   (5)
 #define TAG_LEGACY   (6)
+#define TAG_EXIT     (7)
+#define TAG_SHELL    (8)
+#define TAG_GPTSYNC  (9)
+#define NUM_TOOLS    (9)
 
 #define NUM_SCAN_OPTIONS 10
+
 
 //
 // global definitions
@@ -146,12 +152,12 @@ typedef struct {
    BOOLEAN     TextOnly;
    UINTN       Timeout;
    UINTN       DisableFlags;
-   UINTN       HideUIFlags;
-   UINTN       MaxTags;     // max. number of entries to show simultaneously in graphics mode
+   UINTN       MaxTags;     // max. number of OS entries to show simultaneously in graphics mode
    CHAR16      *BannerFileName;
    CHAR16      *SelectionSmallFileName;
    CHAR16      *SelectionBigFileName;
    CHAR16      *DefaultSelection;
+   UINTN       ShowTools[NUM_TOOLS];
    CHAR8       ScanFor[NUM_SCAN_OPTIONS]; // codes of types of loaders for which to scan
 } REFIT_CONFIG;
 

@@ -63,16 +63,12 @@ typedef struct {
     CHAR16  *End16Ptr;
 } REFIT_FILE;
 
-#define DISABLE_FLAG_SHELL      (0x0001)
-#define DISABLE_FLAG_TOOLS      (0x0002)
+#define DISABLE_FLAG_BANNER     (0x0001)
+#define DISABLE_FLAG_LABEL      (0x0002)
 #define DISABLE_FLAG_SINGLEUSER (0x0004)
 #define DISABLE_FLAG_HWTEST     (0x0008)
+#define DISABLE_FLAG_ARROWS     (0x0010)
 #define DISABLE_ALL             ((0xffff))
-
-#define HIDEUI_FLAG_BANNER      (0x0001)
-#define HIDEUI_FLAG_FUNCS       (0x0002)
-#define HIDEUI_FLAG_LABEL       (0x0004)
-#define HIDEUI_ALL              (0xffff)
 
 VOID ReadConfig(VOID);
 VOID ScanUserConfigured(VOID);

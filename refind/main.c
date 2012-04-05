@@ -64,14 +64,16 @@
 #endif
 
 static REFIT_MENU_ENTRY MenuEntryAbout    = { L"About rEFInd", TAG_ABOUT, 1, 0, 'A', NULL, NULL, NULL };
-static REFIT_MENU_ENTRY MenuEntryReset    = { L"Restart Computer", TAG_RESET, 1, 0, 'R', NULL, NULL, NULL };
+static REFIT_MENU_ENTRY MenuEntryReset    = { L"Reboot Computer", TAG_REBOOT, 1, 0, 'R', NULL, NULL, NULL };
 static REFIT_MENU_ENTRY MenuEntryShutdown = { L"Shut Down Computer", TAG_SHUTDOWN, 1, 0, 'U', NULL, NULL, NULL };
 static REFIT_MENU_ENTRY MenuEntryReturn   = { L"Return to Main Menu", TAG_RETURN, 0, 0, 0, NULL, NULL, NULL };
+static REFIT_MENU_ENTRY MenuEntryExit     = { L"Exit rEFInd", TAG_EXIT, 1, 0, 0, NULL, NULL, NULL };
 
 static REFIT_MENU_SCREEN MainMenu       = { L"Main Menu", NULL, 0, NULL, 0, NULL, 0, L"Automatic boot" };
 static REFIT_MENU_SCREEN AboutMenu      = { L"About", NULL, 0, NULL, 0, NULL, 0, NULL };
 
-REFIT_CONFIG        GlobalConfig = { FALSE, 20, 0, 0, 0, NULL, NULL, NULL, NULL };
+REFIT_CONFIG GlobalConfig = { FALSE, 20, 0, 0, NULL, NULL, NULL, NULL,
+                              {TAG_SHELL, TAG_ABOUT, TAG_SHUTDOWN, TAG_REBOOT, 0, 0, 0, 0, 0 }};
 
 //
 // misc functions
@@ -81,7 +83,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.3.3");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.3.4");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -1069,50 +1071,6 @@ static LOADER_ENTRY * AddToolEntry(IN CHAR16 *LoaderPath, IN CHAR16 *LoaderTitle
     return Entry;
 } /* static LOADER_ENTRY * AddToolEntry() */
 
-// Check the disk for add-on tools -- an EFI shell, the dangerous gptsync.efi, and a rescue Linux
-// installation.
-static VOID ScanTool(VOID)
-{
-    CHAR16                  *FileName;
-    LOADER_ENTRY            *Entry;
-    UINTN                   i = 0;
-
-    if (GlobalConfig.DisableFlags & DISABLE_FLAG_TOOLS)
-        return;
-
-    // look for the EFI shell
-    while (((FileName = FindCommaDelimited(SHELL_NAMES, i++)) != NULL) && (!(GlobalConfig.DisableFlags & DISABLE_FLAG_SHELL))) {
-       if (FileExists(SelfRootDir, FileName)) {
-          AddToolEntry(FileName, L"EFI Shell", BuiltinIcon(BUILTIN_ICON_TOOL_SHELL), 'E', FALSE);
-       }
-       FreePool(FileName);
-       FileName = NULL;
-    } // while
-
-    // look for the GPT/MBR sync tool
-    MergeStrings(&FileName, L"\\efi\\tools\\gptsync.efi", 0);
-    if (FileExists(SelfRootDir, FileName)) {
-        AddToolEntry(FileName, L"Make Hybrid MBR", BuiltinIcon(BUILTIN_ICON_TOOL_PART), 'P', FALSE);
-    }
-    FreePool(FileName);
-    FileName = NULL;
-
-    // look for rescue Linux
-    MergeStrings(&FileName, L"\\efi\\rescue\\elilo.efi", 0);
-    if (SelfVolume != NULL && FileExists(SelfRootDir, FileName)) {
-        Entry = AddToolEntry(FileName, L"Rescue Linux", BuiltinIcon(BUILTIN_ICON_TOOL_RESCUE), '0', FALSE);
-        
-        if (UGAWidth == 1440 && UGAHeight == 900)
-            Entry->LoadOptions = L"-d 0 i17";
-        else if (UGAWidth == 1680 && UGAHeight == 1050)
-            Entry->LoadOptions = L"-d 0 i20";
-        else
-            Entry->LoadOptions = L"-d 0 mini";
-    }
-    FreePool(FileName);
-} /* VOID ScanTool() */
-
-
 #ifdef DEBIAN_ENABLE_EFI110
 //
 // pre-boot driver functions
@@ -1291,20 +1249,7 @@ static VOID ScanForBootloaders(VOID) {
             break;
       } // switch()
    } // for
-   ScanTool();
 
-   // fixed other menu entries
-   if (!(GlobalConfig.HideUIFlags & HIDEUI_FLAG_FUNCS)) {
-      MenuEntryAbout.Image = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-      AddMenuEntry(&MainMenu, &MenuEntryAbout);
-   }
-   if (!(GlobalConfig.HideUIFlags & HIDEUI_FLAG_FUNCS) || MainMenu.EntryCount == 0) {
-      MenuEntryShutdown.Image = BuiltinIcon(BUILTIN_ICON_FUNC_SHUTDOWN);
-      AddMenuEntry(&MainMenu, &MenuEntryShutdown);
-      MenuEntryReset.Image = BuiltinIcon(BUILTIN_ICON_FUNC_RESET);
-      AddMenuEntry(&MainMenu, &MenuEntryReset);
-   }
-   
    // assign shortcut keys
    for (i = 0; i < MainMenu.EntryCount && MainMenu.Entries[i]->Row == 0 && i < 9; i++)
       MainMenu.Entries[i]->ShortcutDigit = (CHAR16)('1' + i);
@@ -1312,6 +1257,53 @@ static VOID ScanForBootloaders(VOID) {
    // wait for user ACK when there were errors
    FinishTextScreen(FALSE);
 } // static VOID ScanForBootloaders()
+
+// Add the second-row tags containing built-in and external tools (EFI shell,
+// reboot, etc.)
+static VOID ScanForTools(VOID) {
+   CHAR16 *FileName = NULL;
+   UINTN i, j;
+
+   for (i = 0; i < NUM_TOOLS; i++) {
+      switch(GlobalConfig.ShowTools[i]) {
+         case TAG_SHUTDOWN:
+            MenuEntryShutdown.Image = BuiltinIcon(BUILTIN_ICON_FUNC_SHUTDOWN);
+            AddMenuEntry(&MainMenu, &MenuEntryShutdown);
+            break;
+         case TAG_REBOOT:
+            MenuEntryReset.Image = BuiltinIcon(BUILTIN_ICON_FUNC_RESET);
+            AddMenuEntry(&MainMenu, &MenuEntryReset);
+            break;
+         case TAG_ABOUT:
+            Print(L"Adding menu entry for the 'about' tag....\n");
+            MenuEntryAbout.Image = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
+            AddMenuEntry(&MainMenu, &MenuEntryAbout);
+            break;
+         case TAG_EXIT:
+            MenuEntryExit.Image = BuiltinIcon(BUILTIN_ICON_FUNC_EXIT);
+            AddMenuEntry(&MainMenu, &MenuEntryExit);
+            break;
+         case TAG_SHELL:
+            j = 0;
+            while ((FileName = FindCommaDelimited(SHELL_NAMES, j++)) != NULL) {
+               if (FileExists(SelfRootDir, FileName)) {
+                  AddToolEntry(FileName, L"EFI Shell", BuiltinIcon(BUILTIN_ICON_TOOL_SHELL), 'E', FALSE);
+               }
+            } // while
+            break;
+         case TAG_GPTSYNC:
+            MergeStrings(&FileName, L"\\efi\\tools\\gptsync.efi", 0);
+            if (FileExists(SelfRootDir, FileName)) {
+               AddToolEntry(FileName, L"Make Hybrid MBR", BuiltinIcon(BUILTIN_ICON_TOOL_PART), 'P', FALSE);
+            }
+            break;
+      } // switch()
+      if (FileName != NULL) {
+         FreePool(FileName);
+         FileName = NULL;
+      }
+   } // for
+} // static VOID ScanForTools
 
 //
 // main entry point
@@ -1347,6 +1339,7 @@ efi_main (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
     LoadDrivers();
 #endif /* DEBIAN_ENABLE_EFI110 */
     ScanForBootloaders();
+    ScanForTools();
 
     while (MainLoopRunning) {
         MenuExit = RunMainMenu(&MainMenu, GlobalConfig.DefaultSelection, &ChosenEntry);
@@ -1363,8 +1356,8 @@ efi_main (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
         }
         
         switch (ChosenEntry->Tag) {
-            
-            case TAG_RESET:    // Restart
+
+            case TAG_REBOOT:    // Reboot
                 TerminateScreen();
                 refit_call4_wrapper(RT->ResetSystem, EfiResetCold, EFI_SUCCESS, 0, NULL);
                 MainLoopRunning = FALSE;   // just in case we get this far
@@ -1390,6 +1383,11 @@ efi_main (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
                 
             case TAG_TOOL:     // Start a EFI tool
                 StartTool((LOADER_ENTRY *)ChosenEntry);
+                break;
+
+            case TAG_EXIT:    // Terminate rEFInd
+                BeginTextScreen(L" ");
+                return EFI_SUCCESS;
                 break;
                 
         }

@@ -673,7 +673,7 @@ static VOID PaintAll(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, UINTN
                            itemPosX[i], row1PosY);
       }
    }
-   if (!(GlobalConfig.HideUIFlags & HIDEUI_FLAG_LABEL))
+   if (!(GlobalConfig.DisableFlags & DISABLE_FLAG_LABEL))
       DrawMainMenuText(Screen->Entries[State->CurrentSelection]->Title,
                        (UGAWidth - LAYOUT_TEXT_WIDTH) >> 1, textPosY);
 } // static VOID PaintAll()
@@ -688,7 +688,7 @@ static VOID PaintSelection(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State,
       DrawMainMenuEntry(Screen->Entries[State->CurrentSelection], TRUE,
                         itemPosX[State->CurrentSelection - State->FirstVisible],
                         (Screen->Entries[State->CurrentSelection]->Row == 0) ? row0PosY : row1PosY);
-      if (!(GlobalConfig.HideUIFlags & HIDEUI_FLAG_LABEL))
+      if (!(GlobalConfig.DisableFlags & DISABLE_FLAG_LABEL))
          DrawMainMenuText(Screen->Entries[State->CurrentSelection]->Title,
                           (UGAWidth - LAYOUT_TEXT_WIDTH) >> 1, textPosY);
    } else {
@@ -779,10 +779,10 @@ VOID MainMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, IN UINT
             // For PaintIcon() calls, the starting Y position is moved to the midpoint
             // of the surrounding row; PaintIcon() adjusts this back up by half the
             // icon's height to properly center it.
-            if (State->FirstVisible > 0)
+            if ((State->FirstVisible > 0) && (!(GlobalConfig.DisableFlags & DISABLE_FLAG_ARROWS)))
                PaintIcon(&egemb_arrow_left, L"icons\\arrow_left.icns", row0PosX - TILE_XSPACING,
                          row0PosY + (ROW0_TILESIZE / 2), ALIGN_RIGHT);
-            if (State->LastVisible < (row0Loaders - 1))
+            if ((State->LastVisible < (row0Loaders - 1)) && (!(GlobalConfig.DisableFlags & DISABLE_FLAG_ARROWS)))
                PaintIcon(&egemb_arrow_right, L"icons\\arrow_right.icns",
                          (UGAWidth + (ROW0_TILESIZE + TILE_XSPACING) * State->MaxVisible) / 2 + TILE_XSPACING,
                          row0PosY + (ROW0_TILESIZE / 2), ALIGN_LEFT);
@@ -793,7 +793,7 @@ VOID MainMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, IN UINT
             break;
             
         case MENU_FUNCTION_PAINT_TIMEOUT:
-            if (!(GlobalConfig.HideUIFlags & HIDEUI_FLAG_LABEL))
+            if (!(GlobalConfig.DisableFlags & DISABLE_FLAG_LABEL))
                 DrawMainMenuText(ParamText, (UGAWidth - LAYOUT_TEXT_WIDTH) >> 1, textPosY + TEXT_LINE_HEIGHT);
             break;
             

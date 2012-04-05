@@ -8,18 +8,17 @@
 #
 timeout 20
 
-# Disable menu options for increased security. These are intended for a lab
-# environment where the administrator doesn't want users to mess with the
-# operating system. List the names for the options you want to hide from
-# the boot menu. Currently supported:
-#  shell       - remove the EFI shell
-#  tools       - remove all EFI tools (shell and gptsync)
+# Disable user interface elements for personal preference or to increase
+# security:
+#  banner      - the rEFInd title banner
+#  label       - text label in the menu
 #  singleuser  - remove the submenu options to boot Mac OS X in single-user
-#                 or verbose modes
-#  hwtest      - remove the submenu option to run Apple Hardware Test
+#                or verbose modes
+#  hwtest      - the submenu option to run Apple's hardware test
+#  arrows      - scroll arrows on the OS selection tag line
 #  all         - all of the above
 #
-#disable shell singleuser
+#disable singleuser
 #disable all
 
 # Use a custom title banner instead of the rEFInd icon and name. The file
@@ -42,30 +41,23 @@ timeout 20
 #selection_big   selection-big.bmp
 #selection_small selection-small.bmp
 
-# Hide various user interface elements. Here you can list the names of
-# interface elements to hide. Currently supported:
-#  banner    - the rEFInd title banner
-#  shell     - the EFI shell icon
-#  tools     - all EFI tools (shell and gptsync)
-#  funcs     - built-in functions (about, restart)
-#    ('tools' and 'funcs' together hide the complete second row of icons.)
-#  label     - text label in the menu
-#  badges    - all volume badges (same as 'hidebadges all'); this setting
-#               is not recommended because it won't let you distinguish
-#               installed OSes and bootable CDs/DVDs.
-#  all       - all of the above, except for 'badges'
-#
-# Note: The 'shell' and 'tools' options are equivalent to the 'disable'
-# options with the same names.
-#
-#hideui tools funcs hdbadges
-#hideui all
-
 # Use text mode only. When enabled, this option forces rEFInd into text mode.
 #
 #textonly
 
-# Which types of boot loaders to search:
+# Which non-bootloader tools to show on the tools line, and in what
+# order to display them:
+#  shell     - the EFI shell
+#  gptsync   - the (dangerous) gptsync.efi utility
+#  about     - an "about this program" option
+#  exit      - a tag to exit from rEFInd
+#  shutdown  - shuts down the computer (a bug causes this to reboot EFI
+#              systems)
+#  reboot    - a tag to reboot the computer
+# Default is shell,about,shutdown,reboot
+#showtools shell, about, reboot
+
+# Which types of boot loaders to search, and in what order to display them:
 #  internal      - internal EFI disk-based boot loaders
 #  external      - external EFI disk-based boot loaders
 #  optical       - EFI optical discs (CD, DVD, etc.)
@@ -169,4 +161,3 @@ menuentry "Windows 7" {
 	disabled
 }
 
-# EOF
