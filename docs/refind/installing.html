@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/14/2012; last Web page update: 3/26/2012, referencing rEFInd 0.2.3</p>
+  <p>Originally written: 3/14/2012; last Web page update: 4/5/2012, referencing rEFInd 0.2.4</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -89,13 +89,9 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <hr />
 
-<div class="sidebar">
+<p class="sidebar"><b>Important:</b> A rEFInd zip file, when uncompressed, creates a directory called <tt>refind-<i>version</i></tt>, where <tt><i>version</i></tt> is the version number. This directory includes a subdirectory called <tt>refind</tt> that holds the boot loader, along with another that holds documentation, as well as miscellaneous files in <tt>refind-<i>version</i></tt> itself. When I refer to "the <tt>refind</tt> directory" on this page, I mean the directory with that precise name, not the <tt>refind-<i>version</i></tt> directory that is its parent.</p>
 
-<p><b>Important:</b> A rEFInd zip file, when uncompressed, creates a directory called <tt>refind-<i>version</i></tt>, where <tt><i>version</i></tt> is the version number. This directory includes a subdirectory called <tt>refind</tt> that holds the boot loader, along with another that holds documentation, as well as miscellaneous files in <tt>refind-<i>version</i></tt> itself. When I refer to "the <tt>refind</tt> directory" on this page, I mean the directory with that precise name, not the <tt>refind-<i>version</i></tt> directory that is its parent.</p>
-
-</div>
-
-<p>Once you've uncompressed a rEFInd binary zip file, you can copy the entire <tt>refind</tt> directory into your EFI System Partition's (ESP's) <tt>EFI</tt> directory on UEFI-based PCs, so that rEFInd resides in <tt>EFI/refind</tt>. If you've tried rEFInd using a CD-R image file, you can copy the files from the <tt>EFI/refind</tt> directory on the CD to create an equivalent directory on the ESP. To avoid confusion, though, you should delete the rEFInd binary file for the CPU type your computer does <i>not</i> use. To the best of my knowledge, all UEFI-based PCs use 64-bit CPUs, so you should keep the <tt>refind_x64.efi</tt> binary and delete the <tt>refind_ia32.efi</tt> binary. Most Intel-based Macs also have 64-bit EFI implementations, so you should do the same thing; but very early Intel-based Macs have 32-bit EFIs (and sometimes 32-bit CPUs), which require the <tt>refind_ia32.efi</tt> file. You can determine whether your Mac needs the x86-64 or IA32 build by typing the following command in a Mac Terminal window:</p>
+<p>Once you've uncompressed a rEFInd binary zip file, you can copy the entire <tt>refind</tt> directory into your EFI System Partition's (ESP's) <tt>EFI</tt> directory on UEFI-based PCs, so that rEFInd resides in <tt>EFI/refind</tt>. If you've tried rEFInd using a CD-R image file, you can copy the files from the <tt>EFI/refind</tt> directory on the CD to create an equivalent directory on the ESP. To avoid confusion, though, you should delete the rEFInd binary file for the CPU type your computer does <i>not</i> use. To the best of my knowledge, all UEFI-based PCs use 64-bit CPUs, so you should keep the <tt>refind_x64.efi</tt> binary and delete the <tt>refind_ia32.efi</tt> binary. Most Intel-based Macs also have 64-bit EFI implementations, so you should do the same thing; but very early Intel-based Macs have 32-bit EFIs (and sometimes 32-bit CPUs), which require the <tt>refind_ia32.efi</tt> file. You can determine whether your Mac needs the <i>x</i>86-64 or IA32 build by typing the following command in a Mac Terminal window:</p>
 
 <pre class="listing">
 $ <b>ioreg -l -p IODeviceTree | grep firmware-abi</b>
@@ -127,15 +123,11 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 
 <li>Type <tt><b>cd /boot/efi/EFI/refind</b></tt> to change into rEFInd's new directory on the ESP.</li>
 
-<li>Type <tt><b>rm refind_ia32.efi</b></tt> to remove the IA32 binary if you're using an x86-64 (64-bit) system; or type <tt><b>rm refind_x64.efi</b></tt> to remove the x86-64 binary if you're using an x86 (32-bit) system. You can optionally rename the binary you keep as <tt>refind.efi</tt>, but this isn't required.</li>
+<li>Type <tt><b>rm refind_ia32.efi</b></tt> to remove the IA32 binary if you're using an <i>x</i>86-64 (64-bit) system; or type <tt><b>rm refind_x64.efi</b></tt> to remove the <i>x</i>86-64 binary if you're using an <i>x</i>86 (32-bit) system. You can optionally rename the binary you keep as <tt>refind.efi</tt>, but this isn't required.</li>
 
 <li>Rename the configuration file by typing <tt><b>mv refind.conf-sample refind.conf</b></tt>. Consult the <a href="configfile.html">Editing the rEFInd Configuration File</a> page for information on how to adjust your options.</li>
 
-<div class="sidebar">
-
-<p><b>Warning:</b> I've seen reports that Linux's <tt>efibootmgr</tt> utility can damage some Macs' firmware, necessitating re-flashing it. Therefore, I recommend using <tt>bless</tt> from OS X to do this job on Apple hardware.</p>
-
-</div>
+<p class="sidebar"><b>Warning:</b> I've seen reports that Linux's <tt>efibootmgr</tt> utility can damage some Macs' firmware, necessitating re-flashing it. I've also seen some vague suggestions that this problem has been fixed with the 3.0 kernels, but I haven't been able to substantiate this suggestion. Therefore, I recommend using <tt>bless</tt> from OS X to do this job on Apple hardware.</p>
 
 <a name="efibootmgr">
 <li>On a UEFI-based system, type <tt><b>efibootmgr -c -l \\EFI\\refind\\refind_x64.efi -L rEFInd</b></tt> to add rEFInd to your EFI's list of available boot loaders, which it stores in NVRAM. (Adjust the path to the binary as required if you install somewhere else.) You may need to install this program on some systems; it's a standard part of most distributions' repositories.</li>
@@ -153,11 +145,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 <h2>Installing rEFInd Using Mac OS X</h2>
 </a>
 
-<div class="sidebar">
-
-<p>One of the reasons I've abandoned rEFIt's GUI installation tools for Mac OS X is that there are several bug reports (such as <a href="https://sourceforge.net/tracker/index.php?func=detail&aid=3147364&group_id=161917&atid=821764">this one</a> and <a href="https://sourceforge.net/tracker/?func=detail&aid=3218104&group_id=161917&atid=821764">this one</a>) that the rEFIt installer may be causing filesystem corruption on disks over about 500 MiB. I don't have such a disk on my Mac, so I can't test solutions. Rather than risk other peoples' hard disks, I thought it best to revert to a manual installation proceudure that will, I hope, be less likely to cause problems.</p>
-
-</div>
+<p class="sidebar">One of the reasons I've abandoned rEFIt's GUI installation tools for Mac OS X is that there are several bug reports (such as <a href="https://sourceforge.net/tracker/index.php?func=detail&aid=3147364&group_id=161917&atid=821764">this one</a> and <a href="https://sourceforge.net/tracker/?func=detail&aid=3218104&group_id=161917&atid=821764">this one</a>) that the rEFIt installer may be causing filesystem corruption on disks over about 500 MiB. I don't have such a disk on my Mac, so I can't test solutions. Rather than risk other peoples' hard disks, I thought it best to revert to a manual installation proceudure that will, I hope, be less likely to cause problems.</p>
 
 <p>The procedure for installing rEFInd on a Mac is similar to that for installing it under Linux, except that you can install it to the OS X's system directory rather than to the ESP, and you must use the <tt>bless</tt> utility rather than <tt>efibootmgr</tt>. To be precise, you should follow these steps:</p>
 
@@ -235,9 +223,9 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 
 <li>Look for an existing directory called <tt>EFI/BOOT</tt> or <tt>EFI/Microsoft/BOOT</tt>. If neither of these directories exist, skip the next step. (Note that FAT is case-insensitive, so the name may vary in case.)</li>
 
-<li>Rename the existing directory to something else. For <tt>EFI/BOOT</tt>, try renaming it to <tt>EFI/Oldboot</tt>. For <tt>EFI/Microsoft/BOOT</tt>, rename the <tt>Microsoft</tt> directory&mdash;say, to <tt>MS</tt>. Thus, you'll have <tt>EFI/MS</tt> and its contents, including <tt>EFI/MS/BOOT</tt>.</li>
+<li>Rename the existing directory or boot loader file to something else. For <tt>EFI/BOOT</tt>, try renaming it to <tt>EFI/Oldboot</tt>. For <tt>EFI/Microsoft/BOOT</tt>, move or rename the <tt>bootmgfw.efi</tt> file it contains. For instance, you can move it to <tt>EFI/Microsoft</tt>. This will keep the boot loader accessible to rEFInd's menu, while preventing the firmware from launching it automatically.</li>
 
-<li>Rename/move your <tt>EFI/refind</tt> directory to <tt>EFI/BOOT</tt> (or <tt>EFI/Microsoft/BOOT</tt>, if that directory existed and you've renamed it&mdash;but you'll first need to create a new <tt>EFI/Microsoft</tt> directory).</li>
+<li>Rename/move your <tt>EFI/refind</tt> directory to <tt>EFI/BOOT</tt>. If you're working from <tt>EFI/Microsoft/BOOT</tt>, you should move the contents of your rEFInd directory to <tt>EFI/Microsoft/BOOT</tt>.</li>
 
 <li>Rename <tt>EFI/BOOT/refind_x64.efi</tt> to the name of the boot loader it's replacing&mdash;it should become <tt>EFI/BOOT/bootx64.efi</tt> or <tt>EFI/Microsoft/BOOT/bootmgfw.efi</tt>.</li>
 
@@ -279,11 +267,6 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
     site</a> as part of a package with a few other tools. Place it in the
     <tt>efi/tools</tt> subdirectory of the ESP and rEFInd will detect it
     and give you the option to use it.</li>
-
-<li><b>Rescue Linux</b>&mdash;If the file <tt>efi/rescue/elilo.efi</tt>
-    exists, it will be given a special entry in the boot list. The intent
-    seems to be to launch Linux in a rescue mode, but I've not gotten it to
-    work.</li>
 
 </ul>
 

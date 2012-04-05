@@ -8,18 +8,18 @@
 #
 timeout 20
 
-# Disable user interface elements for personal preference or to increase
+# Hide user interface elements for personal preference or to increase
 # security:
 #  banner      - the rEFInd title banner
 #  label       - text label in the menu
 #  singleuser  - remove the submenu options to boot Mac OS X in single-user
-#                or verbose modes
+#                or verbose modes; affects ONLY MacOS X
 #  hwtest      - the submenu option to run Apple's hardware test
 #  arrows      - scroll arrows on the OS selection tag line
 #  all         - all of the above
 #
-#disable singleuser
-#disable all
+#hideui singleuser
+#hideui all
 
 # Use a custom title banner instead of the rEFInd icon and name. The file
 # path is relative to the directory where refind.efi is located. The color

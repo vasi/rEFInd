@@ -83,7 +83,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.3.4");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.4");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -359,7 +359,7 @@ VOID GenerateSubScreen(LOADER_ENTRY *Entry, IN REFIT_VOLUME *Volume) {
       } // if
 #endif
 
-      if (!(GlobalConfig.DisableFlags & DISABLE_FLAG_SINGLEUSER)) {
+      if (!(GlobalConfig.HideUIFlags & HIDEUI_FLAG_SINGLEUSER)) {
          SubEntry = InitializeLoaderEntry(Entry);
          if (SubEntry != NULL) {
             SubEntry->me.Title        = L"Boot Mac OS X in verbose mode";
@@ -397,7 +397,7 @@ VOID GenerateSubScreen(LOADER_ENTRY *Entry, IN REFIT_VOLUME *Volume) {
 
       // check for Apple hardware diagnostics
       StrCpy(DiagsFileName, L"\\System\\Library\\CoreServices\\.diagnostics\\diags.efi");
-      if (FileExists(Volume->RootDir, DiagsFileName) && !(GlobalConfig.DisableFlags & DISABLE_FLAG_HWTEST)) {
+      if (FileExists(Volume->RootDir, DiagsFileName) && !(GlobalConfig.HideUIFlags & HIDEUI_FLAG_HWTEST)) {
          SubEntry = InitializeLoaderEntry(Entry);
          if (SubEntry != NULL) {
             SubEntry->me.Title        = L"Run Apple Hardware Test";
@@ -1275,7 +1275,6 @@ static VOID ScanForTools(VOID) {
             AddMenuEntry(&MainMenu, &MenuEntryReset);
             break;
          case TAG_ABOUT:
-            Print(L"Adding menu entry for the 'about' tag....\n");
             MenuEntryAbout.Image = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
             AddMenuEntry(&MainMenu, &MenuEntryAbout);
             break;

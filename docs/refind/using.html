@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/14/2012; last Web page update: 3/26/2012, referencing rEFInd 0.2.3</p>
+  <p>Originally written: 3/14/2012; last Web page update: 4/5/2012, referencing rEFInd 0.2.4</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -107,13 +107,9 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <ul>
 
-<div class="sidebar">
-
-<p>As noted on the <a href="installing.html">Installing rEFInd</a> page, the <tt>gptsync</tt> utility is dangerous, but it's useful on some Mac systems that dual-boot with Windows. If you're using a UEFI-based PC, it's best to <i>not</i> install this utility!</p>
-
-</div>
-
 <li>Launch the EFI shell</li>
+
+<p class="sidebar">As noted on the <a href="installing.html">Installing rEFInd</a> page, the <tt>gptsync</tt> utility is dangerous, but it's useful on some Mac systems that dual-boot with Windows. If you're using a UEFI-based PC, it's best to <i>not</i> install this utility!</p>
 
 <li>Launch the <tt>gptsync</tt> utility</li>
 
@@ -125,7 +121,7 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 </ul>
 
-<p>The last three of these options are always available by default, but the first depends on the presence of the EFI shell program file, as described earlier. If you install <tt>gptsync.efi</tt>, its icon will appear, as well.</p>
+<p>The last three of these options are always available by default, but the first depends on the presence of the EFI shell program file, as described earlier. To get the <tt>gptsync</tt> icon, you must install <tt>gptsync.efi</tt> and adjust the <tt>showtools</tt> option in <tt>refind.conf</tt>, as well.</p>
 
 <p>To launch an OS or utility, you should select its icon and then press the Enter key. If you press the Insert key, rEFInd will show a menu that may hold additional options, depending on the OS type. The following figure shows the submenu for Mac OS X. You can use this menu much like the main menu; move the cursor to select the option you want to use, then press the Enter key to launch the boot loader with the selected options. Press the Esc key or select <tt>Return to Main Menu</tt> to return to the main menu.</p>
 

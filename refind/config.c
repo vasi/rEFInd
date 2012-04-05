@@ -326,25 +326,25 @@ VOID ReadConfig(VOID)
         if (StriCmp(TokenList[0], L"timeout") == 0) {
             HandleInt(TokenList, TokenCount, &(GlobalConfig.Timeout));
 
-        // Note: I'm using "hideui" as equivalent to "disable" for the moment (as of rEFInd 0.2.4)
+        // Note: I'm using "disable" as equivalent to "hideui" for the moment (as of rEFInd 0.2.4)
         // because I've folded two options into one and removed some values, so I want to catch
-        // existing configurations as much as possible. The "hideui" equivalency to "disable" will
-        // be removed sooner or later....
-        } else if ((StriCmp(TokenList[0], L"disable") == 0) || (StriCmp(TokenList[0], L"hideui") == 0)) {
+        // existing configurations as much as possible. The "disable" equivalency to "hideui" will
+        // be removed sooner or later, leaving only "hideui".
+        } else if ((StriCmp(TokenList[0], L"hideui") == 0) || (StriCmp(TokenList[0], L"disable") == 0)) {
             for (i = 1; i < TokenCount; i++) {
                 FlagName = TokenList[i];
                 if (StriCmp(FlagName, L"banner") == 0) {
-                   GlobalConfig.DisableFlags |= DISABLE_FLAG_BANNER;
+                   GlobalConfig.HideUIFlags |= HIDEUI_FLAG_BANNER;
                 } else if (StriCmp(FlagName, L"label") == 0) {
-                   GlobalConfig.DisableFlags |= DISABLE_FLAG_LABEL;
+                   GlobalConfig.HideUIFlags |= HIDEUI_FLAG_LABEL;
                 } else if (StriCmp(FlagName, L"singleuser") == 0) {
-                    GlobalConfig.DisableFlags |= DISABLE_FLAG_SINGLEUSER;
+                    GlobalConfig.HideUIFlags |= HIDEUI_FLAG_SINGLEUSER;
                 } else if (StriCmp(FlagName, L"hwtest") == 0) {
-                    GlobalConfig.DisableFlags |= DISABLE_FLAG_HWTEST;
+                    GlobalConfig.HideUIFlags |= HIDEUI_FLAG_HWTEST;
                 } else if (StriCmp(FlagName, L"arrows") == 0) {
-                   GlobalConfig.DisableFlags |= DISABLE_FLAG_ARROWS;
+                   GlobalConfig.HideUIFlags |= HIDEUI_FLAG_ARROWS;
                 } else if (StriCmp(FlagName, L"all") == 0) {
-                    GlobalConfig.DisableFlags = DISABLE_ALL;
+                    GlobalConfig.HideUIFlags = HIDEUI_ALL;
                 } else {
                     Print(L" unknown disable flag: '%s'\n", FlagName);
                 }

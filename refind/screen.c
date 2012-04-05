@@ -341,7 +341,7 @@ VOID BltClearScreen(IN BOOLEAN ShowBanner)
 {
     static EG_IMAGE *Banner = NULL;
 
-    if (ShowBanner && !(GlobalConfig.DisableFlags & DISABLE_FLAG_BANNER)) {
+    if (ShowBanner && !(GlobalConfig.HideUIFlags & HIDEUI_FLAG_BANNER)) {
         // load banner on first call
         if (Banner == NULL) {
             if (GlobalConfig.BannerFileName == NULL)

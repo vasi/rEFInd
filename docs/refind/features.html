@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/14/2012; last Web page update: 3/26/2012, referencing rEFInd 0.2.3</p>
+  <p>Originally written: 3/14/2012; last Web page update: 4/5/2012, referencing rEFInd 0.2.4</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -127,13 +127,15 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <li>Additional OS icons (all of which are Linux distributions, at least so far). This can make it easier to find a specific distribution in the boot list if you've installed multiple Linux distributions.</li>
 
-<li>The ability to auto-detect Linux initial RAM disk files and to read Linux kernel options from a <tt>linux.conf</tt> file. These features support (nearly) automatic handling of Linux kernels with embedded EFI stub loader support (a new feature with Linux 3.3.0).</li>
+<li>The ability to auto-detect Linux initial RAM disk files and to read Linux kernel options from a <tt>refind_linux.conf</tt> file. These features support (nearly) automatic handling of Linux kernels with embedded EFI stub loader support (a new feature with Linux 3.3.0).</li>
 
 <li>Fixes to display problems on many UEFI-based PCs.</li>
 
 <li>Workarounds to file detection bugs in at least one type of UEFI firmware.</li>
 
 <li>Improved detection of itself, to keep rEFInd out of its own boot menu.</li>
+
+<li>An "exit" option (disabled by default), so that you can return to whatever shell or boot manager you used to launch rEFInd, should this ability be desirable. (This feature first appeared in rEFInd 0.2.4.)</li>
 
 </ul>
 

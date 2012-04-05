@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/19/2012; last Web page update: 3/26/2012, referencing rEFInd 0.2.3</p>
+  <p>Originally written: 3/19/2012; last Web page update: 4/5/2012, referencing rEFInd 0.2.4</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -103,7 +103,7 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <h2>Using the EFI Stub Loader</h2>
 
-<p>The Linux <a href="http://www.rodsbooks.com/efi-bootloaders/efistub.html">EFI stub loader</a> is a way to turn a Linux kernel into an EFI application. In a sense, the kernel becomes its own boot loader. This approach to booting Linux is very elegant in some ways, but as described on the page to which I just linked, it has its disadvantages, too. One challenge to booting in this way is that modern Linux installations typically require that the kernel be passed a number of options at boot time. These tell the kernel where the Linux root (<tt>/</tt>) filesystem is, where the initial RAM disk is, and so on. Without these options, Linux won't boot. These options are impossible for a generic boot loader to guess without a little help. For this reason, rEFIt, rEFInd's parent program, could not boot a Linux kernel with EFI stub support. rEFInd, however, goes a little further....</p>
+<p>The Linux <a href="http://www.rodsbooks.com/efi-bootloaders/efistub.html">EFI stub loader</a> is a way to turn a Linux kernel into an EFI application. In a sense, the kernel becomes its own boot loader. This approach to booting Linux is very elegant in some ways, but as described on the page to which I just linked, it has its disadvantages, too. One challenge to booting in this way is that modern Linux installations typically require that the kernel be passed a number of options at boot time. These tell the kernel where the Linux root (<tt>/</tt>) filesystem is, where the initial RAM disk is, and so on. Without these options, Linux won't boot. These options are impossible for a generic boot loader to guess without a little help. It's possible to build a kernel with a default set of options, but this is rather limiting. Thus, rEFInd provides configuration options to help.</p>
 
 <p>With all versions of rEFInd, you can create manual boot loader stanzas in the <tt>refind.conf</tt> file to identify a Linux kernel and to pass it all the options it needs. This approach is effective and flexible, but it requires editing a single configuration file. If a computer boots two different Linux distributions, and if both were to support rEFInd, problems might arise as each one tries to modify its own rEFInd configuration; or the one that controls rEFInd might set inappropriate options for another distribution. This is a problem that's been a minor annoyance for years under BIOS, since the same potential for poor configuration applies to LILO, GRUB Legacy, and GRUB 2 on BIOS. The most reliable solution there is to chainload one boot loader to another. The same solution is possible under EFI, but rEFInd offers another possibility.</p>
 

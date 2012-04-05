@@ -151,7 +151,7 @@ typedef struct {
 typedef struct {
    BOOLEAN     TextOnly;
    UINTN       Timeout;
-   UINTN       DisableFlags;
+   UINTN       HideUIFlags;
    UINTN       MaxTags;     // max. number of OS entries to show simultaneously in graphics mode
    CHAR16      *BannerFileName;
    CHAR16      *SelectionSmallFileName;

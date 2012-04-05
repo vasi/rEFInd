@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/14/2012; last Web page update: 3/26/2012, referencing rEFInd 0.2.3</p>
+  <p>Originally written: 3/14/2012; last Web page update: 4/5/2012, referencing rEFInd 0.2.4</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -93,19 +93,27 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <p>Broadly speaking, rEFInd's configuration file is broken down into two sections: <i>global options</i> and <i>OS stanzas.</i> The global options section sets options that apply globally&mdash;to set the timeout period, enable graphics or text mode, and so on. OS stanzas are optional, but if present, they enable you to add new boot options or replace the auto-detected options with customized ones. Both sections include configuration lines and comment lines, the latter being denoted by a leading hash mark (<tt>#</tt>). rEFInd ignores comment lines, so you can add explanatory text. The default configuration file includes numerous comments explaining each of the options.</p>
 
-<h2>Hiding EFI Boot Loaders</h2>
+<h2>Hiding and Displaying EFI Boot Loaders</h2>
 
-<div class="sidebar">
-
-<p>ESPs use the FAT filesystem, which is case-insensitive. Unfortunately, at least one EFI implementation (Gigabyte's <a href="http://www.rodsbooks.com/gb-hybrid-efi/">Hybrid EFI</a>) contains a bug that causes string comparisons that should be case-insensitive to actually be done in a case-sensitive way. This can cause files that are present to appear to be missing. rEFInd includes code to work around this bug in some situations, but not in all of them. If boot loaders appear to be missing, try changing the case on their filenames or on the <tt>EFI</tt> directory in the ESP. (It's coded as uppercase in rEFInd; but EFI loader filename extensions are coded as lowercase <tt>.efi</tt>. I made these choices because they seem to be the most common uses on real-world installations.)</p>
-
-</div>
+<p class="sidebar">ESPs use the FAT filesystem, which is case-insensitive. Unfortunately, at least one EFI implementation (Gigabyte's <a href="http://www.rodsbooks.com/gb-hybrid-efi/">Hybrid EFI</a>) contains a bug that causes string comparisons that should be case-insensitive to actually be done in a case-sensitive way. This can cause files that are present to appear to be missing. rEFInd includes code to work around this bug in some situations, but not in all of them. If boot loaders appear to be missing, try changing the case on their filenames or on the <tt>EFI</tt> directory in the ESP. (It's coded as uppercase in rEFInd; but EFI loader filename extensions are coded as lowercase <tt>.efi</tt>. I made these choices because they seem to be the most common uses on real-world installations.)</p>
 
 <p>Before delving into the configuration file, you should be aware of what you can do by renaming files. By default, rEFInd scans all the filesystems it can read for boot loaders. It scans most of the subdirectories of the <tt>EFI</tt> directory on every filesystem it can access for files with names that end in <tt>.efi</tt>. (rEFIt gives special treatment to the <tt>TOOLS</tt> subdirectory, where it looks for system tools rather than boot loaders.)</p>
 
 <p>If you're like me, you may sometimes want to hide a boot loader from rEFInd's menu for a brief period&mdash;say, because you're testing a variety of configurations but you don't want them all to clutter the menu at once. You might also want to hide a boot loader if you want to override its default settings using a custom entry in <tt>refind.conf</tt> and you don't want an automatic search to duplicate that entry. You can easily hide a boot loader by removing or changing its <tt>.efi</tt> filename extension&mdash;for instance, changing <tt>grub.efi</tt> to <tt>grub</tt>.</p>
 
 <p>Another way to hide a boot loader is to move it into rEFInd's own directory. In order to keep rEFInd from showing up in its own menu, it ignores boot loaders in its own directory. This obviously includes the rEFInd binary file itself, but also anything else you might store there.</p>
+
+<p>In addition to hiding boot loaders, you can adjust their icons. You can do this in either of two ways:</p>
+
+<ul>
+
+<li>You can place a boot loader in a directory with a name that matches one of rEFInd's standard icons, which take names of the form <tt>os_<tt class="variable">name</tt>.icns</tt>. To use this icon, you would place the boot loader in the directory called <tt class="variable">name</tt>.</li>
+
+<li>You can name an icon file after your boot loader, but with an extension of <tt>.icns</tt>. For instance, if you're using <tt class="variable">loader</tt><tt>.efi</tt>, you would name the icon file <tt class="variable">loader</tt><tt>.icns</tt>. These icon files should be 128x128 images in <a href="http://en.wikipedia.org/wiki/Apple_Icon_Image_format">Apple's ICNS format.</a> You can create such files easily in OS X or convert PNG files to ICNS format with <a href="http://icns.sourceforge.net/">libicns.</a></li>
+
+</ul>
+
+<p>rEFInd assigns icons to the Windows and OS X boot loaders based on their conventional locations, so they get suitable icons even though they don't follow these rules.</p>
 
 <h2>Adjusting the Global Configuration</h2>
 
@@ -131,9 +139,9 @@ timeout 20
    <td>Sets the timeout period in seconds. If <tt>0</tt>, the timeout is disabled&mdash;rEFInd waits indefinitely for user input.</td>
 </tr>
 <tr>
-   <td><tt>disable</tt></td>
-   <td><tt>shell</tt>, <tt>tools</tt>, <tt>singleuser</tt>, <tt>hwtest</tt>, or <tt>all</tt></td>
-   <td>Removes the specified menu options for improved security. <tt>shell</tt> removes the EFI shell, <tt>tools</tt> removes all the EFI tools, <tt>singleuser</tt> removes the single-user option from the Mac OS sub-menu, <tt>hwtest</tt> removes the Mac OS hardware test option, and <tt>all</tt> removes all of these options. You can specify multiple parameters with this option. The default is to set none of these options.</td>
+   <td><tt>hideui</tt></td>
+   <td><tt>banner</tt>, <tt>label</tt>, <tt>singleuser</tt>, <tt>hwtest</tt>, <tt>arrows</tt>, or <tt>all</tt></td>
+   <td>Removes the specified user interface features. <tt>banner</tt> removes the banner graphic, <tt>label</tt> removes the text description of each tag, <tt>singleuser</tt> removes the single-user option from the Mac OS sub-menu, <tt>hwtest</tt> removes the Mac OS hardware test option, <tt>arrows</tt> removes the arrows to the right or left of the OS tags when rEFInd finds too many OSes to display simultaneously, and <tt>all</tt> removes all of these options. You can specify multiple parameters with this option. The default is to set none of these values.</td>
 </tr>
 <tr>
    <td><tt>banner</tt></td>
@@ -151,9 +159,9 @@ timeout 20
    <td>Like <tt>selection_big</tt>, this sets an alternate highlight graphic, but for the smaller utility tags on the second row.</td>
 </tr>
 <tr>
-   <td><tt>hideui</tt></td>
-   <td><tt>banner</tt>, <tt>shell</tt>, <tt>tools</tt>, <tt>funcs</tt>, <tt>label</tt>, or <tt>all</tt></td>
-   <td>Hides the specified user interface elements: The rEFInd logo, the EFI shell icon, all the tools, built-in functions (restart and about), text labels, and all of the above, respectively. Some of these parameters are redundant with <tt>disable</tt> parameters. The default is to set none of these options.</td>
+   <td><tt>showtools</tt></td>
+   <td><tt>shell</tt>, <tt>gptsync</tt>, <tt>about</tt>, <tt>exit</tt>, <tt>shutdown</tt>, and <tt>reboot</tt></td>
+   <td>Specifies which tool tags to display on the second row. <tt>shell</tt> launches an EFI shell, <tt>gptsync</tt> launches a tool that creates a hybrid MBR, <tt>about</tt> displays information about the program, <tt>exit</tt> terminates rEFInd, <tt>shutdown</tt> shuts down the computer (or reboots it, on UEFI PCs), and <tt>reboot</tt> reboots the computer. The tags appear in the order in which you specify them. The default is <tt>shell, about, shutdown, reboot</tt>.</td>
 </tr>
 <tr>
    <td><tt>textonly</tt></td>
@@ -172,17 +180,19 @@ timeout 20
 </tr>
 </table>
 
-<p>As an example, consider the following <tt>refind.conf</tt> file:</p>
+<p>Prior to version 0.2.4, rEFInd supported a token called <tt>disable</tt>, whose function partially overlapped with <tt>hideui</tt>. Version 0.2.4 merges many of the features of these two tokens into <tt>hideui</tt> and creates the new <tt>showtools</tt> option, which provides the remaining functionality in a more flexible way.</p>
+
+<p>As an example of rEFInd configuration, consider the following <tt>refind.conf</tt> file:</p>
 
 <pre class="listing">
 # Sample refind.conf file
 timeout 5
 banner custom.bmp
 scanfor manual,external,optical
-default_selection L
+default_selection elilo
 </pre>
 
-<p>This example sets a timeout of 5 seconds; loads a custom graphic file called <tt>custom.bmp</tt> from the directory in which <tt>refind.efi</tt> resides; uses manual boot loader configuration but also scans for external EFI boot loaders and EFI boot loaders on optical discs; and sets the default boot loader to Linux. Of course, since this file specifies use of manual boot loader configuration, it's not complete; you'll need to add at least one OS stanza to be able to boot from anything but an external disk or optical drive....</p>
+<p>This example sets a timeout of 5 seconds; loads a custom graphic file called <tt>custom.bmp</tt> from the directory in which <tt>refind.efi</tt> resides; uses manual boot loader configuration but also scans for external EFI boot loaders and EFI boot loaders on optical discs; and sets the default boot loader to the first loader found that includes the string <tt>elilo</tt>. Of course, since this file specifies use of manual boot loader configuration, it's not complete; you'll need to add at least one OS stanza to be able to boot from anything but an external disk or optical drive....</p>
 
 <h2>Creating OS Stanzas</h2>
 
@@ -234,7 +244,7 @@ default_selection L
 <tr>
    <td><tt>graphics</tt></td>
    <td><tt>on</tt> or <tt>off</tt></td>
-   <td>Enables or disables a graphical boot mode. This option is important only for Mac OS X.</td>
+   <td>Enables or disables a graphical boot mode. This option has an effect only on Macintoshes; UEFI PCs seem to be unaffected by it.</td>
 </tr>
 <tr>
    <td><tt>options</tt></td>
