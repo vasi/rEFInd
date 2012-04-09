@@ -83,7 +83,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.4.2");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.5");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -175,7 +175,7 @@ static EFI_STATUS StartEFIImageList(IN EFI_DEVICE_PATH **DevicePaths,
         if (ErrorInStep != NULL)
             *ErrorInStep = 3;
     }
-    
+
     // re-open file handles
     ReinitRefitLib();
 
@@ -234,15 +234,16 @@ static CHAR16 * FindInitrd(IN CHAR16 *LoaderPath, IN REFIT_VOLUME *Volume) {
    KernelVersion = FindNumbers(FileName);
    Path = FindPath(LoaderPath);
 
+   MergeStrings(&Path, L"\\", 0); // Add trailing backslash; necessary for root directory
    DirIterOpen(Volume->RootDir, Path, &DirIter);
    while ((DirIterNext(&DirIter, 2, L"init*", &DirEntry)) && (InitrdName == NULL)) {
       InitrdVersion = FindNumbers(DirEntry->FileName);
       if (KernelVersion != NULL) {
             if (StriCmp(InitrdVersion, KernelVersion) == 0)
-               InitrdName = PoolPrint(L"%s\\%s", Path, DirEntry->FileName);
+               InitrdName = PoolPrint(L"%s%s", Path, DirEntry->FileName);
       } else {
          if (InitrdVersion == NULL)
-            InitrdName = PoolPrint(L"%s\\%s", Path, DirEntry->FileName);
+            InitrdName = PoolPrint(L"%s%s", Path, DirEntry->FileName);
       } // if/else
       if (InitrdVersion != NULL)
          FreePool(InitrdVersion);
@@ -521,17 +522,20 @@ static CHAR16 * GetMainLinuxOptions(IN CHAR16 * LoaderPath, IN REFIT_VOLUME *Vol
 // that will (with luck) work fairly automatically.
 VOID SetLoaderDefaults(LOADER_ENTRY *Entry, CHAR16 *LoaderPath, IN REFIT_VOLUME *Volume) {
    CHAR16          IconFileName[256];
-   CHAR16          *FileName, *OSIconName = NULL, *Temp;
+   CHAR16          *FileName, *PathOnly, *OSIconName = NULL, *Temp;
    CHAR16          ShortcutLetter = 0;
 
    FileName = Basename(LoaderPath);
+   PathOnly = FindPath(LoaderPath);
 
    // locate a custom icon for the loader
    StrCpy(IconFileName, LoaderPath);
    ReplaceExtension(IconFileName, L".icns");
    if (FileExists(Volume->RootDir, IconFileName)) {
       Entry->me.Image = LoadIcns(Volume->RootDir, IconFileName, 128);
-   } // if
+   } else if ((StrLen(PathOnly) == 0) && (Volume->VolIconImage != NULL)) {
+      Entry->me.Image = Volume->VolIconImage;
+   } // icon matched to loader or volume
 
    Temp = FindLastDirName(LoaderPath);
    MergeStrings(&OSIconName, Temp, L',');
@@ -552,6 +556,9 @@ VOID SetLoaderDefaults(LOADER_ENTRY *Entry, CHAR16 *LoaderPath, IN REFIT_VOLUME 
       Entry->OSType = 'R';
       ShortcutLetter = 'R';
    } else if (StriCmp(LoaderPath, MACOSX_LOADER_PATH) == 0) {
+      if (Volume->VolIconImage != NULL) { // custom icon file found
+         Entry->me.Image = Volume->VolIconImage;
+      }
       MergeStrings(&OSIconName, L"mac", L',');
       Entry->UseGraphicsMode = TRUE;
       Entry->OSType = 'M';
@@ -581,6 +588,8 @@ VOID SetLoaderDefaults(LOADER_ENTRY *Entry, CHAR16 *LoaderPath, IN REFIT_VOLUME 
    Entry->me.ShortcutLetter = ShortcutLetter;
    if (Entry->me.Image == NULL)
       Entry->me.Image = LoadOSIcon(OSIconName, L"unknown", FALSE);
+   if (PathOnly != NULL)
+      FreePool(PathOnly);
 } // VOID SetLoaderDefaults()
 
 // Add a specified EFI boot loader to the list, using automatic settings

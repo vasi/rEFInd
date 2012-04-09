@@ -63,6 +63,10 @@ UINTN            VolumesCount = 0;
 // Maximum size for disk sectors
 #define SECTOR_SIZE 4096
 
+// Default names for volume badges (mini-icon to define disk type) and icons
+#define VOLUME_BADGE_NAME L".VolumeBadge.icns"
+#define VOLUME_ICON_NAME L".VolumeIcon.icns"
+
 // functions
 
 static EFI_STATUS FinishInitRefitLib(VOID);
@@ -435,7 +439,7 @@ static VOID ScanVolumeBootcode(IN OUT REFIT_VOLUME *Volume, OUT BOOLEAN *Bootabl
                 CopyMem(Volume->MbrPartitionTable, MbrTable, 4 * 16);
             }
         }
-        
+
     } else {
 #if REFIT_DEBUG > 0
         CheckError(Status, L"while reading boot sector");
@@ -468,7 +472,7 @@ static VOID ScanVolume(IN OUT REFIT_VOLUME *Volume)
     UINTN                   PartialLength;
     EFI_FILE_SYSTEM_INFO    *FileSystemInfoPtr;
     BOOLEAN                 Bootable;
-    
+
     // get device path
     Volume->DevicePath = DuplicateDevicePath(DevicePathFromHandle(Volume->DeviceHandle));
 #if REFIT_DEBUG > 0
@@ -479,9 +483,9 @@ static VOID ScanVolume(IN OUT REFIT_VOLUME *Volume)
 #endif
     }
 #endif
-    
+
     Volume->DiskKind = DISK_KIND_INTERNAL;  // default
-    
+
     // get block i/o
     Status = refit_call3_wrapper(BS->HandleProtocol, Volume->DeviceHandle, &BlockIoProtocol, (VOID **) &(Volume->BlockIO));
     if (EFI_ERROR(Status)) {
@@ -491,16 +495,16 @@ static VOID ScanVolume(IN OUT REFIT_VOLUME *Volume)
         if (Volume->BlockIO->Media->BlockSize == 2048)
             Volume->DiskKind = DISK_KIND_OPTICAL;
     }
-    
+
     // scan for bootcode and MBR table
     Bootable = FALSE;
     ScanVolumeBootcode(Volume, &Bootable);
-    
+
     // detect device type
     DevicePath = Volume->DevicePath;
     while (DevicePath != NULL && !IsDevicePathEndType(DevicePath)) {
         NextDevicePath = NextDevicePathNode(DevicePath);
-        
+
         if (DevicePathType(DevicePath) == MESSAGING_DEVICE_PATH &&
             (DevicePathSubType(DevicePath) == MSG_USB_DP ||
              DevicePathSubType(DevicePath) == MSG_USB_CLASS_DP ||
@@ -512,44 +516,44 @@ static VOID ScanVolume(IN OUT REFIT_VOLUME *Volume)
             Volume->DiskKind = DISK_KIND_OPTICAL;     // El Torito entry -> optical disk
             Bootable = TRUE;
         }
-        
+
         if (DevicePathType(DevicePath) == MEDIA_DEVICE_PATH && DevicePathSubType(DevicePath) == MEDIA_VENDOR_DP) {
             Volume->IsAppleLegacy = TRUE;             // legacy BIOS device entry
             // TODO: also check for Boot Camp GUID
             Bootable = FALSE;   // this handle's BlockIO is just an alias for the whole device
         }
-        
+
         if (DevicePathType(DevicePath) == MESSAGING_DEVICE_PATH) {
             // make a device path for the whole device
             PartialLength = (UINT8 *)NextDevicePath - (UINT8 *)(Volume->DevicePath);
             DiskDevicePath = (EFI_DEVICE_PATH *)AllocatePool(PartialLength + sizeof(EFI_DEVICE_PATH));
             CopyMem(DiskDevicePath, Volume->DevicePath, PartialLength);
             CopyMem((UINT8 *)DiskDevicePath + PartialLength, EndDevicePath, sizeof(EFI_DEVICE_PATH));
-            
+
             // get the handle for that path
             RemainingDevicePath = DiskDevicePath;
             //Print(L"  * looking at %s\n", DevicePathToStr(RemainingDevicePath));
             Status = refit_call3_wrapper(BS->LocateDevicePath, &BlockIoProtocol, &RemainingDevicePath, &WholeDiskHandle);
             //Print(L"  * remaining: %s\n", DevicePathToStr(RemainingDevicePath));
             FreePool(DiskDevicePath);
-            
+
             if (!EFI_ERROR(Status)) {
                 //Print(L"  - original handle: %08x - disk handle: %08x\n", (UINT32)DeviceHandle, (UINT32)WholeDiskHandle);
-                
+
                 // get the device path for later
                 Status = refit_call3_wrapper(BS->HandleProtocol, WholeDiskHandle, &DevicePathProtocol, (VOID **) &DiskDevicePath);
                 if (!EFI_ERROR(Status)) {
                     Volume->WholeDiskDevicePath = DuplicateDevicePath(DiskDevicePath);
                 }
-                
+
                 // look at the BlockIO protocol
                 Status = refit_call3_wrapper(BS->HandleProtocol, WholeDiskHandle, &BlockIoProtocol, (VOID **) &Volume->WholeDiskBlockIO);
                 if (!EFI_ERROR(Status)) {
-                    
+
                     // check the media block size
                     if (Volume->WholeDiskBlockIO->Media->BlockSize == 2048)
                         Volume->DiskKind = DISK_KIND_OPTICAL;
-                    
+
                 } else {
                     Volume->WholeDiskBlockIO = NULL;
                     //CheckError(Status, L"from HandleProtocol");
@@ -557,10 +561,10 @@ static VOID ScanVolume(IN OUT REFIT_VOLUME *Volume)
             } //else
               //  CheckError(Status, L"from LocateDevicePath");
         }
-        
+
         DevicePath = NextDevicePath;
     } // while
-    
+
     if (!Bootable) {
 #if REFIT_DEBUG > 0
         if (Volume->HasBootCode)
@@ -568,16 +572,16 @@ static VOID ScanVolume(IN OUT REFIT_VOLUME *Volume)
 #endif
         Volume->HasBootCode = FALSE;
     }
-    
+
     // default volume icon based on disk kind
     ScanVolumeDefaultIcon(Volume);
-    
+
     // open the root directory of the volume
     Volume->RootDir = LibOpenRoot(Volume->DeviceHandle);
     if (Volume->RootDir == NULL) {
         return;
     }
-    
+
     // get volume name
     FileSystemInfoPtr = LibFileSystemInfo(Volume->RootDir);
     if (FileSystemInfoPtr != NULL) {
@@ -591,8 +595,11 @@ static VOID ScanVolume(IN OUT REFIT_VOLUME *Volume)
     //   - name derived from file system type or partition type
 
     // get custom volume icon if present
-    if (FileExists(Volume->RootDir, L".VolumeIcon.icns"))
-        Volume->VolBadgeImage = LoadIcns(Volume->RootDir, L".VolumeIcon.icns", 32);
+    if (FileExists(Volume->RootDir, VOLUME_BADGE_NAME))
+        Volume->VolBadgeImage = LoadIcns(Volume->RootDir, VOLUME_BADGE_NAME, 32);
+    if (FileExists(Volume->RootDir, VOLUME_ICON_NAME)) {
+       Volume->VolIconImage = LoadIcns(Volume->RootDir, VOLUME_ICON_NAME, 128);
+    }
 }
 
 static VOID ScanExtendedPartition(REFIT_VOLUME *WholeDiskVolume, MBR_PARTITION_INFO *MbrEntry)
@@ -605,9 +612,9 @@ static VOID ScanExtendedPartition(REFIT_VOLUME *WholeDiskVolume, MBR_PARTITION_I
     UINT8                   SectorBuffer[512];
     BOOLEAN                 Bootable;
     MBR_PARTITION_INFO      *EMbrTable;
-    
+
     ExtBase = MbrEntry->StartLBA;
-    
+
     for (ExtCurrent = ExtBase; ExtCurrent; ExtCurrent = NextExtCurrent) {
         // read current EMBR
       Status = refit_call5_wrapper(WholeDiskVolume->BlockIO->ReadBlocks,
@@ -619,7 +626,7 @@ static VOID ScanExtendedPartition(REFIT_VOLUME *WholeDiskVolume, MBR_PARTITION_I
         if (*((UINT16 *)(SectorBuffer + 510)) != 0xaa55)
             break;
         EMbrTable = (MBR_PARTITION_INFO *)(SectorBuffer + 446);
-        
+
         // scan logical partitions in this EMBR
         NextExtCurrent = 0;
         for (i = 0; i < 4; i++) {
@@ -631,7 +638,7 @@ static VOID ScanExtendedPartition(REFIT_VOLUME *WholeDiskVolume, MBR_PARTITION_I
                 NextExtCurrent = ExtBase + EMbrTable[i].StartLBA;
                 break;
             } else {
-                
+
                 // found a logical partition
                 Volume = AllocateZeroPool(sizeof(REFIT_VOLUME));
                 Volume->DiskKind = WholeDiskVolume->DiskKind;
@@ -641,16 +648,16 @@ static VOID ScanExtendedPartition(REFIT_VOLUME *WholeDiskVolume, MBR_PARTITION_I
                 Volume->BlockIO = WholeDiskVolume->BlockIO;
                 Volume->BlockIOOffset = ExtCurrent + EMbrTable[i].StartLBA;
                 Volume->WholeDiskBlockIO = WholeDiskVolume->BlockIO;
-                
+
                 Bootable = FALSE;
                 ScanVolumeBootcode(Volume, &Bootable);
                 if (!Bootable)
                     Volume->HasBootCode = FALSE;
-                
+
                 ScanVolumeDefaultIcon(Volume);
-                
+
                 AddListElement((VOID ***) &Volumes, &VolumesCount, Volume);
-                
+
             }
         }
     }
@@ -696,7 +703,7 @@ VOID ScanVolumes(VOID)
 
     if (SelfVolume == NULL)
         Print(L"WARNING: SelfVolume not found");
-    
+
     // second pass: relate partitions and whole disk devices
     for (VolumeIndex = 0; VolumeIndex < VolumesCount; VolumeIndex++) {
         Volume = Volumes[VolumeIndex];
@@ -732,7 +739,7 @@ VOID ScanVolumes(VOID)
                 // check size
                 if ((UINT64)(MbrTable[PartitionIndex].Size) != Volume->BlockIO->Media->LastBlock + 1)
                     continue;
-                
+
                 // compare boot sector read through offset vs. directly
                 Status = refit_call5_wrapper(Volume->BlockIO->ReadBlocks,
                                              Volume->BlockIO, Volume->BlockIO->Media->MediaId,
@@ -751,9 +758,9 @@ VOID ScanVolumes(VOID)
                     SectorSum += SectorBuffer1[i];
                 if (SectorSum < 1000)
                     continue;
-                
+
                 // TODO: mark entry as non-bootable if it is an extended partition
-                
+
                 // now we're reasonably sure the association is correct...
                 Volume->IsMbrPartition = TRUE;
                 Volume->MbrPartitionIndex = PartitionIndex;
@@ -761,11 +768,11 @@ VOID ScanVolumes(VOID)
                     Volume->VolName = PoolPrint(L"Partition %d", PartitionIndex + 1);
                 break;
             }
-            
+
             FreePool(SectorBuffer1);
             FreePool(SectorBuffer2);
         }
-        
+
     }
 } /* VOID ScanVolumes() */
 
@@ -773,15 +780,15 @@ static VOID UninitVolumes(VOID)
 {
     REFIT_VOLUME            *Volume;
     UINTN                   VolumeIndex;
-    
+
     for (VolumeIndex = 0; VolumeIndex < VolumesCount; VolumeIndex++) {
         Volume = Volumes[VolumeIndex];
-        
+
         if (Volume->RootDir != NULL) {
             refit_call1_wrapper(Volume->RootDir->Close, Volume->RootDir);
             Volume->RootDir = NULL;
         }
-        
+
         Volume->DeviceHandle = NULL;
         Volume->BlockIO = NULL;
         Volume->WholeDiskBlockIO = NULL;
@@ -795,15 +802,15 @@ VOID ReinitVolumes(VOID)
     UINTN                   VolumeIndex;
     EFI_DEVICE_PATH         *RemainingDevicePath;
     EFI_HANDLE              DeviceHandle, WholeDiskHandle;
-    
+
     for (VolumeIndex = 0; VolumeIndex < VolumesCount; VolumeIndex++) {
         Volume = Volumes[VolumeIndex];
-        
+
         if (Volume->DevicePath != NULL) {
             // get the handle for that path
             RemainingDevicePath = Volume->DevicePath;
             Status = refit_call3_wrapper(BS->LocateDevicePath, &BlockIoProtocol, &RemainingDevicePath, &DeviceHandle);
-            
+
             if (!EFI_ERROR(Status)) {
                 Volume->DeviceHandle = DeviceHandle;
 
@@ -855,15 +862,15 @@ EFI_STATUS DirNextEntry(IN EFI_FILE *Directory, IN OUT EFI_FILE_INFO **DirEntry,
     VOID *Buffer;
     UINTN LastBufferSize, BufferSize;
     INTN IterCount;
-    
+
     for (;;) {
-        
+
         // free pointer from last call
         if (*DirEntry != NULL) {
             FreePool(*DirEntry);
             *DirEntry = NULL;
         }
-        
+
         // read next directory entry
         LastBufferSize = BufferSize = 256;
         Buffer = AllocatePool(BufferSize);
@@ -886,16 +893,16 @@ EFI_STATUS DirNextEntry(IN EFI_FILE *Directory, IN OUT EFI_FILE_INFO **DirEntry,
             FreePool(Buffer);
             break;
         }
-        
+
         // check for end of listing
         if (BufferSize == 0) {    // end of directory listing
             FreePool(Buffer);
             break;
         }
-        
+
         // entry is ready to be returned
         *DirEntry = (EFI_FILE_INFO *)Buffer;
-        
+
         // filter results
         if (FilterMode == 1) {   // only return directories
             if (((*DirEntry)->Attribute & EFI_FILE_DIRECTORY))
@@ -905,7 +912,7 @@ EFI_STATUS DirNextEntry(IN EFI_FILE *Directory, IN OUT EFI_FILE_INFO **DirEntry,
                 break;
         } else                   // no filter or unknown filter -> return everything
             break;
-        
+
     }
     return Status;
 }
@@ -930,10 +937,10 @@ BOOLEAN DirIterNext(IN OUT REFIT_DIR_ITER *DirIter, IN UINTN FilterMode, IN CHAR
         FreePool(DirIter->LastFileInfo);
         DirIter->LastFileInfo = NULL;
     }
-    
+
     if (EFI_ERROR(DirIter->LastStatus))
         return FALSE;   // stop iteration
-    
+
     for (;;) {
         DirIter->LastStatus = DirNextEntry(DirIter->DirHandle, &(DirIter->LastFileInfo), FilterMode);
         if (EFI_ERROR(DirIter->LastStatus))
@@ -949,7 +956,7 @@ BOOLEAN DirIterNext(IN OUT REFIT_DIR_ITER *DirIter, IN UINTN FilterMode, IN CHAR
         } else
             break;
     }
-    
+
     *DirEntry = DirIter->LastFileInfo;
     return TRUE;
 }
@@ -1066,7 +1073,7 @@ VOID MergeStrings(IN OUT CHAR16 **First, IN CHAR16 *Second, CHAR16 AddChar) {
    if (Second != NULL)
       Length2 = StrLen(Second);
    NewString = AllocatePool(sizeof(CHAR16) * (Length1 + Length2 + 2));
-   NewString[0] = 0;
+   NewString[0] = L'\0';
    if (NewString != NULL) {
       if (*First != NULL) {
          StrCat(NewString, *First);

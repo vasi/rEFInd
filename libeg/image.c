@@ -77,11 +77,11 @@ EG_IMAGE * egCreateFilledImage(IN UINTN Width, IN UINTN Height, IN BOOLEAN HasAl
 EG_IMAGE * egCopyImage(IN EG_IMAGE *Image)
 {
     EG_IMAGE        *NewImage;
-    
+
     NewImage = egCreateImage(Image->Width, Image->Height, Image->HasAlpha);
     if (NewImage == NULL)
         return NULL;
-    
+
     CopyMem(NewImage->PixelData, Image->PixelData, Image->Width * Image->Height * sizeof(EG_PIXEL));
     return NewImage;
 }
@@ -221,7 +221,7 @@ static EG_IMAGE * egDecodeAny(IN UINT8 *FileData, IN UINTN FileDataLength,
    } else if ((StriCmp(Format, L"ICNS") == 0) || (StriCmp(Format, L"icns") == 0)) {
       NewImage = egDecodeICNS(FileData, FileDataLength, IconSize, WantAlpha);
    } // if/else
-      
+
    return NewImage;
 }
 
@@ -231,19 +231,19 @@ EG_IMAGE * egLoadImage(IN EFI_FILE* BaseDir, IN CHAR16 *FileName, IN BOOLEAN Wan
     UINT8           *FileData;
     UINTN           FileDataLength;
     EG_IMAGE        *NewImage;
-    
+
     if (BaseDir == NULL || FileName == NULL)
         return NULL;
-    
+
     // load file
     Status = egLoadFile(BaseDir, FileName, &FileData, &FileDataLength);
     if (EFI_ERROR(Status))
         return NULL;
-    
+
     // decode it
     NewImage = egDecodeAny(FileData, FileDataLength, egFindExtension(FileName), 128, WantAlpha);
     FreePool(FileData);
-    
+
     return NewImage;
 }
 
@@ -253,24 +253,24 @@ EG_IMAGE * egLoadIcon(IN EFI_FILE* BaseDir, IN CHAR16 *FileName, IN UINTN IconSi
     UINT8           *FileData;
     UINTN           FileDataLength;
     EG_IMAGE        *NewImage;
-    
+
     if (BaseDir == NULL || FileName == NULL)
         return NULL;
-    
+
     // load file
     Status = egLoadFile(BaseDir, FileName, &FileData, &FileDataLength);
     if (EFI_ERROR(Status)) {
 //        Print(L"In egLoadIcon(), Status = %d after egLoadFile(); aborting load!\n", Status);
         return NULL;
     }
-    
+
     // decode it
     NewImage = egDecodeAny(FileData, FileDataLength, egFindExtension(FileName), IconSize, TRUE);
 //    Print(L"Done with egDecodeAny(), used extension '%s'\n", egFindExtension(FileName));
 //    if (NewImage == NULL)
 //       Print(L"Returning NULL from egLoadIcon()\n");
     FreePool(FileData);
-    
+
     return NewImage;
 }
 

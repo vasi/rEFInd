@@ -9,12 +9,12 @@
 </head>
 
 <body>
-  <h1>The rEFInd Boot Manager:<br />Revisions</h1>
+<h1>The rEFInd Boot Manager:<br />Revisions</h1>
 
-  <p class="subhead">by Roderick W. Smith, <a
+<p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Last Web page update: 4/5/2012</p>
+<p>Last Web page update: 4/9/2012</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -92,6 +92,8 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 <p>The following summarizes changes in rEFInd's public releases:</p>
 
 <ul>
+
+<li><b>0.2.5 (4/9/2012)</b>&mdash;Icon-handling improvements are key in this version. I've fixed a bug that caused icons to be replaced with ugly "not-found" default icons when rEFInd was launched in certain ways. I've also added support for <tt>.VolumeIcon.icns</tt> and <tt>.VolumeBadge.icns</tt> files to set loader tags and disk-type badges, respectively. (See the <a href="configfile.html">configuration page</a> for details.) I've also fixed a bug that prevented rEFInd from finding the correct initial RAM disk for Linux kernels stored in the root directory of a partition.</li>
 
 <li><b>0.2.4 (4/5/2012)</b>&mdash;This version adds support for a new location for EFI shells (<tt>shell<tt class="variable">arch</tt>.efi</tt> in the ESP's root directory. It also adds two new <tt>refind.conf</tt> options: <tt>showtools</tt> and <tt>max_tags</tt>, and removes another one (<tt>disable</tt>). The options available in <tt>hideui</tt> are now essentially a combination of what <tt>disable</tt> and <tt>hideui</tt> did, minus functionality now present in <tt>showtools</tt>. I made these changes to reduce redundancy and to increase flexibility. See the <a href="configfile.html">Configuring the Boot Manager</a> page for details.</li>
 

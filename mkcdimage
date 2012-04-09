@@ -74,6 +74,10 @@ mkisofs -A "Bootable rEFInd" -V "rEFInd $Version" -volset "rEFInd $Version" \
 # Create a bootable USB flash drive image, using the FAT filesystem
 # created above and a stored partition table image (plus some empty
 # sectors)....
+#
+# Note: Seems to work on only a few systems, so I'm not distributing
+# the resulting images yet....
+#
 rm ../../refind-flashdrive-$Version.*
 cat $StartDir/flashparts.img refind-bin-$Version.img > refind-flashdrive-$Version.img
 cp $StartDir/README-flashdrive.txt ./
@@ -92,7 +96,7 @@ mv refind-flashdrive-$Version/refind-flashdrive-$Version.img ../
 cd ../
 
 # Zip up the optical disc image....
-rm refind-cd-$Version.zip
+rm -f refind-cd-$Version.zip
 zip -9 refind-cd-$Version.zip refind-cd-$Version.iso
 
-#rm -r temp/
+rm -r temp/

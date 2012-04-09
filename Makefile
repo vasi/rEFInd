@@ -11,8 +11,8 @@ LIB_DIR=libeg
 
 # Build the Symbiote library itself.
 all:
-	make -C $(LIB_DIR) -j 6
-	make -C $(LOADER_DIR) -j 6
+	make -C $(LIB_DIR)
+	make -C $(LOADER_DIR)
 
 clean:
 	make -C $(LIB_DIR) clean

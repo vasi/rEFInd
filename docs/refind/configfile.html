@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/14/2012; last Web page update: 4/5/2012, referencing rEFInd 0.2.4</p>
+  <p>Originally written: 3/14/2012; last Web page update: 4/9/2012, referencing rEFInd 0.2.5</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -103,7 +103,7 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <p>Another way to hide a boot loader is to move it into rEFInd's own directory. In order to keep rEFInd from showing up in its own menu, it ignores boot loaders in its own directory. This obviously includes the rEFInd binary file itself, but also anything else you might store there.</p>
 
-<p>In addition to hiding boot loaders, you can adjust their icons. You can do this in either of two ways:</p>
+<p>In addition to hiding boot loaders, you can adjust their icons. You can do this in any of three ways for auto-detected boot loaders:</p>
 
 <ul>
 
@@ -111,9 +111,13 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <li>You can name an icon file after your boot loader, but with an extension of <tt>.icns</tt>. For instance, if you're using <tt class="variable">loader</tt><tt>.efi</tt>, you would name the icon file <tt class="variable">loader</tt><tt>.icns</tt>. These icon files should be 128x128 images in <a href="http://en.wikipedia.org/wiki/Apple_Icon_Image_format">Apple's ICNS format.</a> You can create such files easily in OS X or convert PNG files to ICNS format with <a href="http://icns.sourceforge.net/">libicns.</a></li>
 
+<li>If you're booting OS X from its standard boot loader, or if you place a boot loader file in the root directory of a partition, you can create a file called <tt>.VolumeIcon.icns</tt> that holds an icon file. OS X uses this file for its volume icons, so rEFInd picks up these icons automatically, provided they include 128x128 bitmaps.</li>
+
 </ul>
 
-<p>rEFInd assigns icons to the Windows and OS X boot loaders based on their conventional locations, so they get suitable icons even though they don't follow these rules.</p>
+<p>As a special case, rEFInd assigns icons to the Windows and OS X boot loaders based on their conventional locations, so they get suitable icons even though they don't follow these rules.</p>
+
+<p>In addition to the main OS tag icon, you can set the <i>badge</i> icon for a volume by creating a file called <tt>.VolumeBadge.icns</tt> in the root directory of a partition. This icon file must include a 32x32 bitmap. If present, it replaces the disk-type icons that are overlaid on the main OS icon. If you use this feature, the badge is applied to all the boot loaders read from the disk, not just those stored in the root directory or the Apple boot loader location. You could use this feature to set a custom badge for different specific disks or to help differentiate multiple OS X installations on one computer.</p>
 
 <h2>Adjusting the Global Configuration</h2>
 

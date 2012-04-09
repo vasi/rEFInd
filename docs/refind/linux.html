@@ -9,12 +9,12 @@
 </head>
 
 <body>
-  <h1>The rEFInd Boot Manager:<br />Methods of Booting Linux</h1>
+<h1>The rEFInd Boot Manager:<br />Methods of Booting Linux</h1>
 
-  <p class="subhead">by Roderick W. Smith, <a
+<p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/19/2012; last Web page update: 4/5/2012, referencing rEFInd 0.2.4</p>
+<p>Originally written: 3/19/2012; last Web page update: 4/9/2012, referencing rEFInd 0.2.5</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -105,13 +105,25 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <p>The Linux <a href="http://www.rodsbooks.com/efi-bootloaders/efistub.html">EFI stub loader</a> is a way to turn a Linux kernel into an EFI application. In a sense, the kernel becomes its own boot loader. This approach to booting Linux is very elegant in some ways, but as described on the page to which I just linked, it has its disadvantages, too. One challenge to booting in this way is that modern Linux installations typically require that the kernel be passed a number of options at boot time. These tell the kernel where the Linux root (<tt>/</tt>) filesystem is, where the initial RAM disk is, and so on. Without these options, Linux won't boot. These options are impossible for a generic boot loader to guess without a little help. It's possible to build a kernel with a default set of options, but this is rather limiting. Thus, rEFInd provides configuration options to help.</p>
 
-<p>With all versions of rEFInd, you can create manual boot loader stanzas in the <tt>refind.conf</tt> file to identify a Linux kernel and to pass it all the options it needs. This approach is effective and flexible, but it requires editing a single configuration file. If a computer boots two different Linux distributions, and if both were to support rEFInd, problems might arise as each one tries to modify its own rEFInd configuration; or the one that controls rEFInd might set inappropriate options for another distribution. This is a problem that's been a minor annoyance for years under BIOS, since the same potential for poor configuration applies to LILO, GRUB Legacy, and GRUB 2 on BIOS. The most reliable solution there is to chainload one boot loader to another. The same solution is possible under EFI, but rEFInd offers another possibility.</p>
+<p>With all versions of rEFInd, you can create manual boot loader stanzas
+in the <tt>refind.conf</tt> file to identify a Linux kernel and to pass it
+all the options it needs. This approach is effective and flexible, but it
+requires editing a single configuration file for all the OSes you want to
+define in this way. If a computer boots two different Linux distributions,
+and if both were to support rEFInd, problems might arise as each one tries
+to modify its own rEFInd configuration; or the one that controls rEFInd
+might set inappropriate options for another distribution. This is a problem
+that's been a minor annoyance for years under BIOS, since the same
+potential for poor configuration applies to LILO, GRUB Legacy, and GRUB 2
+on BIOS. The most reliable solution there is to chainload one boot loader
+to another. The same solution is possible under EFI, but rEFInd offers
+another possibility.</p>
 
 <p>rEFInd 0.2.1 and later supports semi-automatic Linux EFI stub loader detection. This feature works as part of the standard boot loader scan operation, but it extends it as follows:</p>
 
 <ol>
 
-<li>rEFInd looks for boot loaders whose names include the strings <tt>bzImage</tt> or <tt>vmlinuz</tt> and that end in <tt>.efi</tt>. For instance, <tt>bzImage-3.3.0.efi</tt> or <tt>vmlinuz-3.3.0-fc17.efi</tt> would match, and trigger subsequent steps in this procedure. Note that to use this system, you <i>must</i> give your kernel file a <tt>.efi</tt> extension, at least on the ESP (or other boot loader partition, for Macs)!</li>
+<li>rEFInd looks for boot loaders whose names include the strings <tt>bzImage</tt> or <tt>vmlinuz</tt> and that end in <tt>.efi</tt>. For instance, <tt>bzImage-3.3.0.efi</tt> or <tt>vmlinuz-3.3.0-fc17.efi</tt> would match, and trigger subsequent steps in this procedure. Note that to use this system, you <i>must</i> give your kernel file a <tt>.efi</tt> extension, at least on the ESP (or other boot loader partition)!</li>
 
 <p class="sidebar">A kernel whose filename lacks a version string matches an initial RAM disk that also lacks a version string in its filename. Note that you can reliably use only <i>one</i> kernel and initial RAM disk per directory that lack version numbers in their filenames.</p>
 
@@ -171,6 +183,8 @@ total 17943
 <li>You must place your kernels in a directory other than the one that holds the main rEFInd <tt>.efi</tt> file. This is because rEFInd does not scan its own directory for boot loaders.</li>
 
 </ul>
+
+<p class="sidebar"><b>Tip for distribution maintainers:</b> If you maintain an <tt>EFI/<tt class="variable">distname</tt></tt> directory for your kernels, you can place your version of rEFInd in a directory called <tt>EFI/<tt class="variable">distname</tt>/refind</tt>. This will avoid collisions with duplicate rEFInd installations from other distributions.</p>
 
 <p>On the whole, this method of configuration has a lot going for it. For distribution maintainers, if you place your Linux kernel files (with EFI stub support) on the ESP, with suitable filenames, matching initial RAM disk files, and a <tt>refind_linux.conf</tt> file, then any rEFInd 0.2.3 or later installation should detect your files, even if the user installs another distribution with another rEFInd that takes over from yours. (If the user, or this other rEFInd installation, disables auto-detection, this won't work.)</p>
 

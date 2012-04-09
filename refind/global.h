@@ -91,6 +91,7 @@ typedef struct {
    EFI_HANDLE          DeviceHandle;
    EFI_FILE            *RootDir;
    CHAR16              *VolName;
+   EG_IMAGE            *VolIconImage;
    EG_IMAGE            *VolBadgeImage;
    UINTN               DiskKind;
    BOOLEAN             IsAppleLegacy;

@@ -109,7 +109,7 @@ static EFI_STATUS ReadFile(IN EFI_FILE_HANDLE BaseDir, CHAR16 *FileName, REFIT_F
     File->End8Ptr      = File->Current8Ptr + File->BufferSize;
     File->Current16Ptr = (CHAR16 *)File->Buffer;
     File->End16Ptr     = File->Current16Ptr + (File->BufferSize >> 1);
-    
+
     // detect encoding
     File->Encoding = ENCODING_ISO8859_1;   // default: 1:1 translation of CHAR8 to CHAR16
     if (File->BufferSize >= 4) {
@@ -126,7 +126,7 @@ static EFI_STATUS ReadFile(IN EFI_FILE_HANDLE BaseDir, CHAR16 *FileName, REFIT_F
         }
         // TODO: detect other encodings as they are implemented
     }
-    
+ 
     return EFI_SUCCESS;
 }
 
@@ -252,10 +252,10 @@ UINTN ReadTokenLine(IN REFIT_FILE *File, OUT CHAR16 ***TokenList)
             if (*p == 0 || *p == '#')
                 LineFinished = TRUE;
             *p++ = 0;
-            
+
             AddListElement((VOID ***)TokenList, &TokenCount, (VOID *)StrDuplicate(Token));
         }
-        
+
         FreePool(Line);
     }
     return (TokenCount);
@@ -322,7 +322,7 @@ VOID ReadConfig(VOID)
         TokenCount = ReadTokenLine(&File, &TokenList);
         if (TokenCount == 0)
             break;
-        
+
         if (StriCmp(TokenList[0], L"timeout") == 0) {
             HandleInt(TokenList, TokenCount, &(GlobalConfig.Timeout));
 

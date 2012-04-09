@@ -108,14 +108,14 @@ EG_IMAGE * egDecodeICNS(IN UINT8 *FileData, IN UINTN FileDataLength, IN UINTN Ic
         // not an icns file...
         return NULL;
     }
-    
+
     FetchPixelSize = IconSize;
     for (;;) {
         DataPtr = NULL;
         DataLen = 0;
         MaskPtr = NULL;
         MaskLen = 0;
-        
+
         Ptr = FileData + 8;
         BufferEnd = FileData + FileDataLength;
         // iterate over tagged blocks in the file
@@ -123,7 +123,7 @@ EG_IMAGE * egDecodeICNS(IN UINT8 *FileData, IN UINTN FileDataLength, IN UINTN Ic
             BlockLen = ((UINT32)Ptr[4] << 24) + ((UINT32)Ptr[5] << 16) + ((UINT32)Ptr[6] << 8) + (UINT32)Ptr[7];
             if (Ptr + BlockLen > BufferEnd)   // block continues beyond end of file
                 break;
-            
+
             // extract the appropriate blocks for each pixel size
             if (FetchPixelSize == 128) {
                 if (Ptr[0] == 'i' && Ptr[1] == 't' && Ptr[2] == '3' && Ptr[3] == '2') {
@@ -135,7 +135,7 @@ EG_IMAGE * egDecodeICNS(IN UINT8 *FileData, IN UINTN FileDataLength, IN UINTN Ic
                     MaskPtr = Ptr + 8;
                     MaskLen = BlockLen - 8;
                 }
-                
+
             } else if (FetchPixelSize == 48) {
                 if (Ptr[0] == 'i' && Ptr[1] == 'h' && Ptr[2] == '3' && Ptr[3] == '2') {
                     DataPtr = Ptr + 8;
@@ -144,7 +144,7 @@ EG_IMAGE * egDecodeICNS(IN UINT8 *FileData, IN UINTN FileDataLength, IN UINTN Ic
                     MaskPtr = Ptr + 8;
                     MaskLen = BlockLen - 8;
                 }
-                
+
             } else if (FetchPixelSize == 32) {
                 if (Ptr[0] == 'i' && Ptr[1] == 'l' && Ptr[2] == '3' && Ptr[3] == '2') {
                     DataPtr = Ptr + 8;
@@ -153,7 +153,7 @@ EG_IMAGE * egDecodeICNS(IN UINT8 *FileData, IN UINTN FileDataLength, IN UINTN Ic
                     MaskPtr = Ptr + 8;
                     MaskLen = BlockLen - 8;
                 }
-                
+
             } else if (FetchPixelSize == 16) {
                 if (Ptr[0] == 'i' && Ptr[1] == 's' && Ptr[2] == '3' && Ptr[3] == '2') {
                     DataPtr = Ptr + 8;
@@ -162,12 +162,12 @@ EG_IMAGE * egDecodeICNS(IN UINT8 *FileData, IN UINTN FileDataLength, IN UINTN Ic
                     MaskPtr = Ptr + 8;
                     MaskLen = BlockLen - 8;
                 }
-                
+
             }
-            
+
             Ptr += BlockLen;
         }
-        
+
         /* FUTURE: try to load a different size and scale it later
             if (DataPtr == NULL && FetchPixelSize == 32) {
                 FetchPixelSize = 128;
@@ -176,18 +176,18 @@ EG_IMAGE * egDecodeICNS(IN UINT8 *FileData, IN UINTN FileDataLength, IN UINTN Ic
         */
         break;
     }
-    
+
     if (DataPtr == NULL)
         return NULL;   // no image found
-    
+
     // allocate image structure and buffer
     NewImage = egCreateImage(FetchPixelSize, FetchPixelSize, WantAlpha);
     if (NewImage == NULL)
         return NULL;
     PixelCount = FetchPixelSize * FetchPixelSize;
-    
+
     if (DataLen < PixelCount * 3) {
-        
+
         // pixel data is compressed, RGB planar
         CompData = DataPtr;
         CompLen  = DataLen;
@@ -198,9 +198,9 @@ EG_IMAGE * egDecodeICNS(IN UINT8 *FileData, IN UINTN FileDataLength, IN UINTN Ic
         if (CompLen > 0) {
             Print(L" egLoadICNSIcon: %d bytes of compressed data left\n", CompLen);
         }
-        
+
     } else {
-        
+
         // pixel data is uncompressed, RGB interleaved
         SrcPtr  = DataPtr;
         DestPtr = NewImage->PixelData;
@@ -209,17 +209,17 @@ EG_IMAGE * egDecodeICNS(IN UINT8 *FileData, IN UINTN FileDataLength, IN UINTN Ic
             DestPtr->g = *SrcPtr++;
             DestPtr->b = *SrcPtr++;
         }
-        
+
     }
-    
+
     // add/set alpha plane
     if (MaskPtr != NULL && MaskLen >= PixelCount && WantAlpha)
         egInsertPlane(MaskPtr, PLPTR(NewImage, a), PixelCount);
     else
         egSetPlane(PLPTR(NewImage, a), WantAlpha ? 255 : 0, PixelCount);
-    
+
     // FUTURE: scale to originally requested size if we had to load another size
-    
+
     return NewImage;
 }
 
