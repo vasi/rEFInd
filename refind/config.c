@@ -81,7 +81,7 @@ static EFI_STATUS ReadFile(IN EFI_FILE_HANDLE BaseDir, CHAR16 *FileName, REFIT_F
     Status = refit_call5_wrapper(BaseDir->Open, BaseDir, &FileHandle, FileName, EFI_FILE_MODE_READ, 0);
     if (CheckError(Status, L"while loading the configuration file"))
         return Status;
-    
+
     FileInfo = LibFileInfo(FileHandle);
     if (FileInfo == NULL) {
         // TODO: print and register the error
@@ -92,7 +92,7 @@ static EFI_STATUS ReadFile(IN EFI_FILE_HANDLE BaseDir, CHAR16 *FileName, REFIT_F
     if (ReadSize > MAXCONFIGFILESIZE)
         ReadSize = MAXCONFIGFILESIZE;
     FreePool(FileInfo);
-    
+
     File->BufferSize = (UINTN)ReadSize;   // was limited to a few K before, so this is safe
     File->Buffer = AllocatePool(File->BufferSize);
     Status = refit_call3_wrapper(FileHandle->Read, FileHandle, &File->BufferSize, File->Buffer);
@@ -103,7 +103,7 @@ static EFI_STATUS ReadFile(IN EFI_FILE_HANDLE BaseDir, CHAR16 *FileName, REFIT_F
         return Status;
     }
     Status = refit_call1_wrapper(FileHandle->Close, FileHandle);
-    
+
     // setup for reading
     File->Current8Ptr  = (CHAR8 *)File->Buffer;
     File->End8Ptr      = File->Current8Ptr + File->BufferSize;
@@ -346,7 +346,7 @@ VOID ReadConfig(VOID)
                 } else if (StriCmp(FlagName, L"all") == 0) {
                     GlobalConfig.HideUIFlags = HIDEUI_ALL;
                 } else {
-                    Print(L" unknown disable flag: '%s'\n", FlagName);
+                    Print(L" unknown hideui flag: '%s'\n", FlagName);
                 }
             }
 

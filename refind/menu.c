@@ -96,12 +96,12 @@ static VOID InitSelection(VOID)
 {
     UINTN       x, y, src_x, src_y;
     EG_PIXEL    *DestPtr, *SrcPtr;
-    
+
     if (!AllowGraphicsMode)
         return;
     if (SelectionImages[0] != NULL)
         return;
-    
+
     // load small selection image
     if (GlobalConfig.SelectionSmallFileName != NULL) {
         SelectionImages[2] = egLoadImage(SelfDir, GlobalConfig.SelectionSmallFileName, FALSE);
@@ -112,7 +112,7 @@ static VOID InitSelection(VOID)
                                            ROW1_TILESIZE, ROW1_TILESIZE, &MenuBackgroundPixel);
     if (SelectionImages[2] == NULL)
         return;
-    
+
     // load big selection image
     if (GlobalConfig.SelectionBigFileName != NULL) {
         SelectionImages[0] = egLoadImage(SelfDir, GlobalConfig.SelectionBigFileName, FALSE);
@@ -121,14 +121,14 @@ static VOID InitSelection(VOID)
     }
     if (SelectionImages[0] == NULL) {
         // calculate big selection image from small one
-        
+
         SelectionImages[0] = egCreateImage(ROW0_TILESIZE, ROW0_TILESIZE, FALSE);
         if (SelectionImages[0] == NULL) {
             egFreeImage(SelectionImages[2]);
             SelectionImages[2] = NULL;
             return;
         }
-        
+
         DestPtr = SelectionImages[0]->PixelData;
         SrcPtr  = SelectionImages[2]->PixelData;
         for (y = 0; y < ROW0_TILESIZE; y++) {
@@ -138,7 +138,7 @@ static VOID InitSelection(VOID)
                 src_y = (ROW1_TILESIZE >> 1);
             else
                 src_y = y - (ROW0_TILESIZE - ROW1_TILESIZE);
-            
+
             for (x = 0; x < ROW0_TILESIZE; x++) {
                 if (x < (ROW1_TILESIZE >> 1))
                     src_x = x;
@@ -146,12 +146,12 @@ static VOID InitSelection(VOID)
                     src_x = (ROW1_TILESIZE >> 1);
                 else
                     src_x = x - (ROW0_TILESIZE - ROW1_TILESIZE);
-                
+
                 *DestPtr++ = SrcPtr[src_y * ROW1_TILESIZE + src_x];
             }
         }
     }
-    
+
     // non-selected background images
     SelectionImages[1] = egCreateFilledImage(ROW0_TILESIZE, ROW0_TILESIZE, FALSE, &MenuBackgroundPixel);
     SelectionImages[3] = egCreateFilledImage(ROW1_TILESIZE, ROW1_TILESIZE, FALSE, &MenuBackgroundPixel);
@@ -385,9 +385,9 @@ static UINTN RunGenericMenu(IN REFIT_MENU_SCREEN *Screen, IN MENU_STYLE_FUNC Sty
                 break;
         }
     }
-    
+
     StyleFunc(Screen, &State, MENU_FUNCTION_CLEANUP, NULL);
-    
+
     if (ChosenEntry)
         *ChosenEntry = Screen->Entries[State.CurrentSelection];
     return MenuExit;
@@ -404,9 +404,9 @@ static VOID TextMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, 
     static UINTN MenuPosY;
     static CHAR16 **DisplayStrings;
     CHAR16 *TimeoutMessage;
-    
+
     switch (Function) {
-        
+
         case MENU_FUNCTION_INIT:
             // vertical layout
             MenuPosY = 4;
@@ -416,7 +416,7 @@ static VOID TextMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, 
             if (Screen->TimeoutSeconds > 0)
                 MenuHeight -= 2;
             InitScroll(State, Screen->EntryCount, MenuHeight);
-            
+
             // determine width of the menu
             MenuWidth = 20;  // minimum
             for (i = 0; i <= State->MaxIndex; i++) {
@@ -426,7 +426,7 @@ static VOID TextMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, 
             }
             if (MenuWidth > ConWidth - 6)
                 MenuWidth = ConWidth - 6;
-            
+
             // prepare strings for display
             DisplayStrings = AllocatePool(sizeof(CHAR16 *) * Screen->EntryCount);
             for (i = 0; i <= State->MaxIndex; i++)
@@ -434,7 +434,7 @@ static VOID TextMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, 
             // TODO: shorten strings that are too long (PoolPrint doesn't do that...)
             // TODO: use more elaborate techniques for shortening too long strings (ellipses in the middle)
             // TODO: account for double-width characters
-                
+
             // initial painting
             BeginTextScreen(Screen->Title);
             if (Screen->InfoLineCount > 0) {
@@ -444,16 +444,16 @@ static VOID TextMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, 
                     refit_call2_wrapper(ST->ConOut->OutputString, ST->ConOut, Screen->InfoLines[i]);
                 }
             }
-            
+
             break;
-            
+
         case MENU_FUNCTION_CLEANUP:
             // release temporary memory
             for (i = 0; i <= State->MaxIndex; i++)
                 FreePool(DisplayStrings[i]);
             FreePool(DisplayStrings);
             break;
-            
+
         case MENU_FUNCTION_PAINT_ALL:
             // paint the whole screen (initially and after scrolling)
             for (i = 0; i <= State->MaxIndex; i++) {
@@ -479,7 +479,7 @@ static VOID TextMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, 
             else
                refit_call2_wrapper(ST->ConOut->OutputString, ST->ConOut, L" ");
             break;
-            
+
         case MENU_FUNCTION_PAINT_SELECTION:
             // redraw selection cursor
             refit_call3_wrapper(ST->ConOut->SetCursorPosition, ST->ConOut, 2, MenuPosY + (State->LastSelection - State->FirstVisible));
@@ -489,7 +489,7 @@ static VOID TextMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, 
             refit_call2_wrapper(ST->ConOut->SetAttribute, ST->ConOut, ATTR_CHOICE_CURRENT);
             refit_call2_wrapper(ST->ConOut->OutputString, ST->ConOut, DisplayStrings[State->CurrentSelection]);
             break;
-            
+
         case MENU_FUNCTION_PAINT_TIMEOUT:
             if (ParamText[0] == 0) {
                 // clear message
@@ -768,11 +768,11 @@ VOID MainMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, IN UINT
             InitSelection();
             SwitchToGraphicsAndClear();
             break;
-            
+
         case MENU_FUNCTION_CLEANUP:
             FreePool(itemPosX);
             break;
-            
+
         case MENU_FUNCTION_PAINT_ALL:
             BltClearScreen(TRUE);
             PaintAll(Screen, State, itemPosX, row0PosY, row1PosY, textPosY);
@@ -791,12 +791,12 @@ VOID MainMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, IN UINT
         case MENU_FUNCTION_PAINT_SELECTION:
             PaintSelection(Screen, State, itemPosX, row0PosY, row1PosY, textPosY);
             break;
-            
+
         case MENU_FUNCTION_PAINT_TIMEOUT:
             if (!(GlobalConfig.HideUIFlags & HIDEUI_FLAG_LABEL))
                 DrawMainMenuText(ParamText, (UGAWidth - LAYOUT_TEXT_WIDTH) >> 1, textPosY + TEXT_LINE_HEIGHT);
             break;
-            
+
     }
 }
 

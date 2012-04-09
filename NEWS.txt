@@ -1,5 +1,15 @@
-0.2.4 (?/??/2012):
+0.2.5 (?/??/2012):
 ------------------
+
+- Fixed bug that caused icons to drop back to generic icons when rEFInd
+  was launched in certain ways (such as from an EFI shell in rEFInd's
+  directory) on certain systems.
+
+- Fixed bug that caused "unknown disable flag" to be shown (very briefly)
+  instead of "unknown hideui flag" when an improper hideui flag was set.
+
+0.2.4 (4/5/2012):
+-----------------
 
 - Created new refind.conf entry: "showtools". This entry takes options of
   "shell", "gptsync", "about", "exit", "reboot", and "shutdown". This

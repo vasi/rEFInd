@@ -66,10 +66,10 @@ EG_IMAGE * BuiltinIcon(IN UINTN Id)
 {
     if (Id >= BUILTIN_ICON_COUNT)
         return NULL;
-    
+
     if (BuiltinIconTable[Id].Image == NULL)
         BuiltinIconTable[Id].Image = LoadIcnsFallback(SelfDir, BuiltinIconTable[Id].Path, BuiltinIconTable[Id].PixelSize);
-    
+
     return BuiltinIconTable[Id].Image;
 }
 
@@ -104,11 +104,11 @@ EG_IMAGE * LoadOSIcon(IN CHAR16 *OSIconName OPTIONAL, IN CHAR16 *FallbackIconNam
     Image = egLoadIcon(SelfDir, FileName, 128);
     if (Image != NULL)
         return Image;
-    
+
     // try the fallback name with os_ instead of boot_
     if (BootLogo)
         return LoadOSIcon(NULL, FallbackIconName, FALSE);
-    
+
     return DummyImage(128);
 } /* EG_IMAGE * LoadOSIcon() */
 

@@ -61,7 +61,7 @@ mkisofs -A "Bootable rEFInd" -V "rEFInd $Version" -volset "rEFInd $Version" \
     -J -r -v -x ./lost+found -o ../../refind-cd-$Version.iso \
     -eltorito-alt-boot -efi-boot refind-bin-$Version.img \
     -no-emul-boot ./
-    
+
 # Below is like above, but also creates an El Torito entry for BIOS
 # booting. That's useless, but in case something flakes out without
 # it, I'll preserve this version for a while....
@@ -71,5 +71,28 @@ mkisofs -A "Bootable rEFInd" -V "rEFInd $Version" -volset "rEFInd $Version" \
 #    -eltorito-alt-boot -efi-boot refind-bin-$Version.img \
 #    -no-emul-boot ./
 
-cd ../../
-rm -r temp/
+# Create a bootable USB flash drive image, using the FAT filesystem
+# created above and a stored partition table image (plus some empty
+# sectors)....
+rm ../../refind-flashdrive-$Version.*
+cat $StartDir/flashparts.img refind-bin-$Version.img > refind-flashdrive-$Version.img
+cp $StartDir/README-flashdrive.txt ./
+cd ..
+mv refind-bin-$Version refind-flashdrive-$Version
+zip -9r ../refind-flashdrive-$Version.zip \
+    refind-flashdrive-$Version/refind-flashdrive-$Version.img \
+    refind-flashdrive-$Version/docs refind-flashdrive-$Version/LICENSE.txt \
+    refind-flashdrive-$Version/COPYING.txt \
+    refind-flashdrive-$Version/CREDITS.txt \
+    refind-flashdrive-$Version/README.txt \
+    refind-flashdrive-$Version/SHELLS.txt \
+    refind-flashdrive-$Version/README-flashdrive.txt
+mv refind-flashdrive-$Version/refind-flashdrive-$Version.img ../
+
+cd ../
+
+# Zip up the optical disc image....
+rm refind-cd-$Version.zip
+zip -9 refind-cd-$Version.zip refind-cd-$Version.iso
+
+#rm -r temp/

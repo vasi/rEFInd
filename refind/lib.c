@@ -73,13 +73,39 @@ static VOID UninitVolumes(VOID);
 // self recognition stuff
 //
 
+// Converts forward slashes to backslashes and removes duplicate slashes.
+// Necessary because some (buggy?) EFI implementations produce "\/" strings
+// in pathnames.
+static VOID CleanUpPathNameSlashes(IN OUT CHAR16 *PathName) {
+   CHAR16   *NewName;
+   UINTN    i, j = 0;
+   BOOLEAN  LastWasSlash = FALSE;
+
+   NewName = AllocateZeroPool(sizeof(CHAR16) * (StrLen(PathName) + 1));
+   if (NewName != NULL) {
+      for (i = 0; i < StrLen(PathName); i++) {
+         if ((PathName[i] == L'/') || (PathName[i] == L'\\')) {
+            if (!LastWasSlash)
+               NewName[j++] = L'\\';
+            LastWasSlash = TRUE;
+         } else {
+            NewName[j++] = PathName[i];
+            LastWasSlash = FALSE;
+         } // if/else
+      } // for
+      NewName[j] = 0;
+      // Copy the transformed name back....
+      StrCpy(PathName, NewName);
+      FreePool(NewName);
+   } // if allocation OK
+} // CleanUpPathNameSlashes()
+
 EFI_STATUS InitRefitLib(IN EFI_HANDLE ImageHandle)
 {
     EFI_STATUS  Status;
     CHAR16      *DevicePathAsString;
-    CHAR16      BaseDirectory[256];
     UINTN       i;
-    
+
     SelfImageHandle = ImageHandle;
     Status = refit_call3_wrapper(BS->HandleProtocol, SelfImageHandle, &LoadedImageProtocol, (VOID **) &SelfLoadedImage);
     if (CheckFatalError(Status, L"while getting a LoadedImageProtocol handle"))
@@ -87,15 +113,15 @@ EFI_STATUS InitRefitLib(IN EFI_HANDLE ImageHandle)
 
     // find the current directory
     DevicePathAsString = DevicePathToStr(SelfLoadedImage->FilePath);
+    CleanUpPathNameSlashes(DevicePathAsString);
     if (DevicePathAsString != NULL) {
-        StrCpy(BaseDirectory, DevicePathAsString);
-        FreePool(DevicePathAsString);
-        for (i = StrLen(BaseDirectory); i > 0 && BaseDirectory[i] != '\\'; i--) ;
-        BaseDirectory[i] = 0;
+        for (i = StrLen(DevicePathAsString); (i > 0) && (DevicePathAsString[i] != '\\'); i--) ;
+        DevicePathAsString[i] = 0;
     } else
-        BaseDirectory[0] = 0;
-    SelfDirPath = StrDuplicate(BaseDirectory);
-    
+        DevicePathAsString[0] = 0;
+    SelfDirPath = StrDuplicate(DevicePathAsString);
+    FreePool(DevicePathAsString);
+
     return FinishInitRefitLib();
 }
 
@@ -135,7 +161,7 @@ EFI_STATUS ReinitRefitLib(VOID)
 }
 
 static EFI_STATUS FinishInitRefitLib(VOID)
-{    
+{
     EFI_STATUS  Status;
 
     if (SelfRootDir == NULL) {
@@ -949,9 +975,9 @@ CHAR16 * Basename(IN CHAR16 *Path)
 {
     CHAR16  *FileName;
     UINTN   i;
-    
+
     FileName = Path;
-    
+
     if (Path != NULL) {
         for (i = StrLen(Path); i > 0; i--) {
             if (Path[i-1] == '\\' || Path[i-1] == '/') {
@@ -960,14 +986,14 @@ CHAR16 * Basename(IN CHAR16 *Path)
             }
         }
     }
-    
+
     return FileName;
 }
 
 VOID ReplaceExtension(IN OUT CHAR16 *Path, IN CHAR16 *Extension)
 {
     UINTN i;
-    
+
     for (i = StrLen(Path); i >= 0; i--) {
         if (Path[i] == '.') {
             Path[i] = 0;
@@ -987,14 +1013,14 @@ INTN FindMem(IN VOID *Buffer, IN UINTN BufferLength, IN VOID *SearchString, IN U
 {
     UINT8 *BufferPtr;
     UINTN Offset;
-    
+
     BufferPtr = Buffer;
     BufferLength -= SearchStringLength;
     for (Offset = 0; Offset < BufferLength; Offset++, BufferPtr++) {
         if (CompareMem(BufferPtr, SearchString, SearchStringLength) == 0)
             return (INTN)Offset;
     }
-    
+
     return -1;
 }
 
@@ -1018,7 +1044,7 @@ BOOLEAN StriSubCmp(IN CHAR16 *SmallStr, IN CHAR16 *BigStr) {
       FreePool(SmallCopy);
       FreePool(BigCopy);
    } // if
-   
+
    return (Found);
 } // BOOLEAN StriSubCmp()
 
@@ -1034,7 +1060,7 @@ BOOLEAN StriSubCmp(IN CHAR16 *SmallStr, IN CHAR16 *BigStr) {
 VOID MergeStrings(IN OUT CHAR16 **First, IN CHAR16 *Second, CHAR16 AddChar) {
    UINTN Length1 = 0, Length2 = 0;
    CHAR16* NewString;
-   
+
    if (*First != NULL)
       Length1 = StrLen(*First);
    if (Second != NULL)
@@ -1065,7 +1091,7 @@ VOID MergeStrings(IN OUT CHAR16 **First, IN CHAR16 *Second, CHAR16 AddChar) {
 CHAR16 *FindLastDirName(IN CHAR16 *Path) {
    UINTN i, StartOfElement = 0, EndOfElement = 0, PathLength, CopyLength;
    CHAR16 *Found = NULL;
-   
+
    PathLength = StrLen(Path);
    // Find start & end of target element
    for (i = 0; i < PathLength; i++) {
@@ -1113,7 +1139,7 @@ CHAR16 *FindPath(IN CHAR16* FullPath) {
 CHAR16 *FindNumbers(IN CHAR16 *InString) {
    UINTN i, StartOfElement, EndOfElement = 0, InLength, CopyLength;
    CHAR16 *Found = NULL;
-   
+
    InLength = StartOfElement = StrLen(InString);
    // Find start & end of target element
    for (i = 0; i < InLength; i++) {

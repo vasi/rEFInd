@@ -83,7 +83,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.4");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.4.2");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -525,14 +525,14 @@ VOID SetLoaderDefaults(LOADER_ENTRY *Entry, CHAR16 *LoaderPath, IN REFIT_VOLUME 
    CHAR16          ShortcutLetter = 0;
 
    FileName = Basename(LoaderPath);
-   
+
    // locate a custom icon for the loader
    StrCpy(IconFileName, LoaderPath);
    ReplaceExtension(IconFileName, L".icns");
    if (FileExists(Volume->RootDir, IconFileName)) {
       Entry->me.Image = LoadIcns(Volume->RootDir, IconFileName, 128);
    } // if
-   
+
    Temp = FindLastDirName(LoaderPath);
    MergeStrings(&OSIconName, Temp, L',');
    FreePool(Temp);
@@ -582,7 +582,7 @@ VOID SetLoaderDefaults(LOADER_ENTRY *Entry, CHAR16 *LoaderPath, IN REFIT_VOLUME 
    if (Entry->me.Image == NULL)
       Entry->me.Image = LoadOSIcon(OSIconName, L"unknown", FALSE);
 } // VOID SetLoaderDefaults()
-      
+
 // Add a specified EFI boot loader to the list, using automatic settings
 // for icons, options, etc.
 LOADER_ENTRY * AddLoaderEntry(IN CHAR16 *LoaderPath, IN CHAR16 *LoaderTitle, IN REFIT_VOLUME *Volume) {
