@@ -83,7 +83,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.5");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.5.1");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -194,7 +194,7 @@ static EFI_STATUS StartEFIImage(IN EFI_DEVICE_PATH *DevicePath,
                                 OUT UINTN *ErrorInStep)
 {
     EFI_DEVICE_PATH *DevicePaths[2];
-    
+
     DevicePaths[0] = DevicePath;
     DevicePaths[1] = NULL;
     return StartEFIImageList(DevicePaths, LoadOptions, LoadOptionsPrefix, ImageTitle, ErrorInStep);
@@ -234,8 +234,17 @@ static CHAR16 * FindInitrd(IN CHAR16 *LoaderPath, IN REFIT_VOLUME *Volume) {
    KernelVersion = FindNumbers(FileName);
    Path = FindPath(LoaderPath);
 
-   MergeStrings(&Path, L"\\", 0); // Add trailing backslash; necessary for root directory
+   // Add trailing backslash for root directory; necessary on some systems, but must
+   // NOT be added to all directories, since on other systems, a trailing backslash on
+   // anything but the root directory causes them to flake out!
+   if (StrLen(Path) == 0) {
+      MergeStrings(&Path, L"\\", 0);
+   } // if
    DirIterOpen(Volume->RootDir, Path, &DirIter);
+   // Now add a trailing backslash if it was NOT added earlier, for consistency in
+   // building the InitrdName later....
+   if ((StrLen(Path) > 0) && (Path[StrLen(Path) - 1] != L'\\'))
+      MergeStrings(&Path, L"\\", 0);
    while ((DirIterNext(&DirIter, 2, L"init*", &DirEntry)) && (InitrdName == NULL)) {
       InitrdVersion = FindNumbers(DirEntry->FileName);
       if (KernelVersion != NULL) {
@@ -341,7 +350,7 @@ VOID GenerateSubScreen(LOADER_ENTRY *Entry, IN REFIT_VOLUME *Volume) {
       Entry->Title = NULL;
    }
    SubScreen = InitializeSubScreen(Entry);
-   
+
    // loader-specific submenu entries
    if (Entry->OSType == 'M') {          // entries for Mac OS X
 #if defined(EFIX64)
@@ -368,7 +377,7 @@ VOID GenerateSubScreen(LOADER_ENTRY *Entry, IN REFIT_VOLUME *Volume) {
             SubEntry->LoadOptions     = L"-v";
             AddMenuEntry(SubScreen, (REFIT_MENU_ENTRY *)SubEntry);
          } // if
-      
+
 #if defined(EFIX64)
          SubEntry = InitializeLoaderEntry(Entry);
          if (SubEntry != NULL) {
@@ -468,7 +477,7 @@ VOID GenerateSubScreen(LOADER_ENTRY *Entry, IN REFIT_VOLUME *Volume) {
 
       AddMenuInfoLine(SubScreen, L"NOTE: This is an example. Entries");
       AddMenuInfoLine(SubScreen, L"marked with (*) may not work.");
-        
+
    } else if (Entry->OSType == 'X') {   // entries for xom.efi
         // by default, skip the built-in selection and boot from hard disk only
         Entry->LoadOptions = L"-s -h";
@@ -828,7 +837,7 @@ static EFI_STATUS ActivateMbrPartition(IN EFI_BLOCK_IO *BlockIO, IN UINTN Partit
             if (PartitionIndex < LogicalPartitionIndex)
                 break;  // stop the loop, no need to touch further EMBRs
         }
-        
+
     }
 
     return EFI_SUCCESS;
@@ -1091,13 +1100,13 @@ static VOID ScanDriverDir(IN CHAR16 *Path)
     REFIT_DIR_ITER          DirIter;
     EFI_FILE_INFO           *DirEntry;
     CHAR16                  FileName[256];
-    
+
     // look through contents of the directory
     DirIterOpen(SelfRootDir, Path, &DirIter);
     while (DirIterNext(&DirIter, 2, L"*.EFI", &DirEntry)) {
         if (DirEntry->FileName[0] == '.')
             continue;   // skip this
-        
+
         SPrint(FileName, 255, L"%s\\%s", Path, DirEntry->FileName);
         Status = StartEFIImage(FileDevicePath(SelfLoadedImage->DeviceHandle, FileName),
                                L"", DirEntry->FileName, DirEntry->FileName, NULL);
@@ -1108,7 +1117,7 @@ static VOID ScanDriverDir(IN CHAR16 *Path)
         CheckError(Status, FileName);
     }
 }
-EFI_STATUS
+/* EFI_STATUS
 LibScanHandleDatabase (
      EFI_HANDLE  DriverBindingHandle, OPTIONAL
      UINT32      *DriverBindingHandleIndex, OPTIONAL
@@ -1129,7 +1138,7 @@ LibScanHandleDatabase (
 #define EFI_HANDLE_TYPE_DEVICE_HANDLE               0x080
 #define EFI_HANDLE_TYPE_PARENT_HANDLE               0x100
 #define EFI_HANDLE_TYPE_CONTROLLER_HANDLE           0x200
-#define EFI_HANDLE_TYPE_CHILD_HANDLE                0x400
+#define EFI_HANDLE_TYPE_CHILD_HANDLE                0x400 */
 
 static EFI_STATUS ConnectAllDriversToAllControllers(VOID)
 {
@@ -1143,7 +1152,7 @@ static EFI_STATUS ConnectAllDriversToAllControllers(VOID)
     UINTN       HandleIndex;
     BOOLEAN     Parent;
     BOOLEAN     Device;
-    
+
     Status = LibLocateHandle(AllHandles,
                              NULL,
                              NULL,
@@ -1151,7 +1160,7 @@ static EFI_STATUS ConnectAllDriversToAllControllers(VOID)
                              &AllHandleBuffer);
     if (EFI_ERROR(Status))
         return Status;
-    
+
     for (Index = 0; Index < AllHandleCount; Index++) {
         //
         // Scan the handle database
@@ -1165,20 +1174,20 @@ static EFI_STATUS ConnectAllDriversToAllControllers(VOID)
                                        &HandleType);
         if (EFI_ERROR (Status))
             goto Done;
-        
+
         Device = TRUE;
         if (HandleType[Index] & EFI_HANDLE_TYPE_DRIVER_BINDING_HANDLE)
             Device = FALSE;
         if (HandleType[Index] & EFI_HANDLE_TYPE_IMAGE_HANDLE)
             Device = FALSE;
-        
+
         if (Device) {
             Parent = FALSE;
             for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) {
                 if (HandleType[HandleIndex] & EFI_HANDLE_TYPE_PARENT_HANDLE)
                     Parent = TRUE;
             }
-            
+
             if (!Parent) {
                 if (HandleType[Index] & EFI_HANDLE_TYPE_DEVICE_HANDLE) {
                     Status = refit_call4_wrapper(BS->ConnectController,
@@ -1189,11 +1198,11 @@ static EFI_STATUS ConnectAllDriversToAllControllers(VOID)
                 }
             }
         }
-        
+
         FreePool (HandleBuffer);
         FreePool (HandleType);
     }
-    
+
 Done:
     FreePool (AllHandleBuffer);
     return Status;
@@ -1262,7 +1271,7 @@ static VOID ScanForBootloaders(VOID) {
    // assign shortcut keys
    for (i = 0; i < MainMenu.EntryCount && MainMenu.Entries[i]->Row == 0 && i < 9; i++)
       MainMenu.Entries[i]->ShortcutDigit = (CHAR16)('1' + i);
-   
+
    // wait for user ACK when there were errors
    FinishTextScreen(FALSE);
 } // static VOID ScanForBootloaders()
@@ -1351,7 +1360,7 @@ efi_main (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
 
     while (MainLoopRunning) {
         MenuExit = RunMainMenu(&MainMenu, GlobalConfig.DefaultSelection, &ChosenEntry);
-        
+
         // We don't allow exiting the main menu with the Escape key.
         if (MenuExit == MENU_EXIT_ESCAPE) {
            // Commented-out below: Was part of an attempt to get rEFInd to
@@ -1362,7 +1371,7 @@ efi_main (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
 //             SetupScreen();
             continue;
         }
-        
+
         switch (ChosenEntry->Tag) {
 
             case TAG_REBOOT:    // Reboot
@@ -1370,25 +1379,25 @@ efi_main (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
                 refit_call4_wrapper(RT->ResetSystem, EfiResetCold, EFI_SUCCESS, 0, NULL);
                 MainLoopRunning = FALSE;   // just in case we get this far
                 break;
-                
+
             case TAG_SHUTDOWN: // Shut Down
                 TerminateScreen();
                 refit_call4_wrapper(RT->ResetSystem, EfiResetShutdown, EFI_SUCCESS, 0, NULL);
                 MainLoopRunning = FALSE;   // just in case we get this far
                 break;
-                
+
             case TAG_ABOUT:    // About rEFInd
                 AboutrEFInd();
                 break;
-                
+
             case TAG_LOADER:   // Boot OS via .EFI loader
                 StartLoader((LOADER_ENTRY *)ChosenEntry);
                 break;
-                
+
             case TAG_LEGACY:   // Boot legacy OS
                 StartLegacy((LEGACY_ENTRY *)ChosenEntry);
                 break;
-                
+
             case TAG_TOOL:     // Start a EFI tool
                 StartTool((LOADER_ENTRY *)ChosenEntry);
                 break;
@@ -1397,7 +1406,7 @@ efi_main (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
                 BeginTextScreen(L" ");
                 return EFI_SUCCESS;
                 break;
-                
+
         }
     }
 

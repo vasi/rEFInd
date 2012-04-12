@@ -1,3 +1,10 @@
+0.2.6 (?/??/2012):
+------------------
+
+- Fixed bug in 0.2.5 that caused failure of Linux initial RAM disk
+  mapping on some (but not all) systems. Affected computers include at
+  least some Intel motherboards, maybe others.
+
 0.2.5 (4/9/2012):
 -----------------
 

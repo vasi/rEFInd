@@ -78,13 +78,12 @@ scanfor internal,external,optical
 #max_tags 0
 
 # Set the default menu selection.  The available arguments match the
-# keyboard accelerators available within rEFInd.  You may select the default
-# loader using a one-character abbreviation for the OS name ("M" = Mac OS X,
-# "L" = Linux, "W" = Windows).  You may also specify a digit between 1 and
-# 9, in which case the Nth loader in the menu will be the default.  You can
-# also select a rEFInd tool entry ("S" = EFI Shell, "P" = Partitioning Tool,
-# "U" = shutdown).  This is intended as a quick fix to change the default
-# boot choice until full configurability arrives.
+# keyboard accelerators available within rEFInd.  You may select the
+# default loader using:
+#  - A digit between 1 and 9, in which case the Nth loader in the menu
+#    will be the default. 
+#  - Any substring that corresponds to a portion of the loader's title
+#    (usually the OS's name or boot loader's path).
 #
 #default_selection 1
 
