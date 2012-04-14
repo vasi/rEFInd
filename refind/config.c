@@ -419,7 +419,7 @@ static VOID AddSubmenu(LOADER_ENTRY *Entry, REFIT_FILE *File, REFIT_VOLUME *Volu
    if ((SubEntry == NULL) || (SubScreen == NULL))
       return;
    SubEntry->me.Title        = StrDuplicate(Title);
-   
+
    while (((TokenCount = ReadTokenLine(File, &TokenList)) > 0) && (StriCmp(TokenList[0], L"}") != 0)) {
       if ((StriCmp(TokenList[0], L"loader") == 0) && (TokenCount > 1)) { // set the boot loader filename
          if (SubEntry->LoaderPath != NULL)
@@ -461,6 +461,23 @@ static VOID AddSubmenu(LOADER_ENTRY *Entry, REFIT_FILE *File, REFIT_VOLUME *Volu
    Entry->me.SubScreen = SubScreen;
 } // VOID AddSubmenu()
 
+// Finds a volume with the specified Identifier (a volume label, for the moment).
+// If found, sets *Volume to point to that volume. If not, leaves it unchanged.
+// Returns TRUE if a match was found, FALSE if not.
+static BOOLEAN FindVolume(REFIT_VOLUME **Volume, CHAR16 *Identifier) {
+   UINTN     i = 0;
+   BOOLEAN   Found = FALSE;
+
+   while ((i < VolumesCount) && (!Found)) {
+      if (StriCmp(Identifier, Volumes[i]->VolName) == 0) {
+         *Volume = Volumes[i];
+         Found = TRUE;
+      } // if
+      i++;
+   } // while()
+   return (Found);
+} // static VOID FindVolume()
+
 // Adds the options from a SINGLE loaders.conf stanza to a new loader entry and returns
 // that entry. The calling function is then responsible for adding the entry to the
 // list of entries.
@@ -469,6 +486,7 @@ static LOADER_ENTRY * AddStanzaEntries(REFIT_FILE *File, REFIT_VOLUME *Volume, C
    UINTN        TokenCount;
    LOADER_ENTRY *Entry;
    BOOLEAN      DefaultsSet = FALSE, AddedSubmenu = FALSE;
+   REFIT_VOLUME *CurrentVolume = Volume;
 
    // prepare the menu entry
    Entry = InitializeLoaderEntry(NULL);
@@ -476,24 +494,31 @@ static LOADER_ENTRY * AddStanzaEntries(REFIT_FILE *File, REFIT_VOLUME *Volume, C
       return NULL;
 
    Entry->Title           = StrDuplicate(Title);
-   Entry->me.Title        = PoolPrint(L"Boot %s from %s", (Title != NULL) ? Title : L"Unknown", Volume->VolName);
+   Entry->me.Title        = PoolPrint(L"Boot %s from %s", (Title != NULL) ? Title : L"Unknown", CurrentVolume->VolName);
    Entry->me.Row          = 0;
-   Entry->me.BadgeImage   = Volume->VolBadgeImage;
-   Entry->VolName         = Volume->VolName;
+   Entry->me.BadgeImage   = CurrentVolume->VolBadgeImage;
+   Entry->VolName         = CurrentVolume->VolName;
 
    // Parse the config file to add options for a single stanza, terminating when the token
    // is "}" or when the end of file is reached.
    while (((TokenCount = ReadTokenLine(File, &TokenList)) > 0) && (StriCmp(TokenList[0], L"}") != 0)) {
       if ((StriCmp(TokenList[0], L"loader") == 0) && (TokenCount > 1)) { // set the boot loader filename
          Entry->LoaderPath = StrDuplicate(TokenList[1]);
-         Entry->DevicePath = FileDevicePath(Volume->DeviceHandle, Entry->LoaderPath);
-         SetLoaderDefaults(Entry, TokenList[1], Volume);
+         Entry->DevicePath = FileDevicePath(CurrentVolume->DeviceHandle, Entry->LoaderPath);
+         SetLoaderDefaults(Entry, TokenList[1], CurrentVolume);
          FreePool(Entry->LoadOptions);
          Entry->LoadOptions = NULL; // Discard default options, if any
          DefaultsSet = TRUE;
+      } else if ((StriCmp(TokenList[0], L"volume") == 0) && (TokenCount > 1)) {
+         if (FindVolume(&CurrentVolume, TokenList[1])) {
+            FreePool(Entry->me.Title);
+            Entry->me.Title        = PoolPrint(L"Boot %s from %s", (Title != NULL) ? Title : L"Unknown", CurrentVolume->VolName);
+            Entry->me.BadgeImage   = CurrentVolume->VolBadgeImage;
+            Entry->VolName         = CurrentVolume->VolName;
+         } // if match found
       } else if ((StriCmp(TokenList[0], L"icon") == 0) && (TokenCount > 1)) {
          FreePool(Entry->me.Image);
-         Entry->me.Image = LoadIcns(Volume->RootDir, TokenList[1], 128);
+         Entry->me.Image = LoadIcns(CurrentVolume->RootDir, TokenList[1], 128);
          if (Entry->me.Image == NULL) {
             Entry->me.Image = DummyImage(128);
          }
@@ -514,7 +539,7 @@ static LOADER_ENTRY * AddStanzaEntries(REFIT_FILE *File, REFIT_VOLUME *Volume, C
       } else if (StriCmp(TokenList[0], L"disabled") == 0) {
          Entry->Enabled = FALSE;
       } else if ((StriCmp(TokenList[0], L"submenuentry") == 0) && (TokenCount > 1)) {
-         AddSubmenu(Entry, File, Volume, TokenList[1]);
+         AddSubmenu(Entry, File, CurrentVolume, TokenList[1]);
          AddedSubmenu = TRUE;
       } // set options to pass to the loader program
       FreeTokenLine(&TokenList, &TokenCount);
@@ -531,12 +556,12 @@ static LOADER_ENTRY * AddStanzaEntries(REFIT_FILE *File, REFIT_VOLUME *Volume, C
    } // if
 
    if (!DefaultsSet)
-      SetLoaderDefaults(Entry, L"\\EFI\\BOOT\\nemo.efi", Volume); // user included no entry; use bogus one
+      SetLoaderDefaults(Entry, L"\\EFI\\BOOT\\nemo.efi", CurrentVolume); // user included no entry; use bogus one
 
    return(Entry);
 } // static VOID AddStanzaEntries()
 
-// Read the user-configured loaders file, loaders.conf, and add or delete
+// Read the user-configured loaders file, refind_loaders.conf, and add or delete
 // entries based on the contents of that file....
 VOID ScanUserConfigured(VOID)
 {

@@ -293,11 +293,11 @@ VOID ExtractLegacyLoaderPaths(EFI_DEVICE_PATH **PathList, UINTN MaxPaths, EFI_DE
         }
         if (Seen)
             continue;
-        
+
         PathList[PathCount++] = AppendDevicePath(DevicePath, LegacyLoaderMediaPath);
     }
     FreePool(Handles);
-    
+
     if (HardcodedPathList) {
         for (HardcodedIndex = 0; HardcodedPathList[HardcodedIndex] && PathCount < MaxPaths; HardcodedIndex++)
             PathList[PathCount++] = HardcodedPathList[HardcodedIndex];
@@ -316,17 +316,17 @@ static VOID ScanVolumeBootcode(IN OUT REFIT_VOLUME *Volume, OUT BOOLEAN *Bootabl
     UINTN                   i;
     MBR_PARTITION_INFO      *MbrTable;
     BOOLEAN                 MbrTableFound;
-    
+
     Volume->HasBootCode = FALSE;
     Volume->OSIconName = NULL;
     Volume->OSName = NULL;
     *Bootable = FALSE;
-    
+
     if (Volume->BlockIO == NULL)
         return;
     if (Volume->BlockIO->Media->BlockSize > SECTOR_SIZE)
         return;   // our buffer is too small...
-    
+
     // look at the boot sector (this is used for both hard disks and El Torito images!)
     Status = refit_call5_wrapper(Volume->BlockIO->ReadBlocks,
                                  Volume->BlockIO, Volume->BlockIO->Media->MediaId,

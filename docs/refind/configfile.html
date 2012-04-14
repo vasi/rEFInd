@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/14/2012; last Web page update: 4/9/2012, referencing rEFInd 0.2.5</p>
+  <p>Originally written: 3/14/2012; last Web page update: 4/14/2012, referencing rEFInd 0.2.6</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -226,6 +226,11 @@ default_selection elilo
    <td>Sets the name that's displayed along with the icon for this entry. If the name should contain a space, it <i>must</i> be enclosed in quotes. Following the name, an open curly brace (<tt>{</tt>) ends the <tt>menuentry</tt> line.</td>
 </tr>
 <tr>
+   <td><tt>volume</tt></td>
+   <td>filesystem label</td>
+   <td>Sets the volume that's used for subsequent file accesses (by <tt>icon</tt> and <tt>loader</tt>, and by implication by <tt>initrd</tt> if <tt>loader</tt> follows <tt>volume</tt>). You pass this token a filesystem's name/label, which is typically displayed under the volume's icon in file managers and that rEFInd displays on its menu at the end of the boot prompt string. If this label isn't unique, the first volume with the specified label is used. The matching is nominally case-insensitive, but on some EFIs it's case-sensitive.</td>
+</tr>
+<tr>
    <td><tt>loader</tt></td>
    <td>filename</td>
    <td>Sets the filename for the boot loader. You may use either Unix-style slashes (<tt>/</tt>) or Windows/EFI-style backslashes (<tt>\</tt>) to separate directory elements. In either case, the references are to files on the ESP from which rEFInd launched; you can't (yet) launch loaders from other locations. This option should normally be the first in the body of an OS stanza; if it's not, some other options may be ignored.</td>
@@ -276,20 +281,21 @@ menuentry "Ubuntu Linux" {
 }
 
 menuentry Gentoo {
-    loader \EFI\linux\bzImage-3.3.0-rc7
-    initrd \EFI\linux\initrd-3.3.0-rc7.img
-    options "root=/dev/sda3 ro"
     icon \EFI\refind\icons\os_gentoo.icns
+    volume G_KERNELS
+    loader \kernels\bzImage-3.3.0-rc7
+    initrd \kernels\initrd-3.3.0-rc7.img
+    options "root=/dev/sda3 ro"
 }
 </pre>
 
 <p>This example sets up two entries: one for Ubuntu Linux and one for Gentoo Linux. Note that the two entries use different directory separators, simply to demonstrate the fact that it's possible. The Ubuntu entry sets no icon, since rEFInd will note that the boot loader is stored in the <tt>ubuntu</tt> directory, and it will automatically find the appropriate Ubuntu icon (<tt>os_ubuntu.icns</tt>). This option is, however, disabled, so no matching icon will appear when you reboot unless you first comment out or delete the <tt>disabled</tt> line.</p>
 
-<p>The Gentoo entry passes the filename for an initial RAM disk using the <tt>initrd</tt> line and free-form options using the <tt>option</tt> line. It also sets an icon name, since the path to the kernel doesn't include the distribution's name. Note that the kernel filename does <i>not</i> include a <tt>.efi</tt> extension, which keeps rEFInd from picking up the kernel file in its auto-scans.</p>
+<p class="sidebar"><b>Tip:</b> Under Linux, you can learn a filesystem's label by using <tt>blkid</tt>, as in <tt class="userinput">blkid /dev/sda1</tt>. The filesystem's label, if set, is identified by the keyword <tt>LABEL</tt> in the output.</p>
+
+<p>The Gentoo entry begins with an icon specification to be sure that the icon is loaded from the same volume as rEFInd. (If the icon were stored on the same filesystem as the kernel, you'd place the <tt>icon</tt> line after the <tt>volume</tt> line.) This entry uses the <tt>volume</tt> token to tell rEFInd to load the kernel and initial RAM disk file from the filesystem called <tt>G_KERNELS</tt>. It passes the filename for an initial RAM disk using the <tt>initrd</tt> line and free-form options using the <tt>options</tt> line. Note that the kernel filename does <i>not</i> include a <tt>.efi</tt> extension, which keeps rEFInd from picking up the kernel file in its auto-scans.</p>
 
 <p>You can combine these OS stanzas with the global <tt>refind.conf</tt> options presented earlier. The result would contain just one entry on the rEFInd boot menu, unless rEFInd found other boot options on an external or optical disk.</p>
-
-<p>Presently, an important limitation of rEFInd is that the manual boot loader definitions can only read files on the partition from which rEFInd launched. rEFInd can, however, auto-detect boot loaders on other disks or partitions via the <tt>internal</tt>, <tt>external</tt>, and similar options.</p>
 
 <h2>Creating Submenu Entries</h2>
 

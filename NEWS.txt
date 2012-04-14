@@ -1,6 +1,11 @@
 0.2.6 (?/??/2012):
 ------------------
 
+- Added "volume" keyword to configuration file's stanza options. This
+  option changes the volume from which subsequent files (specified by
+  "loader" and "icon") are loaded. You pass "volume" the name/label of the
+  FILESYSTEM you want to use (not the GPT partition name).
+
 - Fixed bug in 0.2.5 that caused failure of Linux initial RAM disk
   mapping on some (but not all) systems. Affected computers include at
   least some Intel motherboards, maybe others.
