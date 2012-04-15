@@ -119,7 +119,7 @@ program. I'm not sure what you'd use in Windows to create ICNS files.</li>
 
 <li>Although the ICNS file format used by rEFInd supports multiple image sizes, if a size that rEFInd needs isn't present in the file, rEFInd can't use the icon. The ability to scale images to the desired size would be useful.</li>
 
-<li>I want to be able to specify the volume on which a boot loader resides using features other than the filesystem's name/label. I used the label because this feature was easily extracted from the data structures that rEFInd maintains (inherited from rEFIt). A number would also be fairly easy to implement, but would be arbitrary and therefore difficult to predict. A partition GUID value would be good, but extracting a GUID from the partition data is harder than extracting the volume's label.</li>
+<li>I would like to be able to specify the volume on which a boot loader resides using a partition GUID value, but extracting a GUID from the partition data is harder than extracting the volume's label or counting up the filesystem numbers.</li>
 
 <li>It would be useful to be able to specify paths to boot loaders and/or initial RAM disks relative to the rEFInd directory (or the boot loader's directory, in the case of initrds).</li>
 

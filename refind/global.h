@@ -105,6 +105,7 @@ typedef struct {
    EFI_BLOCK_IO        *WholeDiskBlockIO;
    EFI_DEVICE_PATH     *WholeDiskDevicePath;
    MBR_PARTITION_INFO  *MbrPartitionTable;
+   BOOLEAN             IsReadable;
 } REFIT_VOLUME;
 
 typedef struct _refit_menu_entry {

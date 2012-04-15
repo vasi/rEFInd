@@ -228,17 +228,17 @@ default_selection elilo
 <tr>
    <td><tt>volume</tt></td>
    <td>filesystem label</td>
-   <td>Sets the volume that's used for subsequent file accesses (by <tt>icon</tt> and <tt>loader</tt>, and by implication by <tt>initrd</tt> if <tt>loader</tt> follows <tt>volume</tt>). You pass this token a filesystem's name/label, which is typically displayed under the volume's icon in file managers and that rEFInd displays on its menu at the end of the boot prompt string. If this label isn't unique, the first volume with the specified label is used. The matching is nominally case-insensitive, but on some EFIs it's case-sensitive.</td>
+   <td>Sets the volume that's used for subsequent file accesses (by <tt>icon</tt> and <tt>loader</tt>, and by implication by <tt>initrd</tt> if <tt>loader</tt> follows <tt>volume</tt>). You pass this token a filesystem's label or a volume number. A filesystem label is typically displayed under the volume's icon in file managers and that rEFInd displays on its menu at the end of the boot prompt string. If this label isn't unique, the first volume with the specified label is used. The matching is nominally case-insensitive, but on some EFIs it's case-sensitive. If a filesystem has no label, you can use a volume number followed by a colon, such as <tt>0:</tt> to refer to the first filesystem or <tt>1:</tt> to refer to the second. The assignment of numbers is arbitrary and may not be consistent across boots, though. It might change if you insert an optical disc or plug in a USB flash drive, for instance. If this option is not set, the volume defaults to the one from which rEFInd launched.</td>
 </tr>
 <tr>
    <td><tt>loader</tt></td>
    <td>filename</td>
-   <td>Sets the filename for the boot loader. You may use either Unix-style slashes (<tt>/</tt>) or Windows/EFI-style backslashes (<tt>\</tt>) to separate directory elements. In either case, the references are to files on the ESP from which rEFInd launched; you can't (yet) launch loaders from other locations. This option should normally be the first in the body of an OS stanza; if it's not, some other options may be ignored.</td>
+   <td>Sets the filename for the boot loader. You may use either Unix-style slashes (<tt>/</tt>) or Windows/EFI-style backslashes (<tt>\</tt>) to separate directory elements. In either case, the references are to files on the ESP from which rEFInd launched or to the one identified by a preceding <tt>volume</tt> token. This option should normally be the first in the body of an OS stanza; if it's not, some other options may be ignored. An exception is if you want to boot a loader from a volume other than the one on which rEFInd resides, in which case <tt>volume</tt> should precede <tt>loader</tt>.</td>
 </tr>
 <tr>
    <td><tt>initrd</tt></td>
    <td>filename</td>
-   <td>Sets the filename for a Linux kernel's initial RAM disk (initrd). This option is useful only when booting a Linux kernel that includes an <a href="http://www.rodsbooks.com/efi-bootloaders/efistub.html">EFI stub loader</a>, which enables you to boot a kernel without the benefit of a separate boot loader. When booted in this way, though, you must normally pass an initrd filename to the boot loader. You must specify the complete EFI path to the initrd file with this option, as in <tt>initrd EFI/linux/initrd-3.3.0-rc7.img</tt>. You'll also have to use the <tt>options</tt> line to pass the Linux root filesystem, and perhaps other options (as in <tt>options "root=/dev/sda4 ro"</tt>).</td>
+   <td>Sets the filename for a Linux kernel's initial RAM disk (initrd). This option is useful only when booting a Linux kernel that includes an <a href="http://www.rodsbooks.com/efi-bootloaders/efistub.html">EFI stub loader</a>, which enables you to boot a kernel without the benefit of a separate boot loader. When booted in this way, though, you must normally pass an initrd filename to the boot loader. You must specify the complete EFI path to the initrd file with this option, as in <tt>initrd EFI/linux/initrd-3.3.0-rc7.img</tt>. You'll also have to use the <tt>options</tt> line to pass the Linux root filesystem, and perhaps other options (as in <tt>options "root=/dev/sda4 ro"</tt>). The initial RAM disk file must reside on the same volume as the kernel.</td>
 </tr>
 <tr>
    <td><tt>icon</tt></td>
@@ -317,7 +317,7 @@ menuentry Gentoo {
 <tr>
    <td><tt>loader</tt></td>
    <td>filename</td>
-   <td>Sets the filename for the boot loader, as described in <a href="#table2">Table 2.</a></td>
+   <td>Sets the filename for the boot loader, as described in <a href="#table2">Table 2.</a> Note that the loader is read from whatever filesystem is specified by the main stanza's <tt>volume</tt> option, provided that option precedes the submenu definition.</td>
 </tr>
 <tr>
    <td><tt>initrd</tt></td>
@@ -346,7 +346,7 @@ menuentry Gentoo {
 </tr>
 </table>
 
-<p>The following menu entry illustrates the use of submenu entries. This is an expansion on the second entry presented earlier:</p>
+<p>The following menu entry illustrates the use of submenu entries. This is a variant of the second entry presented earlier:</p>
 
 <pre class="listing">
 menuentry Gentoo {

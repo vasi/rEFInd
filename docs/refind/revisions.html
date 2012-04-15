@@ -14,7 +14,7 @@
 <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-<p>Last Web page update: 4/9/2012</p>
+<p>Last Web page update: 4/14/2012</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -92,6 +92,8 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 <p>The following summarizes changes in rEFInd's public releases:</p>
 
 <ul>
+
+<li><b>0.2.6 (4/14/2012)</b>&mdash;This version provides one bug fix and one new feature. The bug was introduced in version 0.2.5 and prevents rEFInd from identifying a Linux initial RAM disk file on some (but not all) EFI implementations. The new feature is the <tt>volume</tt> stanza token, which enables you to manually load a boot program from a filesystem other than the one from which rEFInd launched. You can specify a volume either by its label (as in <tt>volume KERNELS</tt> to load from the volume with a filesystem name <tt>KERNELS</tt>) or by number followed by a colon (as in <tt>volume 0:</tt> for the first filesystem or <tt>volume 1:</tt> for the second). See the <a href="configfile.html">Configuring the Boot Manager</a> page for more on this new feature.</li>
 
 <li><b>0.2.5 (4/9/2012)</b>&mdash;Icon-handling improvements are key in this version. I've fixed a bug that caused icons to be replaced with ugly "not-found" default icons when rEFInd was launched in certain ways. I've also added support for <tt>.VolumeIcon.icns</tt> and <tt>.VolumeBadge.icns</tt> files to set loader tags and disk-type badges, respectively. (See the <a href="configfile.html">configuration page</a> for details.) I've also fixed a bug that prevented rEFInd from finding the correct initial RAM disk for Linux kernels stored in the root directory of a partition.</li>
 

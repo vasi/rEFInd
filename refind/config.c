@@ -389,7 +389,7 @@ VOID ReadConfig(VOID)
 
         } else if (StriCmp(TokenList[0], L"default_selection") == 0) {
             HandleString(TokenList, TokenCount, &(GlobalConfig.DefaultSelection));
-            
+
         } else if (StriCmp(TokenList[0], L"textonly") == 0) {
             GlobalConfig.TextOnly = TRUE;
 
@@ -461,24 +461,40 @@ static VOID AddSubmenu(LOADER_ENTRY *Entry, REFIT_FILE *File, REFIT_VOLUME *Volu
    Entry->me.SubScreen = SubScreen;
 } // VOID AddSubmenu()
 
-// Finds a volume with the specified Identifier (a volume label, for the moment).
-// If found, sets *Volume to point to that volume. If not, leaves it unchanged.
+// Finds a volume with the specified Identifier (a volume label or a number
+// followed by a colon, for the moment). If found, sets *Volume to point to
+// that volume. If not, leaves it unchanged.
 // Returns TRUE if a match was found, FALSE if not.
 static BOOLEAN FindVolume(REFIT_VOLUME **Volume, CHAR16 *Identifier) {
-   UINTN     i = 0;
+   UINTN     i = 0, CountedVolumes = 0;
+   INTN      Number = -1;
    BOOLEAN   Found = FALSE;
 
+   if ((StrLen(Identifier) >= 2) && (Identifier[StrLen(Identifier) - 1] == L':') &&
+       (Identifier[0] >= L'0') && (Identifier[0] <= L'9')) {
+      Number = (INTN) Atoi(Identifier);
+   }
    while ((i < VolumesCount) && (!Found)) {
-      if (StriCmp(Identifier, Volumes[i]->VolName) == 0) {
-         *Volume = Volumes[i];
-         Found = TRUE;
-      } // if
+      if (Number >= 0) { // User specified a volume by number
+         if (Volumes[i]->IsReadable) {
+            if (CountedVolumes == Number) {
+               *Volume = Volumes[i];
+               Found = TRUE;
+            }
+            CountedVolumes++;
+         } // if
+      } else { // User specified a volume by label
+         if (StriCmp(Identifier, Volumes[i]->VolName) == 0) {
+            *Volume = Volumes[i];
+            Found = TRUE;
+         } // if
+      } // if/else
       i++;
    } // while()
    return (Found);
 } // static VOID FindVolume()
 
-// Adds the options from a SINGLE loaders.conf stanza to a new loader entry and returns
+// Adds the options from a SINGLE refind.conf stanza to a new loader entry and returns
 // that entry. The calling function is then responsible for adding the entry to the
 // list of entries.
 static LOADER_ENTRY * AddStanzaEntries(REFIT_FILE *File, REFIT_VOLUME *Volume, CHAR16 *Title) {

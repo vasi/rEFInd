@@ -579,7 +579,10 @@ static VOID ScanVolume(IN OUT REFIT_VOLUME *Volume)
     // open the root directory of the volume
     Volume->RootDir = LibOpenRoot(Volume->DeviceHandle);
     if (Volume->RootDir == NULL) {
+        Volume->IsReadable = FALSE;
         return;
+    } else {
+        Volume->IsReadable = TRUE;
     }
 
     // get volume name

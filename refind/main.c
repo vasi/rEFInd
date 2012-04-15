@@ -83,7 +83,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.5.2");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.6");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -650,9 +650,8 @@ static VOID ScanLoaderDir(IN REFIT_VOLUME *Volume, IN CHAR16 *Path)
                 SPrint(FileName, 255, L"\\%s\\%s", Path, DirEntry->FileName);
           else
                 SPrint(FileName, 255, L"\\%s", DirEntry->FileName);
-          // TODO: Sort loader entries by date/time, most recent first
           AddLoaderEntry(FileName, NULL, Volume);
-       } // while()
+       }
        Status = DirIterClose(&DirIter);
        if (Status != EFI_NOT_FOUND) {
           if (Path)
