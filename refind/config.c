@@ -357,7 +357,16 @@ VOID ReadConfig(VOID)
               else
                  GlobalConfig.ScanFor[i] = ' ';
            }
-        } else if (StriCmp(TokenList[0], L"showtools") == 0) {
+
+        } else if (StriCmp(TokenList[0], L"also_scan_dirs") == 0) {
+           if (GlobalConfig.AlsoScan != NULL) {
+              FreePool(GlobalConfig.AlsoScan);
+              GlobalConfig.AlsoScan = NULL;
+           } // if
+           for (i = 1; i < TokenCount; i++)
+              MergeStrings(&GlobalConfig.AlsoScan, TokenList[i], L',');
+
+      } else if (StriCmp(TokenList[0], L"showtools") == 0) {
             SetMem(GlobalConfig.ShowTools, NUM_TOOLS * sizeof(UINTN), 0);
             for (i = 1; (i < TokenCount) && (i < NUM_TOOLS); i++) {
                 FlagName = TokenList[i];

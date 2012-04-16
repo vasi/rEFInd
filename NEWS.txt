@@ -1,3 +1,15 @@
+0.2.7 (?/??/2012):
+------------------
+
+- Fixed bug that caused rEFInd to show up in its own menu sometimes.
+
+- Added new refind.conf token: also_scan_dirs. When scanning volumes for
+  EFI boot loaders, rEFInd always scans the root directory and every
+  subdirectory of the /EFI directory, but it doesn't recurse into these
+  directories. The also_scan_dirs token adds more directories to the scan
+  list. It defaults to "elilo,boot", but you can set it to any directory or
+  directories you like.
+
 0.2.6 (4/14/2012):
 ------------------
 

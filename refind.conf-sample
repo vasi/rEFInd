@@ -55,6 +55,7 @@ timeout 20
 #              systems)
 #  reboot    - a tag to reboot the computer
 # Default is shell,about,shutdown,reboot
+#
 #showtools shell, about, reboot
 
 # Which types of boot loaders to search, and in what order to display them:
@@ -66,7 +67,20 @@ timeout 20
 #  cd            - BIOS optical-disc boot loaders
 #  manual        - use stanzas later in this configuration file
 # Default is internal,external,optical
-scanfor internal,external,optical
+#
+#scanfor internal,external,optical
+
+# When scanning volumes for EFI boot loaders, rEFInd always looks for
+# Mac OS X's and Microsoft Windows' boot loaders in their normal locations,
+# and scans the root directory and every subdirectory of the /EFI directory
+# for additional boot loaders, but it doesn't recurse into these directories.
+# The also_scan_dirs token adds more directories to the scan list.
+# Directories are specified relative to the volume's root directory. This
+# option applies to ALL the volumes that rEFInd scans. If a specified
+# directory doesn't exist, it's ignored (no error condition results).
+# The default is to scan no additional directories.
+#
+#also_scan_dirs boot,EFI/linux/kernels
 
 # Set the maximum number of tags that can be displayed on the screen at
 # any time. If more loaders are discovered than this value, rEFInd shows

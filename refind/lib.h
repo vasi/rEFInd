@@ -73,6 +73,7 @@ EFI_STATUS InitRefitLib(IN EFI_HANDLE ImageHandle);
 VOID UninitRefitLib(VOID);
 EFI_STATUS ReinitRefitLib(VOID);
 
+VOID CleanUpPathNameSlashes(IN OUT CHAR16 *PathName);
 VOID CreateList(OUT VOID ***ListPtr, OUT UINTN *ElementCount, IN UINTN InitialElementCount);
 VOID AddListElement(IN OUT VOID ***ListPtr, IN OUT UINTN *ElementCount, IN VOID *NewElement);
 VOID FreeList(IN OUT VOID ***ListPtr, IN OUT UINTN *ElementCount /*, IN Callback*/);

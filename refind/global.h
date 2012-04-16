@@ -159,6 +159,7 @@ typedef struct {
    CHAR16      *SelectionSmallFileName;
    CHAR16      *SelectionBigFileName;
    CHAR16      *DefaultSelection;
+   CHAR16      *AlsoScan;
    UINTN       ShowTools[NUM_TOOLS];
    CHAR8       ScanFor[NUM_SCAN_OPTIONS]; // codes of types of loaders for which to scan
 } REFIT_CONFIG;

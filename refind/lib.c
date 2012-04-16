@@ -79,8 +79,9 @@ static VOID UninitVolumes(VOID);
 
 // Converts forward slashes to backslashes and removes duplicate slashes.
 // Necessary because some (buggy?) EFI implementations produce "\/" strings
-// in pathnames.
-static VOID CleanUpPathNameSlashes(IN OUT CHAR16 *PathName) {
+// in pathnames and because some user inputs can produce duplicate directory
+// separators
+VOID CleanUpPathNameSlashes(IN OUT CHAR16 *PathName) {
    CHAR16   *NewName;
    UINTN    i, j = 0;
    BOOLEAN  LastWasSlash = FALSE;
@@ -1076,8 +1077,8 @@ VOID MergeStrings(IN OUT CHAR16 **First, IN CHAR16 *Second, CHAR16 AddChar) {
    if (Second != NULL)
       Length2 = StrLen(Second);
    NewString = AllocatePool(sizeof(CHAR16) * (Length1 + Length2 + 2));
-   NewString[0] = L'\0';
    if (NewString != NULL) {
+      NewString[0] = L'\0';
       if (*First != NULL) {
          StrCat(NewString, *First);
          if (AddChar) {
@@ -1085,7 +1086,7 @@ VOID MergeStrings(IN OUT CHAR16 **First, IN CHAR16 *Second, CHAR16 AddChar) {
             NewString[Length1 + 1] = 0;
          } // if (AddChar)
       } // if (*First != NULL)
-      if (First != NULL)
+      if (Second != NULL)
          StrCat(NewString, Second);
       FreePool(*First);
       *First = NewString;
@@ -1174,7 +1175,7 @@ CHAR16 *FindNumbers(IN CHAR16 *InString) {
 
 // Find the #Index element (numbered from 0) in a comma-delimited string
 // of elements.
-// Returns the found element, or NULL if Index is out of range of InString
+// Returns the found element, or NULL if Index is out of range or InString
 // is NULL.
 CHAR16 *FindCommaDelimited(IN CHAR16 *InString, IN UINTN Index) {
    UINTN    StartPos = 0, CurPos = 0;
@@ -1197,10 +1198,10 @@ CHAR16 *FindCommaDelimited(IN CHAR16 *InString, IN UINTN Index) {
          else
             CurPos++;
       } // while
+      if (Index == 0)
+         FoundString = StrDuplicate(&InString[StartPos]);
+      if (FoundString != NULL)
+         FoundString[CurPos - StartPos] = 0;
    } // if
-   if (Index == 0)
-      FoundString = StrDuplicate(&InString[StartPos]);
-   if (FoundString != NULL)
-      FoundString[CurPos - StartPos] = 0;
    return (FoundString);
 } // CHAR16 *FindCommaDelimited()

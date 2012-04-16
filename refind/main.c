@@ -72,7 +72,7 @@ static REFIT_MENU_ENTRY MenuEntryExit     = { L"Exit rEFInd", TAG_EXIT, 1, 0, 0,
 static REFIT_MENU_SCREEN MainMenu       = { L"Main Menu", NULL, 0, NULL, 0, NULL, 0, L"Automatic boot" };
 static REFIT_MENU_SCREEN AboutMenu      = { L"About", NULL, 0, NULL, 0, NULL, 0, NULL };
 
-REFIT_CONFIG GlobalConfig = { FALSE, 20, 0, 0, NULL, NULL, NULL, NULL,
+REFIT_CONFIG GlobalConfig = { FALSE, 20, 0, 0, NULL, NULL, NULL, NULL, NULL,
                               {TAG_SHELL, TAG_ABOUT, TAG_SHUTDOWN, TAG_REBOOT, 0, 0, 0, 0, 0 }};
 
 //
@@ -83,7 +83,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.6");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.6.1");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -606,6 +606,7 @@ VOID SetLoaderDefaults(LOADER_ENTRY *Entry, CHAR16 *LoaderPath, IN REFIT_VOLUME 
 LOADER_ENTRY * AddLoaderEntry(IN CHAR16 *LoaderPath, IN CHAR16 *LoaderTitle, IN REFIT_VOLUME *Volume) {
    LOADER_ENTRY      *Entry;
 
+   CleanUpPathNameSlashes(LoaderPath);
    Entry = InitializeLoaderEntry(NULL);
    if (Entry != NULL) {
       Entry->Title = StrDuplicate(LoaderTitle);
@@ -630,12 +631,18 @@ static VOID ScanLoaderDir(IN REFIT_VOLUME *Volume, IN CHAR16 *Path)
     EFI_STATUS              Status;
     REFIT_DIR_ITER          DirIter;
     EFI_FILE_INFO           *DirEntry;
-    CHAR16                  FileName[256];
+    CHAR16                  FileName[256], *SelfPath;
+    UINTN                   i = 0;
 
-    // Note: SelfDirPath includes a leading backslash ('\'), but Path
-    // doesn't, so we rejigger the string to compensate....
-    if (!SelfDirPath || !Path || ((StriCmp(Path, &SelfDirPath[1]) == 0) && Volume != SelfVolume) ||
-        (StriCmp(Path, &SelfDirPath[1]) != 0)) {
+    // Skip past leading slashes, which are sometimes (but not always) included
+    // in SelfDirPath, to get a path that's known to never include this feature.
+    while ((SelfDirPath != NULL) && (SelfDirPath[i] == L'\\')) {
+       i++;
+    }
+    SelfPath = &SelfDirPath[i]; // NOTE: *DO NOT* call FreePool() on SelfPath!!!
+
+    if (!SelfPath || !Path || ((StriCmp(Path, SelfPath) == 0) && Volume != SelfVolume) ||
+        (StriCmp(Path, SelfPath) != 0)) {
        // look through contents of the directory
        DirIterOpen(Volume->RootDir, Path, &DirIter);
        while (DirIterNext(&DirIter, 2, L"*.efi", &DirEntry)) {
@@ -667,7 +674,8 @@ static VOID ScanEfiFiles(REFIT_VOLUME *Volume) {
    EFI_STATUS              Status;
    REFIT_DIR_ITER          EfiDirIter;
    EFI_FILE_INFO           *EfiDirEntry;
-   CHAR16                  FileName[256];
+   CHAR16                  FileName[256], *Directory;
+   UINTN                   i, Length;
 
    if ((Volume->RootDir != NULL) && (Volume->VolName != NULL)) {
       // check for Mac OS X boot loader
@@ -690,10 +698,6 @@ static VOID ScanEfiFiles(REFIT_VOLUME *Volume) {
 
       // scan the root directory for EFI executables
       ScanLoaderDir(Volume, NULL);
-      // scan the elilo directory (as used on gimli's first Live CD)
-      ScanLoaderDir(Volume, L"elilo");
-      // scan the boot directory
-      ScanLoaderDir(Volume, L"boot");
 
       // scan subdirectories of the EFI directory (as per the standard)
       DirIterOpen(Volume->RootDir, L"EFI", &EfiDirIter);
@@ -706,6 +710,20 @@ static VOID ScanEfiFiles(REFIT_VOLUME *Volume) {
       Status = DirIterClose(&EfiDirIter);
       if (Status != EFI_NOT_FOUND)
          CheckError(Status, L"while scanning the EFI directory");
+
+      // Scan user-specified (or additional default) directories....
+      i = 0;
+      while ((Directory = FindCommaDelimited(GlobalConfig.AlsoScan, i++)) != NULL) {
+         Length = StrLen(Directory);
+         // Some EFI implementations won't read a directory if the path ends in
+         // a backslash, so eliminate this character, if it's present....
+         while ((Length > 0) && (Directory[Length - 1] == L'\\')) {
+            Directory[--Length] = 0;
+         } // while
+         if (Length > 0)
+            ScanLoaderDir(Volume, Directory);
+         FreePool(Directory);
+      } // while
    } // if
 } // static VOID ScanEfiFiles()
 
