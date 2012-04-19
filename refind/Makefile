@@ -19,7 +19,7 @@ LOCAL_CPPFLAGS  = -I$(SRCDIR) -I$(SRCDIR)/../include -I$(SRCDIR)/../libeg -DDEBI
 LOCAL_LDFLAGS   = -L$(SRCDIR)/../libeg/$(LIBEG)
 LOCAL_LIBS      = -leg
 
-OBJS            = main.o config.o menu.o screen.o icns.o lib.o
+OBJS            = main.o config.o menu.o screen.o icns.o lib.o bootsvcs.o
 TARGET          = refind.efi
 
 all: $(TARGET)

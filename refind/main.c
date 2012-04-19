@@ -49,6 +49,7 @@
 #include "icns.h"
 #include "menu.h"
 #include "refit_call_wrapper.h"
+#include "bootsvcs.h"
 #include "../include/syslinux_mbr.h"
 
 // 
@@ -72,7 +73,7 @@ static REFIT_MENU_ENTRY MenuEntryExit     = { L"Exit rEFInd", TAG_EXIT, 1, 0, 0,
 static REFIT_MENU_SCREEN MainMenu       = { L"Main Menu", NULL, 0, NULL, 0, NULL, 0, L"Automatic boot" };
 static REFIT_MENU_SCREEN AboutMenu      = { L"About", NULL, 0, NULL, 0, NULL, 0, NULL };
 
-REFIT_CONFIG GlobalConfig = { FALSE, 20, 0, 0, NULL, NULL, NULL, NULL, NULL,
+REFIT_CONFIG GlobalConfig = { FALSE, 20, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL,
                               {TAG_SHELL, TAG_ABOUT, TAG_SHUTDOWN, TAG_REBOOT, 0, 0, 0, 0, 0 }};
 
 //
@@ -83,7 +84,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.6.1");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.6.2");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -115,7 +116,8 @@ static VOID AboutrEFInd(VOID)
 static EFI_STATUS StartEFIImageList(IN EFI_DEVICE_PATH **DevicePaths,
                                     IN CHAR16 *LoadOptions, IN CHAR16 *LoadOptionsPrefix,
                                     IN CHAR16 *ImageTitle,
-                                    OUT UINTN *ErrorInStep)
+                                    OUT UINTN *ErrorInStep,
+                                    IN BOOLEAN Verbose)
 {
     EFI_STATUS              Status, ReturnStatus;
     EFI_HANDLE              ChildImageHandle;
@@ -124,7 +126,8 @@ static EFI_STATUS StartEFIImageList(IN EFI_DEVICE_PATH **DevicePaths,
     CHAR16                  ErrorInfo[256];
     CHAR16                  *FullLoadOptions = NULL;
 
-    Print(L"Starting %s\n", ImageTitle);
+    if (Verbose)
+        Print(L"Starting %s\n", ImageTitle);
     if (ErrorInStep != NULL)
         *ErrorInStep = 0;
 
@@ -160,7 +163,8 @@ static EFI_STATUS StartEFIImageList(IN EFI_DEVICE_PATH **DevicePaths,
         // NOTE: We also include the terminating null in the length for safety.
         ChildLoadedImage->LoadOptions = (VOID *)LoadOptions;
         ChildLoadedImage->LoadOptionsSize = ((UINT32)StrLen(LoadOptions) + 1) * sizeof(CHAR16);
-        Print(L"Using load options '%s'\n", LoadOptions);
+        if (Verbose)
+            Print(L"Using load options '%s'\n", LoadOptions);
     }
 
     // close open file handles
@@ -191,13 +195,14 @@ bailout:
 static EFI_STATUS StartEFIImage(IN EFI_DEVICE_PATH *DevicePath,
                                 IN CHAR16 *LoadOptions, IN CHAR16 *LoadOptionsPrefix,
                                 IN CHAR16 *ImageTitle,
-                                OUT UINTN *ErrorInStep)
+                                OUT UINTN *ErrorInStep,
+                                IN BOOLEAN Verbose)
 {
     EFI_DEVICE_PATH *DevicePaths[2];
 
     DevicePaths[0] = DevicePath;
     DevicePaths[1] = NULL;
-    return StartEFIImageList(DevicePaths, LoadOptions, LoadOptionsPrefix, ImageTitle, ErrorInStep);
+    return StartEFIImageList(DevicePaths, LoadOptions, LoadOptionsPrefix, ImageTitle, ErrorInStep, Verbose);
 } /* static EFI_STATUS StartEFIImage() */
 
 //
@@ -210,7 +215,7 @@ static VOID StartLoader(IN LOADER_ENTRY *Entry)
 
     BeginExternalScreen(Entry->UseGraphicsMode, L"Booting OS");
     StartEFIImage(Entry->DevicePath, Entry->LoadOptions,
-                  Basename(Entry->LoaderPath), Basename(Entry->LoaderPath), &ErrorInStep);
+                  Basename(Entry->LoaderPath), Basename(Entry->LoaderPath), &ErrorInStep, TRUE);
     FinishExternalScreen();
 }
 
@@ -395,7 +400,7 @@ VOID GenerateSubScreen(LOADER_ENTRY *Entry, IN REFIT_VOLUME *Volume) {
             AddMenuEntry(SubScreen, (REFIT_MENU_ENTRY *)SubEntry);
          }
 #endif
-      
+
          SubEntry = InitializeLoaderEntry(Entry);
          if (SubEntry != NULL) {
             SubEntry->me.Title        = L"Boot Mac OS X in single user mode";
@@ -939,7 +944,7 @@ static VOID StartLegacy(IN LEGACY_ENTRY *Entry)
 
     ExtractLegacyLoaderPaths(DiscoveredPathList, MAX_DISCOVERED_PATHS, LegacyLoaderList);
 
-    Status = StartEFIImageList(DiscoveredPathList, Entry->LoadOptions, NULL, L"legacy loader", &ErrorInStep);
+    Status = StartEFIImageList(DiscoveredPathList, Entry->LoadOptions, NULL, L"legacy loader", &ErrorInStep, TRUE);
     if (Status == EFI_NOT_FOUND) {
         if (ErrorInStep == 1) {
             Print(L"\nPlease make sure that you have the latest firmware update installed.\n");
@@ -1083,7 +1088,7 @@ static VOID StartTool(IN LOADER_ENTRY *Entry)
 {
     BeginExternalScreen(Entry->UseGraphicsMode, Entry->me.Title + 6);  // assumes "Start <title>" as assigned below
     StartEFIImage(Entry->DevicePath, Entry->LoadOptions, Basename(Entry->LoaderPath),
-                  Basename(Entry->LoaderPath), NULL);
+                  Basename(Entry->LoaderPath), NULL, TRUE);
     FinishExternalScreen();
 } /* static VOID StartTool() */
 
@@ -1107,69 +1112,54 @@ static LOADER_ENTRY * AddToolEntry(IN CHAR16 *LoaderPath, IN CHAR16 *LoaderTitle
     return Entry;
 } /* static LOADER_ENTRY * AddToolEntry() */
 
-#ifdef DEBIAN_ENABLE_EFI110
 //
 // pre-boot driver functions
 //
 
-static VOID ScanDriverDir(IN CHAR16 *Path)
+static UINTN ScanDriverDir(IN CHAR16 *Path)
 {
     EFI_STATUS              Status;
     REFIT_DIR_ITER          DirIter;
+    UINTN                   NumFound = 0;
     EFI_FILE_INFO           *DirEntry;
     CHAR16                  FileName[256];
 
     // look through contents of the directory
     DirIterOpen(SelfRootDir, Path, &DirIter);
-    while (DirIterNext(&DirIter, 2, L"*.EFI", &DirEntry)) {
+    while (DirIterNext(&DirIter, 2, L"*.efi", &DirEntry)) {
         if (DirEntry->FileName[0] == '.')
             continue;   // skip this
 
         SPrint(FileName, 255, L"%s\\%s", Path, DirEntry->FileName);
+        NumFound++;
         Status = StartEFIImage(FileDevicePath(SelfLoadedImage->DeviceHandle, FileName),
-                               L"", DirEntry->FileName, DirEntry->FileName, NULL);
+                               L"", DirEntry->FileName, DirEntry->FileName, NULL, FALSE);
     }
     Status = DirIterClose(&DirIter);
     if (Status != EFI_NOT_FOUND) {
         SPrint(FileName, 255, L"while scanning the %s directory", Path);
         CheckError(Status, FileName);
     }
+    return (NumFound);
 }
-/* EFI_STATUS
-LibScanHandleDatabase (
-     EFI_HANDLE  DriverBindingHandle, OPTIONAL
-     UINT32      *DriverBindingHandleIndex, OPTIONAL
-     EFI_HANDLE  ControllerHandle, OPTIONAL
-     UINT32      *ControllerHandleIndex, OPTIONAL
-     UINTN       *HandleCount,
-     EFI_HANDLE  **HandleBuffer,
-     UINT32      **HandleType
-     );
-#define EFI_HANDLE_TYPE_UNKNOWN                     0x000
-#define EFI_HANDLE_TYPE_IMAGE_HANDLE                0x001
-#define EFI_HANDLE_TYPE_DRIVER_BINDING_HANDLE       0x002
-#define EFI_HANDLE_TYPE_DEVICE_DRIVER               0x004
-#define EFI_HANDLE_TYPE_BUS_DRIVER                  0x008
-#define EFI_HANDLE_TYPE_DRIVER_CONFIGURATION_HANDLE 0x010
-#define EFI_HANDLE_TYPE_DRIVER_DIAGNOSTICS_HANDLE   0x020
-#define EFI_HANDLE_TYPE_COMPONENT_NAME_HANDLE       0x040
-#define EFI_HANDLE_TYPE_DEVICE_HANDLE               0x080
-#define EFI_HANDLE_TYPE_PARENT_HANDLE               0x100
-#define EFI_HANDLE_TYPE_CONTROLLER_HANDLE           0x200
-#define EFI_HANDLE_TYPE_CHILD_HANDLE                0x400 */
 
 static EFI_STATUS ConnectAllDriversToAllControllers(VOID)
 {
-    EFI_STATUS  Status;
-    UINTN       AllHandleCount;
-    EFI_HANDLE  *AllHandleBuffer;
-    UINTN       Index;
-    UINTN       HandleCount;
-    EFI_HANDLE  *HandleBuffer;
-    UINT32      *HandleType;
-    UINTN       HandleIndex;
-    BOOLEAN     Parent;
-    BOOLEAN     Device;
+    EFI_STATUS           Status;
+    UINTN                AllHandleCount;
+    EFI_HANDLE           *AllHandleBuffer;
+    UINTN                Index;
+    UINTN                HandleCount;
+    EFI_HANDLE           *HandleBuffer;
+    UINT32               *HandleType;
+    UINTN                HandleIndex;
+    BOOLEAN              Parent;
+    BOOLEAN              Device;
+
+    // GNU EFI's EFI_BOOT_SERVICES data structure is truncated, but all the
+    // items are in memory, so point a more complete data structure to it
+    // so that we can use items not in GNU EFI's implementation....
+    gBS = (MY_BOOT_SERVICES*) BS;
 
     Status = LibLocateHandle(AllHandles,
                              NULL,
@@ -1204,15 +1194,15 @@ static EFI_STATUS ConnectAllDriversToAllControllers(VOID)
             for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) {
                 if (HandleType[HandleIndex] & EFI_HANDLE_TYPE_PARENT_HANDLE)
                     Parent = TRUE;
-            }
+            } // for
 
             if (!Parent) {
                 if (HandleType[Index] & EFI_HANDLE_TYPE_DEVICE_HANDLE) {
-                    Status = refit_call4_wrapper(BS->ConnectController,
-                                                 AllHandleBuffer[Index],
-                                                 NULL,
-                                                 NULL,
-                                                 TRUE);
+                   Status = refit_call4_wrapper(gBS->ConnectController,
+                                                AllHandleBuffer[Index],
+                                                NULL,
+                                                NULL,
+                                                TRUE);
                 }
             }
         }
@@ -1224,23 +1214,30 @@ static EFI_STATUS ConnectAllDriversToAllControllers(VOID)
 Done:
     FreePool (AllHandleBuffer);
     return Status;
-}
+} /* EFI_STATUS ConnectAllDriversToAllControllers() */
 
 static VOID LoadDrivers(VOID)
 {
-    CHAR16                  DirName[256];
+    CHAR16        *Directory;
+    UINTN         i = 0, Length, NumFound = 0;
 
-    // load drivers from /efi/refind/drivers
-    SPrint(DirName, 255, L"%s\\drivers", SelfDirPath);
-    ScanDriverDir(DirName);
-
-    // load drivers from /efi/tools/drivers
-    ScanDriverDir(L"\\efi\\tools\\drivers");
+    // Scan user-specified driver directories....
+    while ((Directory = FindCommaDelimited(GlobalConfig.DriverDirs, i++)) != NULL) {
+       Length = StrLen(Directory);
+       // Some EFI implementations won't read a directory if the path ends in
+       // a backslash, so eliminate this character, if it's present....
+       while ((Length > 0) && (Directory[Length - 1] == L'\\')) {
+          Directory[--Length] = 0;
+       } // while
+       if (Length > 0)
+          NumFound += ScanDriverDir(Directory);
+       FreePool(Directory);
+    } // while
 
     // connect all devices
-    ConnectAllDriversToAllControllers();
+    if (NumFound > 0)
+       ConnectAllDriversToAllControllers();
 }
-#endif /* DEBIAN_ENABLE_EFI110 */
 
 static VOID ScanForBootloaders(VOID) {
    UINTN i;
@@ -1370,9 +1367,7 @@ efi_main (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
 
     // further bootstrap (now with config available)
     SetupScreen();
-#ifdef DEBIAN_ENABLE_EFI110
     LoadDrivers();
-#endif /* DEBIAN_ENABLE_EFI110 */
     ScanForBootloaders();
     ScanForTools();
 
@@ -1432,6 +1427,6 @@ efi_main (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
     // fails, go into an endless loop.
     refit_call4_wrapper(RT->ResetSystem, EfiResetCold, EFI_SUCCESS, 0, NULL);
     EndlessIdleLoop();
-    
+
     return EFI_SUCCESS;
 } /* efi_main() */

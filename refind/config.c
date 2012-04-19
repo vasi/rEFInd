@@ -366,7 +366,15 @@ VOID ReadConfig(VOID)
            for (i = 1; i < TokenCount; i++)
               MergeStrings(&GlobalConfig.AlsoScan, TokenList[i], L',');
 
-      } else if (StriCmp(TokenList[0], L"showtools") == 0) {
+        } else if (StriCmp(TokenList[0], L"scan_driver_dirs") == 0) {
+           if (GlobalConfig.DriverDirs != NULL) {
+              FreePool(GlobalConfig.DriverDirs);
+              GlobalConfig.DriverDirs = NULL;
+           } // if
+           for (i = 1; i < TokenCount; i++)
+              MergeStrings(&GlobalConfig.DriverDirs, TokenList[i], L',');
+
+        } else if (StriCmp(TokenList[0], L"showtools") == 0) {
             SetMem(GlobalConfig.ShowTools, NUM_TOOLS * sizeof(UINTN), 0);
             for (i = 1; (i < TokenCount) && (i < NUM_TOOLS); i++) {
                 FlagName = TokenList[i];
@@ -402,9 +410,9 @@ VOID ReadConfig(VOID)
         } else if (StriCmp(TokenList[0], L"textonly") == 0) {
             GlobalConfig.TextOnly = TRUE;
 
-        } else if ((StriCmp(TokenList[0], L"}") == 0) || (StriCmp(TokenList[0], L"loader") == 0) ||
-                   (StriCmp(TokenList[0], L"icon") == 0) || (StriCmp(TokenList[0], L"options") == 0)) {
-           // Do nothing; handled by ScanUserConfigured()
+//         } else if ((StriCmp(TokenList[0], L"}") == 0) || (StriCmp(TokenList[0], L"loader") == 0) ||
+//                    (StriCmp(TokenList[0], L"icon") == 0) || (StriCmp(TokenList[0], L"options") == 0)) {
+//            // Do nothing; handled by ScanUserConfigured()
         } else if ((StriCmp(TokenList[0], L"max_tags") == 0) && (TokenCount > 1)) {
            GlobalConfig.MaxTags = Atoi(TokenList[1]);
         }

@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/14/2012; last Web page update: 4/14/2012, referencing rEFInd 0.2.6</p>
+  <p>Originally written: 3/14/2012; last Web page update: 4/17/2012, referencing rEFInd 0.2.6</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -127,7 +127,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 
 <li>Rename the configuration file by typing <tt><b>mv refind.conf-sample refind.conf</b></tt>. Consult the <a href="configfile.html">Editing the rEFInd Configuration File</a> page for information on how to adjust your options.</li>
 
-<p class="sidebar"><b>Warning:</b> I've seen reports that Linux's <tt>efibootmgr</tt> utility can damage some Macs' firmware, necessitating re-flashing it. I've also seen some vague suggestions that this problem has been fixed with the 3.0 kernels, but I haven't been able to substantiate this suggestion. Therefore, I recommend using <tt>bless</tt> from OS X to do this job on Apple hardware.</p>
+<p class="sidebar"><b>Warning:</b> I've seen reports that Linux's <tt>efibootmgr</tt> utility can damage some Macs' firmware, necessitating re-flashing it. I've also seen some vague suggestions that this problem has been fixed with the 3.0 kernels, but I haven't been able to substantiate this suggestion. In either event, <tt>efibootmgr</tt> by itself can't completely change the EFI boot loader on Macs. Therefore, I recommend using <tt>bless</tt> from OS X to do this job on Apple hardware. Alternatively, there's a new Linux program, <tt>hfs-bless</tt>, part of the <a href="http://www.codon.org.uk/~mjg59/mactel-boot/"><tt>mactel-boot</tt></a> package, that's supposed to work with <tt>efibootmgr</tt> to make a Mac HFS partition bootable. I've not yet tried it, though.</p>
 
 <a name="efibootmgr">
 <li>On a UEFI-based system, type <tt><b>efibootmgr -c -l \\EFI\\refind\\refind_x64.efi -L rEFInd</b></tt> to add rEFInd to your EFI's list of available boot loaders, which it stores in NVRAM. (Adjust the path to the binary as required if you install somewhere else.) You may need to install this program on some systems; it's a standard part of most distributions' repositories.</li>
@@ -197,9 +197,13 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 
 <li>Type <b><tt>rename refind.conf-sample refind.conf</tt></b> to rename rEFInd's configuration file.</li>
 
+<li>Type <b><tt>bcdedit /set {bootmgr} path \EFI\refind\refind_x64.efi</tt></b> to set rEFInd as the default EFI boot program. Note that <tt>{bootmgr}</tt> is entered as such; that's not a notation for a variable.</li>
+
+<li>If you like, type <b><tt>bcdedit /set {bootmgr} description "<i>rEFInd description</i>"</tt></b> to set a description (change <tt><i>rEFInd description</i></tt> as you see fit).</li>
+
 </ol>
 
-<p>Unfortunately, I know of no Windows tool that's equivalent to <tt>efibootmgr</tt> under Linux or <tt>bless</tt> under OS X. (Such a tool <i>must</i> exist, but I don't know what it is. If you do, please <a href="mailto:rodsmith@rodsbooks.com">e-mail</a> me a pointer!) This can make adding rEFInd to your system a bit tricky, particularly if your firmware provides few boot options. In the best of all possible worlds, you'll be able to use your firmware's user interface to add rEFInd to your firmware's own boot manager; however, far too many EFI implementations lack even this modest capability. If you're stuck in this boat, you have several options, such as:</p>
+<p>At this point, when you reboot, rEFInd should appear as your new default boot program. One caveat: My only EFI Windows installation uses UEFI DUET, which "forgets" its boot options upon reboot. Thus, I'm unable to test the last two steps (which were provided by a helpful user) myself. If it doesn't work for you, you have several other options, such as:</p>
 
 <ul>
 

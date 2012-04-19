@@ -117,6 +117,8 @@ program. I'm not sure what you'd use in Windows to create ICNS files.</li>
 
 <li>The code could be more flexible in its handling of the sizes of various graphical elements, and particularly drawn text. Prior to version 0.2.2, submenu text was invisible on UEFI-based PCs with 800x600 and smaller displays because of an inability to properly crop the graphics fields that hold the text. With version 0.2.2, I've put a band-aid on this problem by reducing the field size so that it now works on 800x600 displays, but smaller displays still suffer from this problem. This is just an example of the inflexibility of certain layout issues within rEFInd.</li>
 
+<li>I'd like to add a configuration option to set the screen resolution. Many computers seem to default to 800x600, even when the hardware can handle much higher resolutions. A higher resolution would enable fitting more OS tags on the screen at once. I haven't yet looked into the system calls that would enable such changes.</li>
+
 <li>Although the ICNS file format used by rEFInd supports multiple image sizes, if a size that rEFInd needs isn't present in the file, rEFInd can't use the icon. The ability to scale images to the desired size would be useful.</li>
 
 <li>I would like to be able to specify the volume on which a boot loader resides using a partition GUID value, but extracting a GUID from the partition data is harder than extracting the volume's label or counting up the filesystem numbers.</li>

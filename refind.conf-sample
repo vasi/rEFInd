@@ -58,6 +58,15 @@ timeout 20
 #
 #showtools shell, about, reboot
 
+# Directories in which to search for EFI drivers. These drivers can
+# provide filesystem support, give access to hard disks on plug-in
+# controllers, etc. In most cases none are needed, but if you add
+# EFI drivers and you want rEFInd to automatically load them, you
+# should specify one or more paths here.
+# Default is to scan no directories for EFI drivers
+#
+#scan_driver_dirs EFI/refind/drivers,drivers
+
 # Which types of boot loaders to search, and in what order to display them:
 #  internal      - internal EFI disk-based boot loaders
 #  external      - external EFI disk-based boot loaders

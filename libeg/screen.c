@@ -64,20 +64,20 @@ VOID egInitScreen(VOID)
 {
     EFI_STATUS Status;
     UINT32 UGAWidth, UGAHeight, UGADepth, UGARefreshRate;
-    
+
     // get protocols
     Status = LibLocateProtocol(&ConsoleControlProtocolGuid, (VOID **) &ConsoleControl);
     if (EFI_ERROR(Status))
         ConsoleControl = NULL;
-    
+
     Status = LibLocateProtocol(&UgaDrawProtocolGuid, (VOID **) &UgaDraw);
     if (EFI_ERROR(Status))
         UgaDraw = NULL;
-    
+
     Status = LibLocateProtocol(&GraphicsOutputProtocolGuid, (VOID **) &GraphicsOutput);
     if (EFI_ERROR(Status))
         GraphicsOutput = NULL;
-    
+
     // get screen size
     egHasGraphics = FALSE;
     if (GraphicsOutput != NULL) {
@@ -142,14 +142,14 @@ VOID egSetGraphicsModeEnabled(IN BOOLEAN Enable)
 {
     EFI_CONSOLE_CONTROL_SCREEN_MODE CurrentMode;
     EFI_CONSOLE_CONTROL_SCREEN_MODE NewMode;
-    
+
     if (ConsoleControl != NULL) {
         refit_call4_wrapper(ConsoleControl->GetMode, ConsoleControl, &CurrentMode, NULL, NULL);
-        
+
         NewMode = Enable ? EfiConsoleControlScreenGraphics
                          : EfiConsoleControlScreenText;
         if (CurrentMode != NewMode)
-	    refit_call2_wrapper(ConsoleControl->SetMode, ConsoleControl, NewMode);
+           refit_call2_wrapper(ConsoleControl->SetMode, ConsoleControl, NewMode);
     }
 }
 

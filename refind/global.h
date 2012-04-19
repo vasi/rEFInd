@@ -160,6 +160,7 @@ typedef struct {
    CHAR16      *SelectionBigFileName;
    CHAR16      *DefaultSelection;
    CHAR16      *AlsoScan;
+   CHAR16      *DriverDirs;
    UINTN       ShowTools[NUM_TOOLS];
    CHAR8       ScanFor[NUM_SCAN_OPTIONS]; // codes of types of loaders for which to scan
 } REFIT_CONFIG;
