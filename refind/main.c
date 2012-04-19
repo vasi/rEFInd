@@ -49,7 +49,7 @@
 #include "icns.h"
 #include "menu.h"
 #include "refit_call_wrapper.h"
-#include "bootsvcs.h"
+#include "driver_support.h"
 #include "../include/syslinux_mbr.h"
 
 // 
@@ -1001,7 +1001,7 @@ static LEGACY_ENTRY * AddLegacyEntry(IN CHAR16 *LoaderTitle, IN REFIT_VOLUME *Vo
     SubEntry->Volume          = Entry->Volume;
     SubEntry->LoadOptions     = Entry->LoadOptions;
     AddMenuEntry(SubScreen, (REFIT_MENU_ENTRY *)SubEntry);
-    
+
     AddMenuEntry(SubScreen, &MenuEntryReturn);
     Entry->me.SubScreen = SubScreen;
     AddMenuEntry(&MainMenu, (REFIT_MENU_ENTRY *)Entry);
@@ -1159,7 +1159,7 @@ static EFI_STATUS ConnectAllDriversToAllControllers(VOID)
     // GNU EFI's EFI_BOOT_SERVICES data structure is truncated, but all the
     // items are in memory, so point a more complete data structure to it
     // so that we can use items not in GNU EFI's implementation....
-    gBS = (MY_BOOT_SERVICES*) BS;
+//    gBS = (MY_BOOT_SERVICES*) BS;
 
     Status = LibLocateHandle(AllHandles,
                              NULL,
@@ -1198,7 +1198,7 @@ static EFI_STATUS ConnectAllDriversToAllControllers(VOID)
 
             if (!Parent) {
                 if (HandleType[Index] & EFI_HANDLE_TYPE_DEVICE_HANDLE) {
-                   Status = refit_call4_wrapper(gBS->ConnectController,
+                   Status = refit_call4_wrapper(BS->ConnectController,
                                                 AllHandleBuffer[Index],
                                                 NULL,
                                                 NULL,

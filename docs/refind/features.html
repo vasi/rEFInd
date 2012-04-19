@@ -14,7 +14,7 @@
 <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-<p>Originally written: 3/14/2012; last Web page update: 4/14/2012, referencing rEFInd 0.2.6</p>
+<p>Originally written: 3/14/2012; last Web page update: 4/19/2012, referencing rEFInd 0.2.7</p>
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
 
@@ -104,11 +104,15 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <li>Set OS-specific boot options, such as to launch Mac OS X with verbose text-mode debug messages.</li>
 
+<li>Load EFI drivers for filesystems or hardware devices not supported natively by your firmware. (This feature is absent in some builds of rEFIt and in rEFInd prior to version 0.2.7.)</li>
+
 </ul>
 
 <p>I've used rEFIt on a couple of computers for over a year, but I've found that it has some frustrating limitations. It tends to flood the screen with non-functional BIOS boot options, for instance; and it has a number of bugs on UEFI-based systems. I therefore expanded on rEFIt, giving rEFInd features that improve on or go beyond those of rEFIt, such as:</p>
 
 <ul>
+
+<li>Bug fixes, focusing on those that have bothered me personally, such as those I've just mentioned.</li>
 
 <li>User-configurable methods of detecting boot loaders:
 
@@ -121,6 +125,8 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
     You can select which of these methods to use to construct the rEFInd main boot menu. Although rEFIt supports auto-detection, it does not support manual configuration; and rEFIt's options to enable, disable, and prioritize individual boot loader detection methods are primitive compared to those in rEFInd.</li>
 
 <li>The ability to fine-tune options passed to EFI boot loaders, via manual configuration.</li>
+
+<li>The ability to specify additional directories to scan for boot loaders and drivers (as of version 0.2.7).</li>
 
 <li>Proper handling of more OS options than can fit on the screen. (rEFIt displays an empty list in graphical mode when it detects too many OSes.)</li>
 
@@ -138,7 +144,7 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 </ul>
 
-<p>On the flip side, at least for Mac users, rEFInd comes with less sophisticated Mac installation tools than does rEFIt, in favor of more OS-agnostic packaging. Also, rEFInd doesn't support loading EFI drivers; that job should be done in other ways when using rEFInd.</p>
+<p>On the flip side, at least for Mac users, rEFInd comes with less sophisticated Mac installation tools than does rEFIt, in favor of more OS-agnostic packaging.</p>
 
 <p>If these features sound useful, then read on and try rEFInd. If not, you may need to look elsewhere. My <a href="http://www.rodsbooks.com/efi-bootloaders/index.html">Managing EFI Boot Loaders for Linux</a> page may be useful to you in this case.</p>
 

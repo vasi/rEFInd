@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/14/2012; last Web page update: 4/14/2012, referencing rEFInd 0.2.6</p>
+  <p>Originally written: 3/14/2012; last Web page update: 4/19/2012, referencing rEFInd 0.2.7</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -173,6 +173,11 @@ timeout 20
    <td>rEFInd defaults to a graphical mode; however, if you prefer to do without the flashy graphics, you can run it in text mode by including this option.</td>
 </tr>
 <tr>
+   <td><tt>scan_driver_dirs</tt></td>
+   <td>directory path(s)</td>
+   <td>Scans the specified directory or directories for EFI driver files. If rEFInd discovers <tt>.efi</tt> files in those directories, they're loaded and activated as drivers.</td>
+</tr>
+<tr>
    <td><tt>scanfor</tt></td>
    <td><tt>internal</tt>, <tt>external</tt>, <tt>optical</tt>, <tt>hdbios</tt>, <tt>biosexternal</tt>, <tt>cd</tt>, and <tt>manual</tt></td>
    <td>Tells rEFInd what methods to use to locate boot loaders. The <tt>internal</tt>, <tt>external</tt>, and <tt>optical</tt> parameters tell rEFInd to scan for EFI boot loaders on internal, external, and optical (CD, DVD, and Blu-ray) devices, respectively. The <tt>hdbios</tt>, <tt>biosexternal</tt>, and <tt>cd</tt> parameters are similar, but scan for BIOS boot loaders. (Note that the BIOS options are likely to be useless on UEFI PCs.) The <tt>manual</tt> parameter tells rEFInd to scan the configuration file for manual settings. You can specify multiple parameters to have the program scan for multiple boot loader types. When you do so, the order determines the order in which the boot loaders appear in the menu. The default is <tt>internal, external, optical</tt>.</td>
@@ -197,11 +202,12 @@ timeout 20
 # Sample refind.conf file
 timeout 5
 banner custom.bmp
+scan_driver_dirs drivers,EFI/refind/drivers
 scanfor manual,external,optical
 default_selection elilo
 </pre>
 
-<p>This example sets a timeout of 5 seconds; loads a custom graphic file called <tt>custom.bmp</tt> from the directory in which <tt>refind.efi</tt> resides; uses manual boot loader configuration but also scans for external EFI boot loaders and EFI boot loaders on optical discs; and sets the default boot loader to the first loader found that includes the string <tt>elilo</tt>. Of course, since this file specifies use of manual boot loader configuration, it's not complete; you'll need to add at least one OS stanza to be able to boot from anything but an external disk or optical drive....</p>
+<p>This example sets a timeout of 5 seconds; loads a custom graphic file called <tt>custom.bmp</tt> from the directory in which <tt>refind.efi</tt> resides; scans the <tt>drivers</tt> and <tt>EFI/refind/drivers</tt> directories for EFI drivers; uses manual boot loader configuration but also scans for external EFI boot loaders and EFI boot loaders on optical discs; and sets the default boot loader to the first loader found that includes the string <tt>elilo</tt>. Of course, since this file specifies use of manual boot loader configuration, it's not complete; you'll need to add at least one OS stanza to be able to boot from anything but an external disk or optical drive, as described shortly.</p>
 
 <h2>Creating OS Stanzas</h2>
 
@@ -406,7 +412,7 @@ menuentry Gentoo {
 
 <p><a href="index.html">Go to the main rEFInd page</a></p>
 
-<p><a href="linux.html">Learn about methods of booting Linux with rEFInd</a></p>
+<p><a href="linux.html">Learn about how to adjust rEFInd's appearance</a></p>
 
   <p><a href="http://www.rodsbooks.com/">Return</a> to my main Web page.</p>
 </body>

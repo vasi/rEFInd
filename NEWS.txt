@@ -1,6 +1,17 @@
 0.2.7 (?/??/2012):
 ------------------
 
+- After much trial and tribulation, I've overcome a GNU-EFI limitation and
+  enabled rEFInd to load EFI drivers. This feature was present in the
+  original build of rEFIt but was removed in the versions that could
+  compile under Linux, but now it's back -- and still being compiled under
+  Linux! To use it, you should place your drivers in a convenient directory
+  on the ESP (or whatever partition you use to launch rEFInd) and add a
+  "scan_driver_dirs" entry to refind.conf to tell rEFInd where to look. (As
+  always, you should specify the driver directory relative to the root of
+  the filesystem.) Note that you can't launch drivers from another
+  filesystem; they must be on the same volume that holds rEFInd.
+
 - Fixed bug that caused rEFInd to show up in its own menu sometimes.
 
 - Added new refind.conf token: also_scan_dirs. When scanning volumes for

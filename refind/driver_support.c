@@ -1,8 +1,10 @@
 /*
- * File to implement an full version of EFI_BOOT_SERVICES, to go beyond
- * what GNU-EFI provides. These functions were taken, with modification,
- * from various EDK2 and earlier files (see comments preceding the
- * functions and other blocks of code). The original source files
+ * File to implement LibScanHandleDatabase(), which is used by rEFInd's
+ * driver-loading code (inherited from rEFIt), but which has not been
+ * implemented in GNU-EFI and seems to have been dropped from current
+ * versions of the Tianocore library. This function was taken from a git
+ * site with EFI code, but some of the constants it uses were taken from
+ * a more recent EDK2 package (see below for details). The original files
  * bore the following copyright notice:
  *
  * Copyright (c) 2006 - 2011, Intel Corporation. All rights reserved.<BR>
@@ -16,10 +18,10 @@
  *
  */
 
-#include "bootsvcs.h"
+#include "driver_support.h"
 #include "refit_call_wrapper.h"
 
-// Following "global" constants are from AutoGen.c....
+// Following "global" constants are from EDK2's AutoGen.c....
 EFI_GUID gEfiLoadedImageProtocolGuid = { 0x5B1B31A1, 0x9562, 0x11D2, { 0x8E, 0x3F, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B }};
 EFI_GUID gEfiDriverBindingProtocolGuid = { 0x18A031AB, 0xB443, 0x4D1A, { 0xA5, 0xC0, 0x0C, 0x09, 0x26, 0x1E, 0x9F, 0x71 }};
 EFI_GUID gEfiDriverConfiguration2ProtocolGuid = { 0xBFD7DC1D, 0x24F1, 0x40D9, { 0x82, 0xE7, 0x2E, 0x09, 0xBB, 0x6B, 0x4E, 0xBE }};
@@ -74,7 +76,7 @@ LibScanHandleDatabase (
   // Retrieve the list of all handles from the handle database
   //
 
-  Status = refit_call5_wrapper(gBS->LocateHandleBuffer,
+  Status = refit_call5_wrapper(BS->LocateHandleBuffer,
      AllHandles,
      NULL,
      NULL,
@@ -116,7 +118,7 @@ LibScanHandleDatabase (
     // Retrieve the list of all the protocols on each handle
     //
 
-    Status = refit_call3_wrapper(gBS->ProtocolsPerHandle,
+    Status = refit_call3_wrapper(BS->ProtocolsPerHandle,
                   (*HandleBuffer)[HandleIndex],
                   &ProtocolGuidArray,
                   &ArrayCount
@@ -152,7 +154,7 @@ LibScanHandleDatabase (
         // Retrieve the list of agents that have opened each protocol
         //
 
-        Status = refit_call4_wrapper(gBS->OpenProtocolInformation,
+        Status = refit_call4_wrapper(BS->OpenProtocolInformation,
                       (*HandleBuffer)[HandleIndex],
                       ProtocolGuidArray[ProtocolIndex],
                       &OpenInfo,

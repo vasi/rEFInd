@@ -15,11 +15,11 @@ ifeq ($(ARCH),x86_64)
   LIBEG = build64
 endif
 
-LOCAL_CPPFLAGS  = -I$(SRCDIR) -I$(SRCDIR)/../include -I$(SRCDIR)/../libeg -DDEBIAN_VERSION="L\"$(DEBVER)\""
+LOCAL_CPPFLAGS  = -I$(SRCDIR) -I$(SRCDIR)/../include -I$(SRCDIR)/../libeg
 LOCAL_LDFLAGS   = -L$(SRCDIR)/../libeg/$(LIBEG)
 LOCAL_LIBS      = -leg
 
-OBJS            = main.o config.o menu.o screen.o icns.o lib.o bootsvcs.o
+OBJS            = main.o config.o menu.o screen.o icns.o lib.o driver_support.o
 TARGET          = refind.efi
 
 all: $(TARGET)

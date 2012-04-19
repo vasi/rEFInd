@@ -29,7 +29,7 @@ h1,h2,h3,h4 {
 }
 
 .listing {
-    font-family:Courier,monospace;
+    font-family:monospace;
     margin: 0px;
     padding: 6px;
     border: 1px solid;
