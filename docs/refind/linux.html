@@ -14,7 +14,7 @@
 <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-<p>Originally written: 3/19/2012; last Web page update: 4/14/2012, referencing rEFInd 0.2.6</p>
+<p>Originally written: 3/19/2012; last Web page update: 4/19/2012, referencing rEFInd 0.2.7</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -183,6 +183,8 @@ total 17943
 <li>You must place your kernels in a directory other than the one that holds the main rEFInd <tt>.efi</tt> file. This is because rEFInd does not scan its own directory for boot loaders.</li>
 
 </ul>
+
+<p>Ordinarily, a kernel booted in this way must reside on the ESP, or at least on another FAT partition. On a Macintosh, though, you can use HFS+ to house your kernel files. In fact, that may be necessary; my Mac Mini hangs when I try to boot a Linux kernel via an EFI stub loader from the computer's ESP, but it works fine when booting from an HFS+ partition. If you use <a href="drivers.html">EFI drivers,</a> though, you can place your kernel on any filesystem for which an EFI driver exists. This list is currently rather limited (ext2fs/ext3fs, ReiserFS, ISO-9660, and HFS+), but even just one or two options might help a lot if you've got an undersized ESP or if copying your kernel file to the ESP is a hassle you'd rather avoid.</p>
 
 <p class="sidebar"><b>Tip for distribution maintainers:</b> If you maintain an <tt>EFI/<tt class="variable">distname</tt></tt> directory for your kernels, you can place your version of rEFInd in a directory called <tt>EFI/<tt class="variable">distname</tt>/refind</tt>. This will avoid collisions with duplicate rEFInd installations from other distributions.</p>
 

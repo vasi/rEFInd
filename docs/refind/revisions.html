@@ -14,7 +14,7 @@
 <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-<p>Last Web page update: 4/14/2012</p>
+<p>Last Web page update: 4/19/2012</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -92,6 +92,8 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 <p>The following summarizes changes in rEFInd's public releases:</p>
 
 <ul>
+
+<li><b>0.2.7 (4/19/2012)</b>&mdash;I've added two new tokens to the <tt>refind.conf</tt> file, with associated new functionality. The new <tt>scan_driver_dirs</tt> option tells rEFInd where to scan for EFI drivers, in addition to the default of the <tt>drivers</tt> subdirectory of the rEFInd installation directory. For more on EFI drivers, see <a href="drivers.html">Using EFI Drivers.</a> Note that previous versions of rEFInd couldn't load drivers at all, although they could make use of hardware and filesystems activated by drivers loaded before rEFInd launched. The second new token is <tt>also_scan_dirs</tt>, which adds arbitrary directories to the list that rEFInd scans for boot loaders. (Without this option, rEFInd scans each volume's boot directory and every subdirectory of the <tt>/EFI</tt> directory, with the exception of <tt>/EFI/tools</tt> and rEFInd's own directory.) This version also fixes a minor bug that caused rEFInd to sometimes include itself in the list of OS options. Finally, if you build rEFInd yourself, you should be aware that it now requires a newer version of the GNU-EFI library than it required in the past. See the <tt>BUILDING.txt</tt> file, included in the source code package, for details.</li>
 
 <li><b>0.2.6 (4/14/2012)</b>&mdash;This version provides one bug fix and one new feature. The bug was introduced in version 0.2.5 and prevents rEFInd from identifying a Linux initial RAM disk file on some (but not all) EFI implementations. The new feature is the <tt>volume</tt> stanza token, which enables you to manually load a boot program from a filesystem other than the one from which rEFInd launched. You can specify a volume either by its label (as in <tt>volume KERNELS</tt> to load from the volume with a filesystem name <tt>KERNELS</tt>) or by number followed by a colon (as in <tt>volume 0:</tt> for the first filesystem or <tt>volume 1:</tt> for the second). See the <a href="configfile.html">Configuring the Boot Manager</a> page for more on this new feature.</li>
 

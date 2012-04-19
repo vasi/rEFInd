@@ -20,8 +20,8 @@
 #include <efi/efi.h>
 #include <efi/efilib.h>
 
-#ifndef _MY_SCAN_HANDLE_DATABASE
-#define _MY_SCAN_HANDLE_DATABASE
+#ifndef _DRIVER_SUPPORT
+#define _DRIVER_SUPPORT
 
 // Below is from http://git.etherboot.org/?p=mirror/efi/shell/.git;a=commitdiff;h=b1b0c63423cac54dc964c2930e04aebb46a946ec;
 // Seems to have been replaced by ParseHandleDatabaseByRelationshipWithType(), but the latter isn't working for me....

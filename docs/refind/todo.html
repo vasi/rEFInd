@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/14/2012; last Web page update: 4/14/2012, referencing rEFInd 0.2.6</p>
+  <p>Originally written: 3/14/2012; last Web page update: 4/19/2012, referencing rEFInd 0.2.7</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -107,13 +107,7 @@ rEFInd, feel free to submit it. I might or might not replace the icons it
 uses now (most of which come from the Oxygen Icons package), but I may
 provide a way to make selecting a theme from one of several installed
 themes easy, and provide links to themes on this Web site (or even host
-them on the project's Sourceforge page). Note that rEFInd currently
-supports only BMP format and ICNS format graphics files, and the former
-aren't very useful for icons because they lack transparency support. ICNS
-is an Apple format, and many Mac tools support it. In Linux, you can
-convert PNG images to ICNS format by using the <a
-href="http://icns.sourceforge.net/">libicns</a> library's <tt>png2icns</tt>
-program. I'm not sure what you'd use in Windows to create ICNS files.</li>
+them on the project's Sourceforge page). For more information on designing themes for rEFInd, see the <a href="themes.html">Theming rEFInd</a> page.</li>
 
 <li>The code could be more flexible in its handling of the sizes of various graphical elements, and particularly drawn text. Prior to version 0.2.2, submenu text was invisible on UEFI-based PCs with 800x600 and smaller displays because of an inability to properly crop the graphics fields that hold the text. With version 0.2.2, I've put a band-aid on this problem by reducing the field size so that it now works on 800x600 displays, but smaller displays still suffer from this problem. This is just an example of the inflexibility of certain layout issues within rEFInd.</li>
 
@@ -121,13 +115,17 @@ program. I'm not sure what you'd use in Windows to create ICNS files.</li>
 
 <li>Although the ICNS file format used by rEFInd supports multiple image sizes, if a size that rEFInd needs isn't present in the file, rEFInd can't use the icon. The ability to scale images to the desired size would be useful.</li>
 
+<li>EFI supports network boots. rEFInd doesn't, but it would be nice if it would.</li>
+
 <li>I would like to be able to specify the volume on which a boot loader resides using a partition GUID value, but extracting a GUID from the partition data is harder than extracting the volume's label or counting up the filesystem numbers.</li>
 
 <li>It would be useful to be able to specify paths to boot loaders and/or initial RAM disks relative to the rEFInd directory (or the boot loader's directory, in the case of initrds).</li>
 
 <li>There's currently no way to create a manual boot stanza for a BIOS-booted OS. This isn't a big priority for me personally, but I can see how it could be for some people.</li>
 
-<li>Returning from a program (such as an EFI shell or a boot loader that fails) produces an error message about a failure when "(re)opening our installation volume" on some computers. (Among mine, only a 32-bit Mac Mini produces this message.) This <i>seems to be</i> harmless, but I haven't removed the error message because I don't fully understand its cause or why it doesn't appear on most systems. This needs investigating and fixing.</li>
+<li>I'd like to find a way to get rEFInd to launch BIOS boot loaders on UEFI-based systems. This option currently works only on Macs&mdash;or at least, I've not gotten it to work on any of my UEFI-based PCs.</li>
+
+<li>Returning from a program (such as an EFI shell or a boot loader that fails) produces an error message about a failure when "(re)opening our installation volume" on some computers. (Among mine, only a 32-bit Mac Mini produces this message.) In some cases, rEFInd then hangs. I don't fully understand its cause or why it doesn't appear on most systems. This needs investigating and fixing.</li>
 
 <li>The Page Up and Page Down keys work in a rather strange way&mdash;a result of an admittedly quick fix on my part to a problem with a data structure that makes implementation of scrolling harder than it ought to be.</li>
 
@@ -138,8 +136,6 @@ program. I'm not sure what you'd use in Windows to create ICNS files.</li>
 <li>A way to read boot options set via <tt>efibootmgr</tt>, <tt>bless</tt>, or similar options from NVRAM to add to the boot set would be useful.</li>
 
 <li>A way to examine and change the NVRAM settings could be useful. This would enable a CD-based boot of rEFInd to fix a broken disk boot. Perhaps this could be done via a separate tool that could be launched much like the shell or <tt>gptsync</tt>.</li>
-
-<li>I'd like to find a way to get rEFInd to launch BIOS boot loaders on UEFI-based systems. This option currently works only on Macs&mdash;or at least, I've not gotten it to work on any of my UEFI-based PCs.</li>
 
 <li>I'd like to find a way to have rEFInd re-scan removable media when they're inserted.</li>
 

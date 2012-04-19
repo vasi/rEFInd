@@ -1,4 +1,4 @@
-0.2.7 (?/??/2012):
+0.2.7 (4/19/2012):
 ------------------
 
 - After much trial and tribulation, I've overcome a GNU-EFI limitation and
@@ -10,7 +10,12 @@
   "scan_driver_dirs" entry to refind.conf to tell rEFInd where to look. (As
   always, you should specify the driver directory relative to the root of
   the filesystem.) Note that you can't launch drivers from another
-  filesystem; they must be on the same volume that holds rEFInd.
+  filesystem; they must be on the same volume that holds rEFInd. Those who
+  compile from source code should note that implementing this feature
+  necessitated using a more recent version of the GNU-EFI library. I'm
+  currently using version 3.0p, and version 3.0i does NOT work. I don't
+  know where the change occurred, but you may need to upgrade your GNU-EFI
+  installation.
 
 - Fixed bug that caused rEFInd to show up in its own menu sometimes.
 

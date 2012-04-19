@@ -91,11 +91,41 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <h2>Theming Basics</h2>
 
-<p></p>
+<p>As described on various other pages of this document, rEFInd relies on icon files located in its <tt>icons</tt> subdirectory, and occasionally elsewhere, to define its overall appearance. You can adjust rEFInd's theme in a few ways:</p>
+
+<ul>
+
+<li>You can create new icons and place them in the <tt>icons</tt> subdirectory. This will affect the appearance of the OS tags, the utility tags, and so on. The names of these icons are fairly self-explanatory. Be aware that rEFInd expects its icons to be in Apple's <a href="http://en.wikipedia.org/wiki/Icns">icon image format (ICNS).</a> You can generate such files easily in various Apple programs, or by using the <a href="http://icns.sourceforge.net/">libicns</a> library (and in particular its <tt>png2icns</tt> program) in Linux.</li>
+
+<li>You can customize the appearance of an individual boot loader by placing an ICNS file in its directory with the same name as the boot loader but with a <tt>.icns</tt> extension. For instance, if your boot loader program is <tt>elilo.efi</tt>, you can create a custom icon by naming it <tt>elilo.icns</tt>.</li>
+
+<li>You can provide an icon for boot loaders stored in the root directory of a filesystem by placing a file called <tt>.VolumeIcon.icns</tt> in that volume's root.</li>
+
+<li>You can set a custom badge (the small icon that identifies the disk type) by creating a file called <tt>.VolumeBadge.icns</tt> in that volume's root. This setting applies to all the boot loaders found on this volume, even if they're in subdirectories.</li>
+
+<li>You can adjust the selection background (used to highlight a selected icon) by creating new icons in Microsoft's <a href="http://en.wikipedia.org/wiki/BMP_file_format">BMP format</a>. You should create both 144x144 and 64x64 images and tell rEFInd about them by using the <tt>selection_big</tt> and <tt>selection_small</tt> tokens, respectively, in <tt>refind.conf</tt>.</li>
+
+<li>You can create a new background image and logo by placing a BMP file in rEFInd's main directory and passing its filename to rEFInd with the <tt>banner</tt> option in <tt>refind.conf</tt>. If the image is smaller than the screen, the color in the top-left corner of the image will be used for the rest of the display.</li>
+
+</ul>
+
+<p>Of course, not all of these elements are likely to be included in themes. A minimal rEFInd theme would include just some changes to the icons in the <tt>icons</tt> subdirectory. A more thorough theme would include a changed background image or selection backgrounds.</p>
+
+<p><b>Note:</b> If you'd like to design a logo for rEFInd, please do so! I lack the sort of artistic talent required for creating logos, so I just used plain text. I'd like to have something more eye-catching, though. I don't promise to use the first logo I'm given, but if you have some ideas, or would like to discuss some ideas, feel free to <a href="mailto:rodsmith@rodsbooks.com">e-mail me.</a></p>
 
 <h2>Known Themes</h2>
 
-<p></p>
+<p>I used icons from the Oxygen Icons project, both from the <a href="http://deviantdark.deviantart.com/art/Oxygen-Refit-70199755">Oxygen Refit</a> package and from Gentoo's <tt>oxygen-icons</tt> package. These icons supplemented or replaced icons that rEFIt used; however, many OS icons (such as those for Windows and Mac OS) are carried over from rEFIt. I've also used a handful of icons for individual Linux distributions from other sources&mdash;usually documentation associated with the distribution in question.</p>
+
+<p>In addition to this default icon set, I've received word of one other rEFInd theme:</p>
+
+<ul>
+
+<li><a href="http://ecto-plazm.deviantart.com/art/rEFInd-Icon-Theme-296571397">ecto-plazm's theme</a></li>
+
+</ul>
+
+<p>If you've created or discovered another rEFInd theme, please <a href="mailto:rodsmith@rodsbooks.com">tell me about it</a> so that I can provide a link to it from this page.</p>
 
 <hr />
 

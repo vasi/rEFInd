@@ -84,7 +84,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.6.2");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.7");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -1221,7 +1221,13 @@ static VOID LoadDrivers(VOID)
     CHAR16        *Directory;
     UINTN         i = 0, Length, NumFound = 0;
 
-    // Scan user-specified driver directories....
+    // load drivers from the "drivers" subdirectory of rEFInd's home directory
+    Directory = StrDuplicate(SelfDirPath);
+    MergeStrings(&Directory, L"drivers", L'\\');
+//    SPrint(DirName, 255, L"%s\\drivers", SelfDirPath);
+    NumFound += ScanDriverDir(Directory);
+
+    // Scan additional user-specified driver directories....
     while ((Directory = FindCommaDelimited(GlobalConfig.DriverDirs, i++)) != NULL) {
        Length = StrLen(Directory);
        // Some EFI implementations won't read a directory if the path ends in

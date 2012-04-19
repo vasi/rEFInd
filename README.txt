@@ -44,4 +44,7 @@ rEFInd source code can be obtained from
 https://sourceforge.net/projects/refind/. Consult the BUILDING.txt file in
 the source code package for build instructions. Once  you've built the
 source code, you should duplicate the directory tree described above by
-copying the individual files and the icons directory to the ESP.
+copying the individual files and the icons directory to the ESP. Note that
+the binary file created by the build process will be called "refind.efi".
+You can use that name or rename it to include your architecture code, as
+you see fit.
