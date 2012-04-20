@@ -593,6 +593,9 @@ static VOID ScanVolume(IN OUT REFIT_VOLUME *Volume)
         FreePool(FileSystemInfoPtr);
     }
 
+    if (Volume->VolName == NULL) {
+       Volume->VolName = StrDuplicate(L"Unknown");
+    }
     // TODO: if no official volume name is found or it is empty, use something else, e.g.:
     //   - name from bytes 3 to 10 of the boot sector
     //   - partition number

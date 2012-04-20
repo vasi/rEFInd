@@ -612,7 +612,6 @@ VOID ScanUserConfigured(VOID)
          return;
 
       Volume = SelfVolume;
-      // TODO: Figure out how to set volumes (on per-image basis, preferably)
 
       while ((TokenCount = ReadTokenLine(&File, &TokenList)) > 0) {
          if ((StriCmp(TokenList[0], L"menuentry") == 0) && (TokenCount > 1)) {
