@@ -410,9 +410,9 @@ VOID ReadConfig(VOID)
         } else if (StriCmp(TokenList[0], L"textonly") == 0) {
             GlobalConfig.TextOnly = TRUE;
 
-//         } else if ((StriCmp(TokenList[0], L"}") == 0) || (StriCmp(TokenList[0], L"loader") == 0) ||
-//                    (StriCmp(TokenList[0], L"icon") == 0) || (StriCmp(TokenList[0], L"options") == 0)) {
-//            // Do nothing; handled by ScanUserConfigured()
+        } else if (StriCmp(TokenList[0], L"scan_all_linux_kernels") == 0) {
+           GlobalConfig.ScanAllLinux = TRUE;
+
         } else if ((StriCmp(TokenList[0], L"max_tags") == 0) && (TokenCount > 1)) {
            GlobalConfig.MaxTags = Atoi(TokenList[1]);
         }

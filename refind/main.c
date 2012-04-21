@@ -64,6 +64,18 @@
 #define SHELL_NAMES             L"\\EFI\\tools\\shell.efi"
 #endif
 
+// Filename patterns that identify EFI boot loaders. Note that a single case (either L"*.efi" or
+// L"*.EFI") is fine for most systems; but Gigabyte's buggy Hybrid EFI does a case-sensitive
+// comparison when it should do a case-insensitive comparison, so I'm doubling this up. It does
+// no harm on other computers, AFAIK. In theory, every case variation should be done for
+// completeness, but that's ridiculous....
+#define LOADER_MATCH_PATTERNS   L"*.efi,*.EFI"
+
+// Patterns that identify Linux kernels. Added to the loader match pattern when the
+// scan_all_linux_kernels option is set in the configuration file. Causes kernels WITHOUT
+// a ".efi" extension to be found when scanning for boot loaders.
+#define LINUX_MATCH_PATTERNS    L"vmlinuz*,bzImage*"
+
 static REFIT_MENU_ENTRY MenuEntryAbout    = { L"About rEFInd", TAG_ABOUT, 1, 0, 'A', NULL, NULL, NULL };
 static REFIT_MENU_ENTRY MenuEntryReset    = { L"Reboot Computer", TAG_REBOOT, 1, 0, 'R', NULL, NULL, NULL };
 static REFIT_MENU_ENTRY MenuEntryShutdown = { L"Shut Down Computer", TAG_SHUTDOWN, 1, 0, 'U', NULL, NULL, NULL };
@@ -73,7 +85,7 @@ static REFIT_MENU_ENTRY MenuEntryExit     = { L"Exit rEFInd", TAG_EXIT, 1, 0, 0,
 static REFIT_MENU_SCREEN MainMenu       = { L"Main Menu", NULL, 0, NULL, 0, NULL, 0, L"Automatic boot" };
 static REFIT_MENU_SCREEN AboutMenu      = { L"About", NULL, 0, NULL, 0, NULL, 0, NULL };
 
-REFIT_CONFIG GlobalConfig = { FALSE, 20, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL,
+REFIT_CONFIG GlobalConfig = { FALSE, FALSE, 20, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL,
                               {TAG_SHELL, TAG_ABOUT, TAG_SHUTDOWN, TAG_REBOOT, 0, 0, 0, 0, 0 }};
 
 //
@@ -84,7 +96,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.7.1");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.7.2");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -631,19 +643,18 @@ LOADER_ENTRY * AddLoaderEntry(IN CHAR16 *LoaderPath, IN CHAR16 *LoaderTitle, IN 
 
 // Scan an individual directory for EFI boot loader files and, if found,
 // add them to the list.
-static VOID ScanLoaderDir(IN REFIT_VOLUME *Volume, IN CHAR16 *Path)
+static VOID ScanLoaderDir(IN REFIT_VOLUME *Volume, IN CHAR16 *Path, IN CHAR16 *Pattern)
 {
     EFI_STATUS              Status;
     REFIT_DIR_ITER          DirIter;
     EFI_FILE_INFO           *DirEntry;
-    CHAR16                  *FileName;
+    CHAR16                  FileName[256];
 
-    FileName = AllocateZeroPool(256 * sizeof(CHAR16));
-    if ((!SelfDirPath || !Path || ((StriCmp(Path, SelfDirPath) == 0) && Volume != SelfVolume) ||
-        (StriCmp(Path, SelfDirPath) != 0)) && FileName) {
+    if (!SelfDirPath || !Path || ((StriCmp(Path, SelfDirPath) == 0) && Volume != SelfVolume) ||
+        (StriCmp(Path, SelfDirPath) != 0)) {
        // look through contents of the directory
        DirIterOpen(Volume->RootDir, Path, &DirIter);
-       while (DirIterNext(&DirIter, 2, L"*.efi", &DirEntry)) {
+       while (DirIterNext(&DirIter, 2, Pattern, &DirEntry)) {
           if (DirEntry->FileName[0] == '.' ||
               StriCmp(DirEntry->FileName, L"TextMode.efi") == 0 ||
               StriCmp(DirEntry->FileName, L"ebounce.efi") == 0 ||
@@ -672,8 +683,12 @@ static VOID ScanEfiFiles(REFIT_VOLUME *Volume) {
    EFI_STATUS              Status;
    REFIT_DIR_ITER          EfiDirIter;
    EFI_FILE_INFO           *EfiDirEntry;
-   CHAR16                  FileName[256], *Directory;
+   CHAR16                  FileName[256], *Directory, *MatchPatterns;
    UINTN                   i, Length;
+
+    MatchPatterns = StrDuplicate(LOADER_MATCH_PATTERNS);
+    if (GlobalConfig.ScanAllLinux)
+       MergeStrings(&MatchPatterns, LINUX_MATCH_PATTERNS, L',');
 
    if ((Volume->RootDir != NULL) && (Volume->VolName != NULL)) {
       // check for Mac OS X boot loader
@@ -695,7 +710,7 @@ static VOID ScanEfiFiles(REFIT_VOLUME *Volume) {
       }
 
       // scan the root directory for EFI executables
-      ScanLoaderDir(Volume, NULL);
+      ScanLoaderDir(Volume, NULL, MatchPatterns);
 
       // scan subdirectories of the EFI directory (as per the standard)
       DirIterOpen(Volume->RootDir, L"EFI", &EfiDirIter);
@@ -703,7 +718,7 @@ static VOID ScanEfiFiles(REFIT_VOLUME *Volume) {
          if (StriCmp(EfiDirEntry->FileName, L"tools") == 0 || EfiDirEntry->FileName[0] == '.')
             continue;   // skip this, doesn't contain boot loaders
          SPrint(FileName, 255, L"EFI\\%s", EfiDirEntry->FileName);
-         ScanLoaderDir(Volume, FileName);
+         ScanLoaderDir(Volume, FileName, MatchPatterns);
       } // while()
       Status = DirIterClose(&EfiDirIter);
       if (Status != EFI_NOT_FOUND)
@@ -719,7 +734,7 @@ static VOID ScanEfiFiles(REFIT_VOLUME *Volume) {
             Directory[--Length] = 0;
          } // while
          if (Length > 0)
-            ScanLoaderDir(Volume, Directory);
+            ScanLoaderDir(Volume, Directory, MatchPatterns);
          FreePool(Directory);
       } // while
    } // if
@@ -1148,11 +1163,6 @@ static EFI_STATUS ConnectAllDriversToAllControllers(VOID)
     UINTN                HandleIndex;
     BOOLEAN              Parent;
     BOOLEAN              Device;
-
-    // GNU EFI's EFI_BOOT_SERVICES data structure is truncated, but all the
-    // items are in memory, so point a more complete data structure to it
-    // so that we can use items not in GNU EFI's implementation....
-//    gBS = (MY_BOOT_SERVICES*) BS;
 
     Status = LibLocateHandle(AllHandles,
                              NULL,

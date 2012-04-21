@@ -1,6 +1,17 @@
 0.2.8 (?/??/2012):
 ------------------
 
+- Added new refind.conf option: scan_all_linux_kernels, which causes Linux
+  kernels that lack ".efi" extensions to be included in scans for EFI boot
+  loaders. This may help integration with Linux distributions that don't
+  give their kernels such names by default. Beware, though: It can detect
+  unwanted files, such as older non-stub-loader kernels or .icns files used
+  to give kernels with .efi extensions custom icons.
+
+- Improved EFI boot loader detection on boards with Gigabyte's Hybrid EFI,
+  and perhaps other EFIs with a buggy StriCmp() function. Files with both
+  ".efi" and ".EFI" extensions should now be detected as boot loaders.
+
 - Fixed a bug that caused rEFInd to fail to scan for drivers if the
   filesystem driver didn't set a volume name (that is, if the relevant
   field was set to NULL rather than even an empty string). In such

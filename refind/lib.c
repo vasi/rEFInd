@@ -946,6 +946,10 @@ VOID DirIterOpen(IN EFI_FILE *BaseDir, IN CHAR16 *RelativePath OPTIONAL, OUT REF
 BOOLEAN DirIterNext(IN OUT REFIT_DIR_ITER *DirIter, IN UINTN FilterMode, IN CHAR16 *FilePattern OPTIONAL,
                     OUT EFI_FILE_INFO **DirEntry)
 {
+    BOOLEAN KeepGoing = TRUE;
+    UINTN   i;
+    CHAR16  *OnePattern;
+
     if (DirIter->LastFileInfo != NULL) {
         FreePool(DirIter->LastFileInfo);
         DirIter->LastFileInfo = NULL;
@@ -954,7 +958,7 @@ BOOLEAN DirIterNext(IN OUT REFIT_DIR_ITER *DirIter, IN UINTN FilterMode, IN CHAR
     if (EFI_ERROR(DirIter->LastStatus))
         return FALSE;   // stop iteration
 
-    for (;;) {
+    do {
         DirIter->LastStatus = DirNextEntry(DirIter->DirHandle, &(DirIter->LastFileInfo), FilterMode);
         if (EFI_ERROR(DirIter->LastStatus))
             return FALSE;
@@ -962,13 +966,16 @@ BOOLEAN DirIterNext(IN OUT REFIT_DIR_ITER *DirIter, IN UINTN FilterMode, IN CHAR
             return FALSE;
         if (FilePattern != NULL) {
             if ((DirIter->LastFileInfo->Attribute & EFI_FILE_DIRECTORY))
-                break;
-            if (MetaiMatch(DirIter->LastFileInfo->FileName, FilePattern))
-                break;
+                KeepGoing = FALSE;
+            i = 0;
+            while (KeepGoing && (OnePattern = FindCommaDelimited(FilePattern, i++)) != NULL) {
+               if (MetaiMatch(DirIter->LastFileInfo->FileName, OnePattern))
+                   KeepGoing = FALSE;
+            } // while
             // else continue loop
         } else
             break;
-    }
+    } while (KeepGoing);
 
     *DirEntry = DirIter->LastFileInfo;
     return TRUE;
@@ -1185,7 +1192,8 @@ CHAR16 *FindNumbers(IN CHAR16 *InString) {
 // Find the #Index element (numbered from 0) in a comma-delimited string
 // of elements.
 // Returns the found element, or NULL if Index is out of range or InString
-// is NULL.
+// is NULL. Note that the calling function is responsible for freeing the
+// memory associated with the returned string pointer.
 CHAR16 *FindCommaDelimited(IN CHAR16 *InString, IN UINTN Index) {
    UINTN    StartPos = 0, CurPos = 0;
    BOOLEAN  Found = FALSE;
