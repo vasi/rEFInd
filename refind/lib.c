@@ -157,16 +157,23 @@ EFI_STATUS ReinitRefitLib(VOID)
 {
     ReinitVolumes();
 
-    // Below two lines were in rEFIt, but seem to cause problems on
-    // most systems. OTOH, my Mac Mini produces (apparently harmless)
-    // errors about "(re)opening our installation volume" (see the
-    // next function) when returning from programs when these two lines
-    // are removed. On the gripping hand, the Mac SOMETIMES crashes
-    // when launching a second program even with these lines removed.
-    // TODO: Figure out cause of above weirdness and fix it more
-    // reliably!
-    /* if (SelfVolume != NULL && SelfVolume->RootDir != NULL)
-       SelfRootDir = SelfVolume->RootDir; */
+    if ((ST->Hdr.Revision >> 16) == 1) {
+       // Below two lines were in rEFIt, but seem to cause system crashes or
+       // reboots when launching OSes after returning from programs on most
+       // systems. OTOH, my Mac Mini produces errors about "(re)opening our
+       // installation volume" (see the next function) when returning from
+       // programs when these two lines are removed, and it often crashes
+       // when returning from a program or when launching a second program
+       // with these lines removed. Therefore, the preceding if() statement
+       // executes these lines only on EFIs with a major version number of 1
+       // (which Macs have) and not with 2 (which UEFI PCs have). My selection
+       // of hardware on which to test is limited, though, so this may be the
+       // wrong test, or there may be a better way to fix this problem.
+       // TODO: Figure out cause of above weirdness and fix it more
+       // reliably!
+       if (SelfVolume != NULL && SelfVolume->RootDir != NULL)
+          SelfRootDir = SelfVolume->RootDir;
+    } // if
 
     return FinishInitRefitLib();
 }
@@ -197,7 +204,7 @@ static EFI_STATUS FinishInitRefitLib(VOID)
 VOID CreateList(OUT VOID ***ListPtr, OUT UINTN *ElementCount, IN UINTN InitialElementCount)
 {
     UINTN AllocateCount;
-    
+
     *ElementCount = InitialElementCount;
     if (*ElementCount > 0) {
         AllocateCount = (*ElementCount + 7) & ~7;   // next multiple of 8

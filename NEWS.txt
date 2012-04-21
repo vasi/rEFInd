@@ -1,6 +1,13 @@
 0.2.8 (?/??/2012):
 ------------------
 
+- Fixed (maybe) a bug that caused rEFInd to crash when returning from an
+  EFI shell or other programs on Macs, particularly when rEFInd used
+  graphical mode. I'm not 100% sure this bug is squashed because I still
+  don't understand the cause and I only have one Mac for testing. See
+  comments in the ReinitRefitLib() function in refit/lib.c for more
+  details.
+
 - Added new refind.conf option: scan_all_linux_kernels, which causes Linux
   kernels that lack ".efi" extensions to be included in scans for EFI boot
   loaders. This may help integration with Linux distributions that don't

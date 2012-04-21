@@ -96,7 +96,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.7.2");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.2.7.3");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -1134,7 +1134,7 @@ static UINTN ScanDriverDir(IN CHAR16 *Path)
 
     // look through contents of the directory
     DirIterOpen(SelfRootDir, Path, &DirIter);
-    while (DirIterNext(&DirIter, 2, L"*.efi", &DirEntry)) {
+    while (DirIterNext(&DirIter, 2, LOADER_MATCH_PATTERNS, &DirEntry)) {
         if (DirEntry->FileName[0] == '.')
             continue;   // skip this
 
