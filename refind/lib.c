@@ -77,28 +77,38 @@ static VOID UninitVolumes(VOID);
 // self recognition stuff
 //
 
-// Converts forward slashes to backslashes and removes duplicate slashes.
+// Converts forward slashes to backslashes, removes duplicate slashes, and
+// removes slashes from both the start and end of the pathname.
 // Necessary because some (buggy?) EFI implementations produce "\/" strings
-// in pathnames and because some user inputs can produce duplicate directory
-// separators
+// in pathnames, because some user inputs can produce duplicate directory
+// separators, and because we want consistent start and end slashes for
+// directory comparisons. A special case: If the PathName refers to root,
+// return "/", since some firmware implementations flake out if this
+// isn't present.
 VOID CleanUpPathNameSlashes(IN OUT CHAR16 *PathName) {
    CHAR16   *NewName;
-   UINTN    i, j = 0;
+   UINTN    i, FinalChar = 0;
    BOOLEAN  LastWasSlash = FALSE;
 
-   NewName = AllocateZeroPool(sizeof(CHAR16) * (StrLen(PathName) + 1));
+   NewName = AllocateZeroPool(sizeof(CHAR16) * (StrLen(PathName) + 2));
    if (NewName != NULL) {
       for (i = 0; i < StrLen(PathName); i++) {
          if ((PathName[i] == L'/') || (PathName[i] == L'\\')) {
-            if (!LastWasSlash)
-               NewName[j++] = L'\\';
+            if ((!LastWasSlash) && (FinalChar != 0))
+               NewName[FinalChar++] = L'\\';
             LastWasSlash = TRUE;
          } else {
-            NewName[j++] = PathName[i];
+            NewName[FinalChar++] = PathName[i];
             LastWasSlash = FALSE;
          } // if/else
       } // for
-      NewName[j] = 0;
+      NewName[FinalChar] = 0;
+      if ((FinalChar > 0) && (NewName[FinalChar - 1] == L'\\'))
+         NewName[--FinalChar] = 0;
+      if (FinalChar == 0) {
+         NewName[0] = L'\\';
+         NewName[1] = 0;
+      }
       // Copy the transformed name back....
       StrCpy(PathName, NewName);
       FreePool(NewName);
@@ -109,7 +119,6 @@ EFI_STATUS InitRefitLib(IN EFI_HANDLE ImageHandle)
 {
     EFI_STATUS  Status;
     CHAR16      *DevicePathAsString;
-    UINTN       i;
 
     SelfImageHandle = ImageHandle;
     Status = refit_call3_wrapper(BS->HandleProtocol, SelfImageHandle, &LoadedImageProtocol, (VOID **) &SelfLoadedImage);
@@ -119,12 +128,9 @@ EFI_STATUS InitRefitLib(IN EFI_HANDLE ImageHandle)
     // find the current directory
     DevicePathAsString = DevicePathToStr(SelfLoadedImage->FilePath);
     CleanUpPathNameSlashes(DevicePathAsString);
-    if (DevicePathAsString != NULL) {
-        for (i = StrLen(DevicePathAsString); (i > 0) && (DevicePathAsString[i] != '\\'); i--) ;
-        DevicePathAsString[i] = 0;
-    } else
-        DevicePathAsString[0] = 0;
-    SelfDirPath = StrDuplicate(DevicePathAsString);
+    if (SelfDirPath != NULL)
+       FreePool(SelfDirPath);
+    SelfDirPath = FindPath(DevicePathAsString);
     FreePool(DevicePathAsString);
 
     return FinishInitRefitLib();

@@ -55,7 +55,7 @@
 // 
 // variables
 
-#define MACOSX_LOADER_PATH      L"\\System\\Library\\CoreServices\\boot.efi"
+#define MACOSX_LOADER_PATH      L"System\\Library\\CoreServices\\boot.efi"
 #if defined (EFIX64)
 #define SHELL_NAMES             L"\\EFI\\tools\\shell.efi,\\shellx64.efi"
 #elif defined (EFI32)
@@ -615,7 +615,7 @@ LOADER_ENTRY * AddLoaderEntry(IN CHAR16 *LoaderPath, IN CHAR16 *LoaderTitle, IN 
    Entry = InitializeLoaderEntry(NULL);
    if (Entry != NULL) {
       Entry->Title = StrDuplicate(LoaderTitle);
-      Entry->me.Title = PoolPrint(L"Boot %s from %s", (LoaderTitle != NULL) ? LoaderTitle : LoaderPath + 1, Volume->VolName);
+      Entry->me.Title = PoolPrint(L"Boot %s from %s", (LoaderTitle != NULL) ? LoaderTitle : LoaderPath, Volume->VolName);
       Entry->me.Row = 0;
       Entry->me.BadgeImage = Volume->VolBadgeImage;
       Entry->LoaderPath = StrDuplicate(LoaderPath);
@@ -636,18 +636,11 @@ static VOID ScanLoaderDir(IN REFIT_VOLUME *Volume, IN CHAR16 *Path)
     EFI_STATUS              Status;
     REFIT_DIR_ITER          DirIter;
     EFI_FILE_INFO           *DirEntry;
-    CHAR16                  FileName[256], *SelfPath;
-    UINTN                   i = 0;
+    CHAR16                  *FileName;
 
-    // Skip past leading slashes, which are sometimes (but not always) included
-    // in SelfDirPath, to get a path that's known to never include this feature.
-    while ((SelfDirPath != NULL) && (SelfDirPath[i] == L'\\')) {
-       i++;
-    }
-    SelfPath = &SelfDirPath[i]; // NOTE: *DO NOT* call FreePool() on SelfPath!!!
-
-    if (!SelfPath || !Path || ((StriCmp(Path, SelfPath) == 0) && Volume != SelfVolume) ||
-        (StriCmp(Path, SelfPath) != 0)) {
+    FileName = AllocateZeroPool(256 * sizeof(CHAR16));
+    if ((!SelfDirPath || !Path || ((StriCmp(Path, SelfDirPath) == 0) && Volume != SelfVolume) ||
+        (StriCmp(Path, SelfDirPath) != 0)) && FileName) {
        // look through contents of the directory
        DirIterOpen(Volume->RootDir, Path, &DirIter);
        while (DirIterNext(&DirIter, 2, L"*.efi", &DirEntry)) {
@@ -690,13 +683,13 @@ static VOID ScanEfiFiles(REFIT_VOLUME *Volume) {
       }
 
       // check for XOM
-      StrCpy(FileName, L"\\System\\Library\\CoreServices\\xom.efi");
+      StrCpy(FileName, L"System\\Library\\CoreServices\\xom.efi");
       if (FileExists(Volume->RootDir, FileName)) {
          AddLoaderEntry(FileName, L"Windows XP (XoM)", Volume);
       }
 
       // check for Microsoft boot loader/menu
-      StrCpy(FileName, L"\\EFI\\Microsoft\\Boot\\Bootmgfw.efi");
+      StrCpy(FileName, L"EFI\\Microsoft\\Boot\\Bootmgfw.efi");
       if (FileExists(Volume->RootDir, FileName)) {
          AddLoaderEntry(FileName, L"Microsoft EFI boot", Volume);
       }
@@ -1224,7 +1217,6 @@ static VOID LoadDrivers(VOID)
     // load drivers from the "drivers" subdirectory of rEFInd's home directory
     Directory = StrDuplicate(SelfDirPath);
     MergeStrings(&Directory, L"drivers", L'\\');
-//    SPrint(DirName, 255, L"%s\\drivers", SelfDirPath);
     NumFound += ScanDriverDir(Directory);
 
     // Scan additional user-specified driver directories....
