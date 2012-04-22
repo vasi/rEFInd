@@ -175,15 +175,15 @@ static CHAR16 *ReadLine(REFIT_FILE *File)
                 *q++ = *p++;
         }
         *q = 0;
-        
+
     } else if (File->Encoding == ENCODING_UTF16_LE) {
-        
+
         CHAR16 *p, *LineStart, *LineEnd;
-        
+
         p = File->Current16Ptr;
         if (p >= File->End16Ptr)
             return NULL;
-        
+
         LineStart = p;
         for (; p < File->End16Ptr; p++)
             if (*p == 13 || *p == 10)
@@ -193,19 +193,19 @@ static CHAR16 *ReadLine(REFIT_FILE *File)
             if (*p != 13 && *p != 10)
                 break;
         File->Current16Ptr = p;
-        
+
         LineLength = (UINTN)(LineEnd - LineStart) + 1;
         Line = AllocatePool(LineLength * sizeof(CHAR16));
         if (Line == NULL)
             return NULL;
-        
+
         for (p = LineStart, q = Line; p < LineEnd; )
             *q++ = *p++;
         *q = 0;
-        
+
     } else
         return NULL;   // unsupported encoding
-    
+
     return Line;
 }
 
@@ -409,6 +409,10 @@ VOID ReadConfig(VOID)
 
         } else if (StriCmp(TokenList[0], L"textonly") == 0) {
             GlobalConfig.TextOnly = TRUE;
+
+        } else if ((StriCmp(TokenList[0], L"resolution") == 0) && (TokenCount == 3)) {
+           GlobalConfig.RequestedScreenWidth = Atoi(TokenList[1]);
+           GlobalConfig.RequestedScreenHeight = Atoi(TokenList[2]);
 
         } else if (StriCmp(TokenList[0], L"scan_all_linux_kernels") == 0) {
            GlobalConfig.ScanAllLinux = TRUE;

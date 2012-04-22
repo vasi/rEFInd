@@ -1,5 +1,26 @@
-0.2.8 (?/??/2012):
+0.3.0 (?/??/2012):
 ------------------
+
+- I'm officially upgrading this project's status from "alpha" to "beta" and
+  giving it a bump from 0.2.x to 0.3.0. This doesn't reflect any major
+  milestone with this version; rather, it reflects my sense that rEFInd has
+  been "out there" for a while, and although I've gotten bug reports,
+  they've been minor and/or have been fixed. The program still has known
+  bugs, but my impression is that it is, overall, usable by ordinary users.
+
+- Added "resolution" option to refind.conf, which enables setting the video
+  resolution. To use it, pass two numeric values, as in "resolution 1024
+  768" to use a 1024x768 video mode. Note that not all modes are supported.
+  If you specify a non-supported video mode on a UEFI system, a message
+  appears listing the supported video modes and you must then press a key
+  to continue, using the default video mode (usually 800x600).
+  Unfortunately, I don't know the calls to get a list of supported video
+  modes on older EFI 1.x systems (including Macs), so on Macs setting an
+  incorrect video mode silently fails (you keep using the default mode).
+  This makes changing your video mode a hit-or-miss proposition on Macs.
+  CAUTION: It's possible to set a legal video mode that your monitor can't
+  handle, in which case you'll get a blank display until you boot an OS
+  that resets the video mode.
 
 - Fixed (maybe) a bug that caused rEFInd to crash when returning from an
   EFI shell or other programs on Macs, particularly when rEFInd used

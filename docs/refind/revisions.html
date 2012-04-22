@@ -14,7 +14,7 @@
 <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-<p>Last Web page update: 4/19/2012</p>
+<p>Last Web page update: 4/22/2012</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -92,6 +92,8 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 <p>The following summarizes changes in rEFInd's public releases:</p>
 
 <ul>
+
+<li><b>0.3.0 (4/22/2012)</b>&mdash;This version marks the official transition from alpha to beta status for rEFInd. This isn't because of any important objective milestone being passed; it's just that rEFInd has been used by many people who have reported no show-stopping bugs, so I'm now confident that rEFInd is stable enough for general use. That's not to say it's perfect; it still has numerous <a href="todo.html">known bugs and limitations.</a> That's why it's still beta. To get down to specifics, this version adds two new configuration file tokens: <tt>resolution</tt>, which sets the screen resolution; and <tt>scan_all_linux_kernels</tt>, which adds Linux kernel files to the boot loader list even if they lack <tt>.efi</tt> filename extensions. See the <a href="configfile.html">Configuring the Boot Manager</a> page for details on these new options. I've also fixed some bugs: One that sometimes caused Macs to crash when returning from the EFI shell or other programs; another that caused rEFInd to fail to scan filesystems if the filesystem driver didn't return a volume name; and a third that caused rEFInd to fail to detect boot loaders depending on the case of the filename on some EFIs (this is really a workaround for an EFI implementation bug). The first of these is a <i>very</i> tentative fix and it could have negative effects on some systems (non-Mac EFI 1.x systems or Macs that weren't affected by the bug in other recent releases), so be sure to <a href="mailto:rodsmith@rodsbooks.com">contact me</a> if rEFInd crashes or otherwise misbehaves after you use an EFI shell.</li>
 
 <li><b>0.2.7 (4/19/2012)</b>&mdash;I've added two new tokens to the <tt>refind.conf</tt> file, with associated new functionality. The new <tt>scan_driver_dirs</tt> option tells rEFInd where to scan for EFI drivers, in addition to the default of the <tt>drivers</tt> subdirectory of the rEFInd installation directory. For more on EFI drivers, see <a href="drivers.html">Using EFI Drivers.</a> Note that previous versions of rEFInd couldn't load drivers at all, although they could make use of hardware and filesystems activated by drivers loaded before rEFInd launched. The second new token is <tt>also_scan_dirs</tt>, which adds arbitrary directories to the list that rEFInd scans for boot loaders. (Without this option, rEFInd scans each volume's boot directory and every subdirectory of the <tt>/EFI</tt> directory, with the exception of <tt>/EFI/tools</tt> and rEFInd's own directory.) This version also fixes a minor bug that caused rEFInd to sometimes include itself in the list of OS options. Finally, if you build rEFInd yourself, you should be aware that it now requires a newer version of the GNU-EFI library than it required in the past. See the <tt>BUILDING.txt</tt> file, included in the source code package, for details.</li>
 

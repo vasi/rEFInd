@@ -153,6 +153,8 @@ typedef struct {
 typedef struct {
    BOOLEAN     TextOnly;
    BOOLEAN     ScanAllLinux;
+   UINTN       RequestedScreenWidth;
+   UINTN       RequestedScreenHeight;
    UINTN       Timeout;
    UINTN       HideUIFlags;
    UINTN       MaxTags;     // max. number of OS entries to show simultaneously in graphics mode

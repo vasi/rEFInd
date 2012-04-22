@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/14/2012; last Web page update: 4/19/2012, referencing rEFInd 0.2.7</p>
+  <p>Originally written: 3/14/2012; last Web page update: 4/22/2012, referencing rEFInd 0.3.0</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -97,7 +97,9 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <ul>
 
-<li>Testing! rEFIt was complex enough that changes such as the ones I've made have the potential to disrupt the program's operation in unexpected ways. I can only test on a handful of systems with a limited number of configurations. Therefore, if you try rEFInd and run into bugs, please report them to me!</li>
+<li>Testing! rEFIt was complex enough that changes such as the ones I've made have the potential to disrupt the program's operation in unexpected ways. Since the initial 0.2.0 release, I've continued to add features to rEFInd, and every new feature is another way for bugs to get into the program. I can only test on a handful of systems with a limited number of configurations. Therefore, if you try rEFInd and run into bugs, please report them to me!</li>
+
+<li>Currently, rEFInd can detect whether it's compiled for <i>x</i>86 or <i>x</i>86-64 systems and displays this information in its "About" screen (AboutrEFInd() in main.c). I'd like to add detection for Itanium and ARM systems, but I have no way to test such changes.</li>
 
 <li>I have little talent with graphics manipulation programs, so rEFInd's boot logo, such as it is, is pretty weak. If you have artistic talent and would like to create a rEFInd logo, please feel free to send it to me. I won't make any final decision about changes until at least June 30 of 2012.</li>
 
@@ -111,7 +113,7 @@ them on the project's Sourceforge page). For more information on designing theme
 
 <li>The code could be more flexible in its handling of the sizes of various graphical elements, and particularly drawn text. Prior to version 0.2.2, submenu text was invisible on UEFI-based PCs with 800x600 and smaller displays because of an inability to properly crop the graphics fields that hold the text. With version 0.2.2, I've put a band-aid on this problem by reducing the field size so that it now works on 800x600 displays, but smaller displays still suffer from this problem. This is just an example of the inflexibility of certain layout issues within rEFInd.</li>
 
-<li>I'd like to add a configuration option to set the screen resolution. Many computers seem to default to 800x600, even when the hardware can handle much higher resolutions. A higher resolution would enable fitting more OS tags on the screen at once. I haven't yet looked into the system calls that would enable such changes.</li>
+<li>Text mode has a known display glitch: Not all loaders are shown until you use the cursor keys to move down the list, effectively "drawing" the "invisible" tags. This obviously needs to be fixed.</li>
 
 <li>Although the ICNS file format used by rEFInd supports multiple image sizes, if a size that rEFInd needs isn't present in the file, rEFInd can't use the icon. The ability to scale images to the desired size would be useful.</li>
 
@@ -123,17 +125,17 @@ them on the project's Sourceforge page). For more information on designing theme
 
 <li>There's currently no way to create a manual boot stanza for a BIOS-booted OS. This isn't a big priority for me personally, but I can see how it could be for some people.</li>
 
-<li>I'd like to find a way to get rEFInd to launch BIOS boot loaders on UEFI-based systems. This option currently works only on Macs&mdash;or at least, I've not gotten it to work on any of my UEFI-based PCs.</li>
+<li>I'd like to find a way to get rEFInd to launch BIOS boot loaders on UEFI-based systems. This option currently works only on Macs&mdash;or at least, I've not gotten it to work on any of my UEFI-based PCs. (I have an idea about this, but haven't yet investigated it in detail. If you'd like to help on this, <a href="mailto:rodsmith@rodsbooks.com">e-mail me</a> for my thoughts.)</li>
 
-<li>Returning from a program (such as an EFI shell or a boot loader that fails) produces an error message about a failure when "(re)opening our installation volume" on some computers. (Among mine, only a 32-bit Mac Mini produces this message.) In some cases, rEFInd then hangs. I don't fully understand its cause or why it doesn't appear on most systems. This needs investigating and fixing.</li>
-
-<li>The <a href="http://www.rodsbooks.com/gb-hybrid-efi/">Gigabyte Hybrid EFI</a> has a bug that causes the allegedly case-insensitive <tt>StriCmp()</tt> function to perform a case-sensitive comparison. This causes any number of bugs in file matching. For instance: Changing the case of icon filename extensions (or various other parts of icon filenames) causes icons to be replaced by ugly "generic" ones; rEFInd sometimes appears in its own menu (the firmware sometimes returns an all-caps version of the filename, but other times returns the filename with the correct case, causing a mismatch if the path includes lowercase elements); and boot loaders will not be detected if their filenames use uppercase <tt>.EFI</tt> extensions. Some of these problems can be overcome by converting both strings to be compared to one case before doing the comparison, but others aren't so easy, since I think <tt>StriCmp()</tt> is being called internally to the EFI. In any event, it'd be nice to fix some of these problems. OTOH, this is a workaround for a bug on just one EFI implementation, and a dismal one at that, so I'm inclined to just let it go.</li>
+<li>The <a href="http://www.rodsbooks.com/gb-hybrid-efi/">Gigabyte Hybrid EFI</a> has a bug that causes the allegedly case-insensitive <tt>StriCmp()</tt> function to perform a case-sensitive comparison. This causes any number of bugs in file matching. For instance: Changing the case of icon filename extensions (or various other parts of icon filenames) causes icons to be replaced by ugly "generic" ones; and rEFInd sometimes appears in its own menu (the firmware sometimes returns an all-caps version of the filename, but other times returns the filename with the correct case, causing a mismatch if the path includes lowercase elements). Some of these problems can be overcome by converting both strings to be compared to one case before doing the comparison, but others aren't so easy, since I think <tt>StriCmp()</tt> is being called internally to the EFI. In any event, it'd be nice to fix some of these problems. OTOH, this is a workaround for a bug on just one EFI implementation, and a dismal one at that, so I'm inclined to just let it go.</li>
 
 <li>I've received queries about rEFInd's ability to work with Apple's whole-disk encryption scheme that's new with OS X 10.7. Unfortunately, I lack the hardware to test this.</li>
 
 <li>The Page Up and Page Down keys work in a rather strange way&mdash;a result of an admittedly quick fix on my part to a problem with a data structure that makes implementation of scrolling harder than it ought to be.</li>
 
 <li>I'd like to find a way to enable users to enter customizations for boot options and then save them to the <tt>refind.conf</tt> file.</li>
+
+<li>Auto-detected boot loaders are currently displayed in an arbitrary order, aside from the crude internal/external/optical distinctions, which can be affected by the order of options in <tt>scanfor</tt>. I'd like to sort entries by file timestamp within each directory, with the newest entry first. This will be beneficial because using the directory name as the entry in <tt>default_selection</tt> will then return the most recent boot loader in that directory, which is most likely the desired result when you upgrade a Linux kernel with an EFI stub loader. (As it is, to guarantee use of the most recent kernel, you must update <tt>refind.conf</tt>.) There might also be other ways to sort entries to some beneficial end, but I haven't thought of any.</li>
 
 <li>It should be possible to override specific auto-detected boot loader settings&mdash;say, to disable one specific boot loader or change its icon.</li>
 

@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 4/19/2012; last Web page update: 4/19/2012, referencing rEFInd 0.2.7</p>
+  <p>Originally written: 4/19/2012; last Web page update: 4/22/2012, referencing rEFInd 0.3.0</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -149,7 +149,7 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <p>The Clover EFI Tools ext2fs driver performs much like the rEFIt ext2fs driver, but it doesn't deliver a filesystem label, which makes it less desirable. The NTFS driver from this package is nice and speedy, though, so if for some reason you need to place a boot loader on an NTFS volume, this driver might be worth tracking down.</p>
 
-<p>Although both ext2fs and ReiserFS are case-sensitive, these drivers treat them in a case-insensitive way. Symbolic links work, which opens up possibilities for configuration, such as using a single kernel binary for multiple Linux distributions, with a link in one subdirectory pointing to a file in another directory. (If you try this, though, be sure to use <i>relative</t> links, as in <tt>../otherdist/bzImage.efi</tt>, at least if the partition is not Linux's root filesystem.)</p>
+<p>Although both ext2fs and ReiserFS are case-sensitive, these drivers treat them in a case-insensitive way. Symbolic links work, which opens up possibilities for configuration, such as using a single kernel binary for multiple Linux distributions, with a link in one subdirectory pointing to a file in another directory. (If you try this, though, be sure to use <i>relative</i> links, as in <tt>../otherdist/bzImage.efi</tt>, at least if the partition is not Linux's root filesystem.)</p>
 
 </ul>
 

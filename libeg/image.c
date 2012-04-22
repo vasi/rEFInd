@@ -153,7 +153,7 @@ static EFI_STATUS egFindESP(OUT EFI_FILE_HANDLE *RootDir)
     EFI_STATUS          Status;
     UINTN               HandleCount = 0;
     EFI_HANDLE          *Handles;
-    
+
     Status = LibLocateHandle(ByProtocol, &ESPGuid, NULL, &HandleCount, &Handles);
     if (!EFI_ERROR(Status) && HandleCount > 0) {
         *RootDir = LibOpenRoot(Handles[0]);

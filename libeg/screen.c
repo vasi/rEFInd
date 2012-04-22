@@ -35,6 +35,7 @@
  */
 
 #include "libegint.h"
+#include "../refind/screen.h"
 #include "refit_call_wrapper.h"
 
 #include <efiUgaDraw.h>
@@ -62,7 +63,7 @@ static UINTN egScreenHeight = 600;
 
 VOID egInitScreen(VOID)
 {
-    EFI_STATUS Status;
+    EFI_STATUS Status = EFI_SUCCESS;
     UINT32 UGAWidth, UGAHeight, UGADepth, UGARefreshRate;
 
     // get protocols
@@ -95,6 +96,68 @@ VOID egInitScreen(VOID)
         }
     }
 }
+
+// Sets the screen resolution to the specified value, if possible.
+// If the specified value is not valid, displays a warning with the valid
+// modes on UEFI systems, or silently fails on EFI 1.x systems. Note that
+// this function attempts to set ANY screen resolution, even 0x0 or
+// ridiculously large values.
+// Returns TRUE if successful, FALSE if not.
+BOOLEAN egSetScreenSize(IN UINTN ScreenWidth, IN UINTN ScreenHeight) {
+   EFI_STATUS Status = EFI_SUCCESS;
+   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *Info;
+   UINT32 ModeNum = 0;
+   UINTN Size;
+   BOOLEAN ModeSet = FALSE;
+   UINT32 UGAWidth, UGAHeight, UGADepth, UGARefreshRate;
+
+   if (GraphicsOutput != NULL) { // GOP mode (UEFI)
+      // Do a loop through the modes to see if the specified one is available;
+      // and if so, switch to it....
+      while ((Status == EFI_SUCCESS) && (!ModeSet)) {
+         Status = refit_call4_wrapper(GraphicsOutput->QueryMode, GraphicsOutput, ModeNum, &Size, &Info);
+         if ((Status == EFI_SUCCESS) && (Size >= sizeof(*Info)) &&
+             (Info->HorizontalResolution == ScreenWidth) && (Info->VerticalResolution == ScreenHeight)) {
+            Status = refit_call2_wrapper(GraphicsOutput->SetMode, GraphicsOutput, ModeNum);
+            ModeSet = (Status == EFI_SUCCESS);
+         } // if
+         ModeNum++;
+      } // while()
+
+      if (ModeSet) {
+         egScreenWidth = ScreenWidth;
+         egScreenHeight = ScreenHeight;
+      } else {// If unsuccessful, display an error message for the user....
+         Print(L"Error setting mode %d x %d; using default mode!\nAvailable modes are:\n", ScreenWidth, ScreenHeight);
+         ModeNum = 0;
+         Status = EFI_SUCCESS;
+         while (Status == EFI_SUCCESS) {
+            Status = refit_call4_wrapper(GraphicsOutput->QueryMode, GraphicsOutput, ModeNum, &Size, &Info);
+            if ((Status == EFI_SUCCESS) && (Size >= sizeof(*Info))) {
+               Print(L"Mode %d: %d x %d\n", ModeNum, Info->HorizontalResolution, Info->VerticalResolution);
+            } // else
+            ModeNum++;
+         } // while()
+         PauseForKey();
+      } // if()
+   } else if (UgaDraw != NULL) { // UGA mode (EFI 1.x)
+      // Try to use current color depth & refresh rate for new mode. Maybe not the best choice
+      // in all cases, but I don't know how to probe for alternatives....
+      Status = refit_call5_wrapper(UgaDraw->GetMode, UgaDraw, &UGAWidth, &UGAHeight, &UGADepth, &UGARefreshRate);
+      Status = refit_call5_wrapper(UgaDraw->SetMode, UgaDraw, ScreenWidth, ScreenHeight, UGADepth, UGARefreshRate);
+      if (Status == EFI_SUCCESS) {
+         egScreenWidth = ScreenWidth;
+         egScreenHeight = ScreenHeight;
+         ModeSet = TRUE;
+      } else {
+         // TODO: Find a list of supported modes and display it.
+         // NOTE: Below doesn't actually appear unless we explicitly switch to text mode.
+         // This is just a placeholder until something better can be done....
+         Print(L"Error setting mode %d x %d; unsupported mode!\n");
+      } // if/else
+   } // if/else if
+   return (ModeSet);
+} // BOOLEAN egSetScreenSize()
 
 VOID egGetScreenSize(OUT UINTN *ScreenWidth, OUT UINTN *ScreenHeight)
 {
@@ -129,12 +192,12 @@ BOOLEAN egHasGraphicsMode(VOID)
 BOOLEAN egIsGraphicsModeEnabled(VOID)
 {
     EFI_CONSOLE_CONTROL_SCREEN_MODE CurrentMode;
-    
+
     if (ConsoleControl != NULL) {
         refit_call4_wrapper(ConsoleControl->GetMode, ConsoleControl, &CurrentMode, NULL, NULL);
         return (CurrentMode == EfiConsoleControlScreenGraphics) ? TRUE : FALSE;
     }
-    
+
     return FALSE;
 }
 
@@ -160,15 +223,15 @@ VOID egSetGraphicsModeEnabled(IN BOOLEAN Enable)
 VOID egClearScreen(IN EG_PIXEL *Color)
 {
     EFI_UGA_PIXEL FillColor;
-    
+
     if (!egHasGraphics)
         return;
-    
+
     FillColor.Red   = Color->r;
     FillColor.Green = Color->g;
     FillColor.Blue  = Color->b;
     FillColor.Reserved = 0;
-    
+
     if (GraphicsOutput != NULL) {
         // EFI_GRAPHICS_OUTPUT_BLT_PIXEL and EFI_UGA_PIXEL have the same
         // layout, and the header from TianoCore actually defines them
@@ -185,7 +248,7 @@ VOID egDrawImage(IN EG_IMAGE *Image, IN UINTN ScreenPosX, IN UINTN ScreenPosY)
 {
     if (!egHasGraphics)
         return;
-    
+
     if (Image->HasAlpha) {
         Image->HasAlpha = FALSE;
         egSetPlane(PLPTR(Image, a), 0, Image->Width * Image->Height);

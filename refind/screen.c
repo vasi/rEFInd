@@ -37,6 +37,7 @@
 #include "global.h"
 #include "screen.h"
 #include "config.h"
+#include "libegint.h"
 #include "refit_call_wrapper.h"
 
 #include "egemb_refind_banner.h"
@@ -73,10 +74,10 @@ static BOOLEAN haveError = FALSE;
 VOID InitScreen(VOID)
 {
     UINTN i;
-    
+
     // initialize libeg
     egInitScreen();
-    
+
     if (egHasGraphicsMode()) {
         egGetScreenSize(&UGAWidth, &UGAHeight);
         AllowGraphicsMode = TRUE;
@@ -85,23 +86,23 @@ VOID InitScreen(VOID)
         egSetGraphicsModeEnabled(FALSE);   // just to be sure we are in text mode
     }
     GraphicsScreenDirty = TRUE;
-    
+
     // disable cursor
     refit_call2_wrapper(ST->ConOut->EnableCursor, ST->ConOut, FALSE);
-    
+
     // get size of text console
     if (refit_call4_wrapper(ST->ConOut->QueryMode, ST->ConOut, ST->ConOut->Mode->Mode, &ConWidth, &ConHeight) != EFI_SUCCESS) {
         // use default values on error
         ConWidth = 80;
         ConHeight = 25;
     }
-    
+
     // make a buffer for a whole text line
     BlankLine = AllocatePool((ConWidth + 1) * sizeof(CHAR16));
     for (i = 0; i < ConWidth; i++)
         BlankLine[i] = ' ';
     BlankLine[i] = 0;
-    
+
     // show the banner (even when in graphics mode)
     DrawScreenHeader(L"Initializing...");
 }
@@ -112,10 +113,15 @@ VOID SetupScreen(VOID)
         // switch to text mode if requested
         AllowGraphicsMode = FALSE;
         SwitchToText(FALSE);
-        
+
     } else if (AllowGraphicsMode) {
         // clear screen and show banner
         // (now we know we'll stay in graphics mode)
+        if ((GlobalConfig.RequestedScreenWidth > 0) && (GlobalConfig.RequestedScreenHeight > 0) &&
+            egSetScreenSize(GlobalConfig.RequestedScreenWidth, GlobalConfig.RequestedScreenHeight)) {
+              UGAWidth = GlobalConfig.RequestedScreenWidth;
+              UGAHeight = GlobalConfig.RequestedScreenHeight;
+        } // if user requested a particular screen resolution
         SwitchToGraphics();
         BltClearScreen(TRUE);
     }
@@ -143,7 +149,7 @@ VOID BeginTextScreen(IN CHAR16 *Title)
 {
     DrawScreenHeader(Title);
     SwitchToText(FALSE);
-    
+
     // reset error flag
     haveError = FALSE;
 }
@@ -154,7 +160,7 @@ VOID FinishTextScreen(IN BOOLEAN WaitAlways)
         SwitchToText(FALSE);
         PauseForKey();
     }
-    
+
     // reset error flag
     haveError = FALSE;
 }
@@ -163,18 +169,18 @@ VOID BeginExternalScreen(IN BOOLEAN UseGraphicsMode, IN CHAR16 *Title)
 {
     if (!AllowGraphicsMode)
         UseGraphicsMode = FALSE;
-    
+
     if (UseGraphicsMode) {
         SwitchToGraphics();
         BltClearScreen(FALSE);
     }
-    
+
     // show the header
     DrawScreenHeader(Title);
-    
+
     if (!UseGraphicsMode)
         SwitchToText(TRUE);
-    
+
     // reset error flag
     haveError = FALSE;
 }
@@ -183,12 +189,12 @@ VOID FinishExternalScreen(VOID)
 {
     // make sure we clean up later
     GraphicsScreenDirty = TRUE;
-    
+
     if (haveError) {
         SwitchToText(FALSE);
         PauseForKey();
     }
-    
+
     // reset error flag
     haveError = FALSE;
 }
@@ -236,7 +242,7 @@ static BOOLEAN ReadAllKeyStrokes(VOID)
     BOOLEAN       GotKeyStrokes;
     EFI_STATUS    Status;
     EFI_INPUT_KEY key;
-    
+
     GotKeyStrokes = FALSE;
     for (;;) {
         Status = refit_call2_wrapper(ST->ConIn->ReadKeyStroke, ST->ConIn, &key);
@@ -259,10 +265,10 @@ VOID PauseForKey(VOID)
         refit_call1_wrapper(BS->Stall, 5000000);     // 5 seconds delay
         ReadAllKeyStrokes();    // empty the buffer again
     }
-    
+
     refit_call3_wrapper(BS->WaitForEvent, 1, &ST->ConIn->WaitForKey, &index);
     ReadAllKeyStrokes();        // empty the buffer to protect the menu
-    
+
     Print(L"\n");
 }
 
@@ -272,7 +278,7 @@ VOID DebugPause(VOID)
     // show console and wait for key
     SwitchToText(FALSE);
     PauseForKey();
-    
+
     // reset error flag
     haveError = FALSE;
 }
@@ -281,7 +287,7 @@ VOID DebugPause(VOID)
 VOID EndlessIdleLoop(VOID)
 {
     UINTN index;
-    
+
     for (;;) {
         ReadAllKeyStrokes();
         refit_call3_wrapper(BS->WaitForEvent, 1, &ST->ConIn->WaitForKey, &index);
@@ -295,34 +301,34 @@ VOID EndlessIdleLoop(VOID)
 BOOLEAN CheckFatalError(IN EFI_STATUS Status, IN CHAR16 *where)
 {
     CHAR16 ErrorName[64];
-    
+
     if (!EFI_ERROR(Status))
         return FALSE;
-    
+
     StatusToString(ErrorName, Status);
     refit_call2_wrapper(ST->ConOut->SetAttribute, ST->ConOut, ATTR_ERROR);
     Print(L"Fatal Error: %s %s\n", ErrorName, where);
     refit_call2_wrapper(ST->ConOut->SetAttribute, ST->ConOut, ATTR_BASIC);
     haveError = TRUE;
-    
+
     //BS->Exit(ImageHandle, ExitStatus, ExitDataSize, ExitData);
-    
+
     return TRUE;
 }
 
 BOOLEAN CheckError(IN EFI_STATUS Status, IN CHAR16 *where)
 {
     CHAR16 ErrorName[64];
-    
+
     if (!EFI_ERROR(Status))
         return FALSE;
-    
+
     StatusToString(ErrorName, Status);
     refit_call2_wrapper(ST->ConOut->SetAttribute, ST->ConOut, ATTR_ERROR);
     Print(L"Error: %s %s\n", ErrorName, where);
     refit_call2_wrapper(ST->ConOut->SetAttribute, ST->ConOut, ATTR_BASIC);
     haveError = TRUE;
-    
+
     return TRUE;
 }
 
@@ -351,18 +357,18 @@ VOID BltClearScreen(IN BOOLEAN ShowBanner)
             if (Banner != NULL)
                 MenuBackgroundPixel = Banner->PixelData[0];
         }
-        
+
         // clear and draw banner
         egClearScreen(&MenuBackgroundPixel);
         if (Banner != NULL)
             BltImage(Banner, (UGAWidth - Banner->Width) >> 1,
                      ((UGAHeight - LAYOUT_TOTAL_HEIGHT) >> 1) + LAYOUT_BANNER_HEIGHT - Banner->Height);
-        
+
     } else {
         // clear to standard background color
         egClearScreen(&StdBackgroundPixel);
     }
-    
+
     GraphicsScreenDirty = FALSE;
 }
 
