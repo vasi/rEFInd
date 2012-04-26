@@ -1024,20 +1024,20 @@ CHAR16 * Basename(IN CHAR16 *Path)
     return FileName;
 }
 
-VOID ReplaceExtension(IN OUT CHAR16 *Path, IN CHAR16 *Extension)
+// Replaces a filename extension of ".efi" with the specified string
+// (Extension). If the input Path doesn't end in ".efi", Extension
+// is added to the existing filename.
+VOID ReplaceEfiExtension(IN OUT CHAR16 *Path, IN CHAR16 *Extension)
 {
-    UINTN i;
+    UINTN PathLen;
 
-    for (i = StrLen(Path); i >= 0; i--) {
-        if (Path[i] == '.') {
-            Path[i] = 0;
-            break;
-        }
-        if (Path[i] == '\\' || Path[i] == '/')
-            break;
-    }
+    PathLen = StrLen(Path);
+    // Note: Do StriCmp() twice to work around Gigabyte Hybrid EFI case-sensitivity bug....
+    if ((PathLen >= 4) && ((StriCmp(&Path[PathLen - 4], L".efi") == 0) || (StriCmp(&Path[PathLen - 4], L".EFI") == 0))) {
+       Path[PathLen - 4] = 0;
+    } // if
     StrCat(Path, Extension);
-}
+} // VOID ReplaceEfiExtension()
 
 //
 // memory string search
@@ -1117,6 +1117,35 @@ VOID MergeStrings(IN OUT CHAR16 **First, IN CHAR16 *Second, CHAR16 AddChar) {
       Print(L"Error! Unable to allocate memory in MergeStrings()!\n");
    } // if/else
 } // static CHAR16* MergeStrings()
+
+// Takes an input pathname (*Path) and returns the part of the filename from
+// the final dot onwards, converted to lowercase. If the filename includes
+// no dots, or if the input is NULL, returns an empty (but allocated) string.
+// The calling function is responsible for freeing the memory associated with
+// the return value.
+CHAR16 *FindExtension(IN CHAR16 *Path) {
+   CHAR16     *Extension;
+   BOOLEAN    Found = FALSE, FoundSlash = FALSE;
+   UINTN       i;
+
+   Extension = AllocateZeroPool(sizeof(CHAR16));
+   if (Path) {
+      i = StrLen(Path);
+      while ((!Found) && (!FoundSlash) && (i >= 0)) {
+         if (Path[i] == L'.')
+            Found = TRUE;
+         else if ((Path[i] == L'/') || (Path[i] == L'\\'))
+            FoundSlash = TRUE;
+         if (!Found)
+            i--;
+      } // while
+      if (Found) {
+         MergeStrings(&Extension, &Path[i], 0);
+         StrLwr(Extension);
+      } // if (Found)
+   } // if
+   return (Extension);
+} // CHAR16 *FindExtension
 
 // Takes an input pathname (*Path) and locates the final directory component
 // of that name. For instance, if the input path is 'EFI\foo\bar.efi', this

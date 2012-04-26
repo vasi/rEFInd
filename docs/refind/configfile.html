@@ -199,8 +199,8 @@ timeout 20
 </tr>
 <tr>
    <td><tt>default_selection</tt></td>
-   <td>A substring of a boot loader's title</td>
-   <td>Sets the default boot OS based on the loader's title, which appears in the main menu when you select the loader; the text reads <tt>Boot <i>Title</i> from <i>Disk</i></tt>. You can enter any substring of <tt><i>Title</i></tt> as the <tt>default_selection</tt>, so long as it's two or more characters in length. Be sure you enter a unique substring, though; rEFInd stops searching when it finds the first match. One-character entries are matched against the first character of the title, except for digits, which refer to the numeric order of the boot loader entries. (Note: In version 0.2.0, only the first character of this entry was used, and was matched against the first character of the title.)</td>
+   <td>A substring of a boot loader's title; or a numeric position</td>
+   <td>Sets the default boot OS based on the loader's title, which appears in the main menu beneath the icons when you select the loader. You can enter any substring of the title as the <tt>default_selection</tt>, so long as it's two or more characters in length. It's best to use a unique substring, since rEFInd stops searching when it finds the first match. Because rEFInd sorts entries within a directory in descending order by file modification time, if you specify a directory (or volume name, for loaders in a partition's root directory) as the <tt>default_selection</tt>, the most recent loader in that directory will be the default. One-character entries are matched against the first character of the title, except for digits, which refer to the numeric order of the boot loader entries. (Note: In version 0.2.0, only the first character of this entry was used, and was matched against the first character of the title.)</td>
 </tr>
 </table>
 

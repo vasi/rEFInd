@@ -1,4 +1,28 @@
-0.3.0 (?/??/2012):
+0.3.1 (?/??/2012):
+------------------
+
+- Modified loader scanning code to sort boot loader entries within a
+  directory by modification time, so that the most recently-modified loader
+  is first among those in a given directory. Thus, if you specify a
+  directory name (or volume name, for loaders stored in the root directory
+  of a volume) as the default_selection, the most recent of those loaders
+  will be the default. This is intended to help with Linux kernel
+  maintenance when using the EFI stub loader; set up this way, the most
+  recent kernel copied to your kernel directory will be the default,
+  obviating the need to adjust the refind.conf file when adding a new
+  kernel. If you want to change the default among those in the default
+  directory, you can use "touch" to adjust the modification timestamp.
+
+- Tweaked code to find loader-specific .icns file so that it finds files
+  for Linux kernels without .efi extensions. In this case, files should be
+  named the same as the kernels they match, but with .icns extensions. For
+  instance, bzImage-3.3.2 should have an icon called bzImage-3.3.2.icns.
+  (The old code would have looked for an icon called bzImage-3.3.icns.)
+
+- Eliminated bogus OS loader tags for filenames that end in ".icns" when
+  the scan_all_linux_kernels option is set.
+
+0.3.0 (4/22/2012):
 ------------------
 
 - I'm officially upgrading this project's status from "alpha" to "beta" and

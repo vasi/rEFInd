@@ -88,6 +88,14 @@ static REFIT_MENU_SCREEN AboutMenu      = { L"About", NULL, 0, NULL, 0, NULL, 0,
 REFIT_CONFIG GlobalConfig = { FALSE, FALSE, 0, 0, 20, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL,
                               {TAG_SHELL, TAG_ABOUT, TAG_SHUTDOWN, TAG_REBOOT, 0, 0, 0, 0, 0 }};
 
+// Structure used to hold boot loader filenames and time stamps in
+// a linked list; used to sort entries within a directory.
+struct LOADER_LIST {
+   CHAR16              *FileName;
+   EFI_TIME            TimeStamp;
+   struct LOADER_LIST  *NextEntry;
+};
+
 //
 // misc functions
 //
@@ -96,7 +104,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.3.0");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.3.0.2");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -556,7 +564,7 @@ VOID SetLoaderDefaults(LOADER_ENTRY *Entry, CHAR16 *LoaderPath, IN REFIT_VOLUME 
 
    // locate a custom icon for the loader
    StrCpy(IconFileName, LoaderPath);
-   ReplaceExtension(IconFileName, L".icns");
+   ReplaceEfiExtension(IconFileName, L".icns");
    if (FileExists(Volume->RootDir, IconFileName)) {
       Entry->me.Image = LoadIcns(Volume->RootDir, IconFileName, 128);
    } else if ((StrLen(PathOnly) == 0) && (Volume->VolIconImage != NULL)) {
@@ -626,7 +634,8 @@ LOADER_ENTRY * AddLoaderEntry(IN CHAR16 *LoaderPath, IN CHAR16 *LoaderTitle, IN 
    CleanUpPathNameSlashes(LoaderPath);
    Entry = InitializeLoaderEntry(NULL);
    if (Entry != NULL) {
-      Entry->Title = StrDuplicate(LoaderTitle);
+      Entry->Title = StrDuplicate((LoaderTitle != NULL) ? LoaderTitle : LoaderPath);
+//      Entry->Title = StrDuplicate(LoaderTitle);
       Entry->me.Title = PoolPrint(L"Boot %s from %s", (LoaderTitle != NULL) ? LoaderTitle : LoaderPath, Volume->VolName);
       Entry->me.Row = 0;
       Entry->me.BadgeImage = Volume->VolBadgeImage;
@@ -641,24 +650,85 @@ LOADER_ENTRY * AddLoaderEntry(IN CHAR16 *LoaderPath, IN CHAR16 *LoaderTitle, IN 
    return(Entry);
 } // LOADER_ENTRY * AddLoaderEntry()
 
+// Returns -1 if (Time1 < Time2), +1 if (Time1 > Time2), or 0 if
+// (Time1 == Time2). Precision is only to the nearest second; since
+// this is used for sorting boot loader entries, differences smaller
+// than this are likely to be meaningless (and unlikely!).
+INTN TimeComp(EFI_TIME *Time1, EFI_TIME *Time2) {
+   INT64 Time1InSeconds, Time2InSeconds;
+
+   // Following values are overestimates; I'm assuming 31 days in every month.
+   // This is fine for the purpose of this function, which has a limited
+   // purpose.
+   Time1InSeconds = Time1->Second + (Time1->Minute * 60) + (Time1->Hour * 3600) + (Time1->Day * 86400) +
+                    (Time1->Month * 2678400) + ((Time1->Year - 1998) * 32140800);
+   Time2InSeconds = Time2->Second + (Time2->Minute * 60) + (Time2->Hour * 3600) + (Time2->Day * 86400) +
+                    (Time2->Month * 2678400) + ((Time2->Year - 1998) * 32140800);
+   if (Time1InSeconds < Time2InSeconds)
+      return (-1);
+   else if (Time1InSeconds > Time2InSeconds)
+      return (1);
+
+   return 0;
+} // INTN TimeComp()
+
+// Adds a loader list element, keeping it sorted by date. Returns the new
+// first element (the one with the most recent date).
+static struct LOADER_LIST * AddLoaderListEntry(struct LOADER_LIST *LoaderList, struct LOADER_LIST *NewEntry) {
+   struct LOADER_LIST *LatestEntry, *CurrentEntry, *PrevEntry = NULL;
+
+   LatestEntry = CurrentEntry = LoaderList;
+   if (LoaderList == NULL) {
+      LatestEntry = NewEntry;
+   } else {
+      while ((CurrentEntry != NULL) && (TimeComp(&(NewEntry->TimeStamp), &(CurrentEntry->TimeStamp)) < 0)) {
+         PrevEntry = CurrentEntry;
+         CurrentEntry = CurrentEntry->NextEntry;
+      } // while
+      NewEntry->NextEntry = CurrentEntry;
+      if (PrevEntry == NULL) {
+         LatestEntry = NewEntry;
+      } else {
+         PrevEntry->NextEntry = NewEntry;
+      } // if/else
+   } // if/else
+   return (LatestEntry);
+} // static VOID AddLoaderListEntry()
+
+// Delete the LOADER_LIST linked list
+static VOID CleanUpLoaderList(struct LOADER_LIST *LoaderList) {
+   struct LOADER_LIST *Temp;
+
+   while (LoaderList != NULL) {
+      Temp = LoaderList;
+      LoaderList = LoaderList->NextEntry;
+      FreePool(Temp->FileName);
+      FreePool(Temp);
+   } // while
+} // static VOID CleanUpLoaderList()
+
 // Scan an individual directory for EFI boot loader files and, if found,
-// add them to the list.
+// add them to the list. Sorts the entries within the loader directory
+// so that the most recent one appears first in the list.
 static VOID ScanLoaderDir(IN REFIT_VOLUME *Volume, IN CHAR16 *Path, IN CHAR16 *Pattern)
 {
     EFI_STATUS              Status;
     REFIT_DIR_ITER          DirIter;
     EFI_FILE_INFO           *DirEntry;
-    CHAR16                  FileName[256];
+    CHAR16                  FileName[256], *Extension;
+    struct LOADER_LIST      *LoaderList = NULL, *NewLoader;
 
     if (!SelfDirPath || !Path || ((StriCmp(Path, SelfDirPath) == 0) && Volume != SelfVolume) ||
         (StriCmp(Path, SelfDirPath) != 0)) {
        // look through contents of the directory
        DirIterOpen(Volume->RootDir, Path, &DirIter);
        while (DirIterNext(&DirIter, 2, Pattern, &DirEntry)) {
+          Extension = FindExtension(DirEntry->FileName);
           if (DirEntry->FileName[0] == '.' ||
               StriCmp(DirEntry->FileName, L"TextMode.efi") == 0 ||
               StriCmp(DirEntry->FileName, L"ebounce.efi") == 0 ||
               StriCmp(DirEntry->FileName, L"GraphicsConsole.efi") == 0 ||
+              StriCmp(Extension, L".icns") == 0 ||
               StriSubCmp(L"shell", DirEntry->FileName))
                 continue;   // skip this
 
@@ -666,8 +736,20 @@ static VOID ScanLoaderDir(IN REFIT_VOLUME *Volume, IN CHAR16 *Path, IN CHAR16 *P
                 SPrint(FileName, 255, L"\\%s\\%s", Path, DirEntry->FileName);
           else
                 SPrint(FileName, 255, L"\\%s", DirEntry->FileName);
-          AddLoaderEntry(FileName, NULL, Volume);
-       }
+          NewLoader = AllocateZeroPool(sizeof(struct LOADER_LIST));
+          if (NewLoader != NULL) {
+             NewLoader->FileName = StrDuplicate(FileName);
+             NewLoader->TimeStamp = DirEntry->ModificationTime;
+             LoaderList = AddLoaderListEntry(LoaderList, NewLoader);
+          } // if
+          FreePool(Extension);
+       } // while
+       NewLoader = LoaderList;
+       while (NewLoader != NULL) {
+          AddLoaderEntry(NewLoader->FileName, NULL, Volume);
+          NewLoader = NewLoader->NextEntry;
+       } // while
+       CleanUpLoaderList(LoaderList);
        Status = DirIterClose(&DirIter);
        if (Status != EFI_NOT_FOUND) {
           if (Path)
@@ -727,12 +809,8 @@ static VOID ScanEfiFiles(REFIT_VOLUME *Volume) {
       // Scan user-specified (or additional default) directories....
       i = 0;
       while ((Directory = FindCommaDelimited(GlobalConfig.AlsoScan, i++)) != NULL) {
+         CleanUpPathNameSlashes(Directory);
          Length = StrLen(Directory);
-         // Some EFI implementations won't read a directory if the path ends in
-         // a backslash, so eliminate this character, if it's present....
-         while ((Length > 0) && (Directory[Length - 1] == L'\\')) {
-            Directory[--Length] = 0;
-         } // while
          if (Length > 0)
             ScanLoaderDir(Volume, Directory, MatchPatterns);
          FreePool(Directory);
@@ -1132,6 +1210,7 @@ static UINTN ScanDriverDir(IN CHAR16 *Path)
     EFI_FILE_INFO           *DirEntry;
     CHAR16                  FileName[256];
 
+    CleanUpPathNameSlashes(Path);
     // look through contents of the directory
     DirIterOpen(SelfRootDir, Path, &DirIter);
     while (DirIterNext(&DirIter, 2, LOADER_MATCH_PATTERNS, &DirEntry)) {
@@ -1219,6 +1298,9 @@ Done:
     return Status;
 } /* EFI_STATUS ConnectAllDriversToAllControllers() */
 
+// Load all EFI drivers from rEFInd's "drivers" subdirectory and from the
+// directories specified by the user in the "scan_driver_dirs" configuration
+// file line.
 static VOID LoadDrivers(VOID)
 {
     CHAR16        *Directory;
@@ -1226,17 +1308,14 @@ static VOID LoadDrivers(VOID)
 
     // load drivers from the "drivers" subdirectory of rEFInd's home directory
     Directory = StrDuplicate(SelfDirPath);
+    CleanUpPathNameSlashes(Directory);
     MergeStrings(&Directory, L"drivers", L'\\');
     NumFound += ScanDriverDir(Directory);
 
     // Scan additional user-specified driver directories....
     while ((Directory = FindCommaDelimited(GlobalConfig.DriverDirs, i++)) != NULL) {
+       CleanUpPathNameSlashes(Directory);
        Length = StrLen(Directory);
-       // Some EFI implementations won't read a directory if the path ends in
-       // a backslash, so eliminate this character, if it's present....
-       while ((Length > 0) && (Directory[Length - 1] == L'\\')) {
-          Directory[--Length] = 0;
-       } // while
        if (Length > 0)
           NumFound += ScanDriverDir(Directory);
        FreePool(Directory);
@@ -1245,7 +1324,7 @@ static VOID LoadDrivers(VOID)
     // connect all devices
     if (NumFound > 0)
        ConnectAllDriversToAllControllers();
-}
+} /* static VOID LoadDrivers() */
 
 static VOID ScanForBootloaders(VOID) {
    UINTN i;

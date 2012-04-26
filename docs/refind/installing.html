@@ -14,7 +14,7 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/14/2012; last Web page update: 4/22/2012, referencing rEFInd 0.3.0</p>
+  <p>Originally written: 3/14/2012; last Web page update: 4/24/2012, referencing rEFInd 0.3.0</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -113,6 +113,8 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 /dev/sda1         191284 16604    174681   9% /boot/efi
 </pre>
 
+<p class="sidebar"><b>Warning:</b> If you're running Linux on a Mac, I recommend you install rEFInd under OS X. The Mac's boot process deviates a bit from EFI standards, so you'll probably have to use a tool called <tt>bless</tt> under MacOS to do the job. Alternatively, there's a new Linux program, <tt>hfs-bless</tt>, part of the <a href="http://www.codon.org.uk/~mjg59/mactel-boot/"><tt>mactel-boot</tt></a> package, that's supposed to work with <tt>efibootmgr</tt> to make a Mac HFS partition bootable. I've not yet tried it, though. There are also reports that the <tt>efibootmgr</tt> tool used under Linux can corrupt some Macs' firmware. Although I've seen some vague suggestions that this problem has been fixed under 3.<i>x</i> kernels, I haven't tested this claim.</p>
+
 <p>This example shows that <tt>/dev/sda1</tt> is mounted at <tt>/boot/efi</tt>, which is a typical configuration. (The ESP can be on another disk or partition, but <tt>/dev/sda1</tt> is the most common place for an ESP.) If your output shows <tt>/boot</tt> or <tt>/</tt> under the <tt>Mounted on</tt> column, then your ESP isn't mounted. If you get a <tt>df: `/boot/efi': No such file or directory</tt> error message, then the <tt>/boot/efi</tt> directory doesn't even exist. In such cases, you may need to jump through some extra hoops, as described on my <a href="http://www.rodsbooks.com/efi-bootloaders/installation.html">EFI Boot Loader Installation</a> page.</p>
 
 <p>Assuming the ESP is mounted at <tt>/boot/efi</tt>, you can install the rEFInd files as follows (you must be <tt>root</tt> to issue these commands, or precede each of them with <tt><b>sudo</b></tt>):</p>
@@ -126,8 +128,6 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 <li>Type <tt><b>rm refind_ia32.efi</b></tt> to remove the IA32 binary if you're using an <i>x</i>86-64 (64-bit) system; or type <tt><b>rm refind_x64.efi</b></tt> to remove the <i>x</i>86-64 binary if you're using an <i>x</i>86 (32-bit) system. You can optionally rename the binary you keep as <tt>refind.efi</tt>, but this isn't required.</li>
 
 <li>Rename the configuration file by typing <tt><b>mv refind.conf-sample refind.conf</b></tt>. Consult the <a href="configfile.html">Editing the rEFInd Configuration File</a> page for information on how to adjust your options.</li>
-
-<p class="sidebar"><b>Warning:</b> I've seen reports that Linux's <tt>efibootmgr</tt> utility can damage some Macs' firmware, necessitating re-flashing it. I've also seen some vague suggestions that this problem has been fixed with the 3.0 kernels, but I haven't been able to substantiate this suggestion. In either event, <tt>efibootmgr</tt> by itself can't completely change the EFI boot loader on Macs. Therefore, I recommend using <tt>bless</tt> from OS X to do this job on Apple hardware. Alternatively, there's a new Linux program, <tt>hfs-bless</tt>, part of the <a href="http://www.codon.org.uk/~mjg59/mactel-boot/"><tt>mactel-boot</tt></a> package, that's supposed to work with <tt>efibootmgr</tt> to make a Mac HFS partition bootable. I've not yet tried it, though.</p>
 
 <a name="efibootmgr">
 <li>On a UEFI-based system, type <tt><b>efibootmgr -c -l \\EFI\\refind\\refind_x64.efi -L rEFInd</b></tt> to add rEFInd to your EFI's list of available boot loaders, which it stores in NVRAM. (Adjust the path to the binary as required if you install somewhere else.) You may need to install this program on some systems; it's a standard part of most distributions' repositories.</li>
@@ -145,25 +145,67 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 <h2>Installing rEFInd Using Mac OS X</h2>
 </a>
 
-<p class="sidebar">One of the reasons I've abandoned rEFIt's GUI installation tools for Mac OS X is that there are several bug reports (such as <a href="https://sourceforge.net/tracker/index.php?func=detail&aid=3147364&group_id=161917&atid=821764">this one</a> and <a href="https://sourceforge.net/tracker/?func=detail&aid=3218104&group_id=161917&atid=821764">this one</a>) that the rEFIt installer may be causing filesystem corruption on disks over about 500 MiB. I don't have such a disk on my Mac, so I can't test solutions. Rather than risk other peoples' hard disks, I thought it best to revert to a manual installation proceudure that will, I hope, be less likely to cause problems. I've received reports that rEFInd doesn't have rEFIt's disk-corruption problems, so the manual installation procedure, although less convenient, seems to have paid dividends in the form of safety.</p>
+<p class="sidebar"><b>Warning:</b> One of the reasons I've abandoned rEFIt's GUI installation tools for Mac OS X is that there are several bug reports (such as <a href="https://sourceforge.net/tracker/index.php?func=detail&aid=3147364&group_id=161917&atid=821764">this one</a> and <a href="https://sourceforge.net/tracker/?func=detail&aid=3218104&group_id=161917&atid=821764">this one</a>) that the rEFIt installer may be causing filesystem corruption on disks over about 500 MiB. <a href="https://sourceforge.net/tracker/?func=detail&aid=3218104&group_id=161917&atid=821764">This</a> report on the problem, and particularly the post by mic-marchen, suggests that the problem is related to a bug in OS X's <tt>bless</tt> utility, and particularly its <tt>--info</tt> option, that causes it to corrupt data on disks with 4 KiB sectors. These <i>Advanced Format</i> disks are becoming increasingly common, particularly at larger disk sizes. Therefore, I <i>strongly</i> recommend that you <i>not</i> type <tt class="userinput">sudo bless --info</tt> to check the status of your installation if you have such a disk, or even if you suspect you might have such a disk. (I've seen Advanced Format disks as small as 320 GB.)</p>
 
 <p>The procedure for installing rEFInd on a Mac is similar to that for installing it under Linux, except that you can (and probably should) install it to OS X's system partition or some other HFS+ partition rather than to the ESP, and you must use the <tt>bless</tt> utility rather than <tt>efibootmgr</tt>. To be precise, you should follow these steps:</p>
 
 <ol>
 
-<li>Open a Terminal window in which you'll type the following commands.</li>
+<li>Open a Terminal window in which you'll type the following
+    commands.</li>
 
-<li>If you want to install rEFInd on your ESP, you must first mount it. You can do this by typing <b><tt>mkdir /Volumes/esp</tt></b> followed by <b><tt>sudo mount_msdos /dev/disk0s1 /Volumes/esp</tt></b>. Note that this step is optional, and in fact I've had problems blessing a boot loader on the ESP, so I don't recommend doing this. Also, you may need to change <tt>/dev/disk0s1</tt> to something else if your ESP is at an unusual location. Use a tool such as my <a href="http://www.rodsbooks.com/gdisk/">GPT fdisk (<tt>gdisk</tt>)</a> to examine your partition table to find your ESP if necessary.</li>
+<li>If you want to install rEFInd on your ESP, you must first mount it. You
+    can do this by typing <b><tt>mkdir /Volumes/esp</tt></b> followed by
+    <b><tt>sudo mount -t msdos /dev/disk0s1 /Volumes/esp</tt></b>. Note
+    that this step is usually optional, and it makes the procedure a bit
+    more complex, so you might want to forego it. On the other hand,
+    installing to the ESP is required if you're using the whole-disk
+    encryption feature of OS X 10.7. Note that you may need to change
+    <tt>/dev/disk0s1</tt> to something else if your ESP is at an unusual
+    location. Use a tool such as my <a
+    href="http://www.rodsbooks.com/gdisk/">GPT fdisk (<tt>gdisk</tt>)</a>
+    to examine your partition table to find your ESP if necessary.</li>
 
-<li>Type <b><tt>sudo mkdir -p /efi/refind</tt></b> to create a suitable directory for rEFInd. If you want to place rEFInd on the ESP or some other partition, you should adjust the pathname appropriately, as in <tt>/Volumes/esp/efi/refind</tt>. Alternatively, you can use the Finder to create the directory.</li>
+<li>Type <b><tt>sudo mkdir -p /efi/refind</tt></b> to create a suitable
+    directory for rEFInd. If you want to place rEFInd on the ESP or some
+    other partition, you should adjust the pathname appropriately, as in
+    <tt>/Volumes/esp/efi/refind</tt>. Alternatively, you can use the Finder
+    to create the directory.</li>
 
-<li>Copy the files in the <tt>refind</tt> subdirectory of the rEFInd binary package to the like-named directory you've just created. You can do this in the Finder or by typing <b><tt>sudo cp -r refind/* /efi/refind/</tt></b> in your Terminal window after changing into the rEFInd package's main directory.</li>
+<li>Copy the files in the <tt>refind</tt> subdirectory of the rEFInd binary
+    package to the like-named directory you've just created. You can do
+    this in the Finder or by typing <b><tt>sudo cp -r refind/*
+    /efi/refind/</tt></b> in your Terminal window after changing into the
+    rEFInd package's main directory.</li>
 
-<li>Remove the file for the version of rEFInd you're not using, as in <b><tt>sudo rm /efi/refind/refind_ia32.efi</tt></b> on a Mac with a 64-bit EFI or <b><tt>sudo rm /efi/refind/refind_x64.efi</tt></b> on a Mac with a 32-bit EFI.</li>
+<li>Remove the file for the version of rEFInd you're not using, as in
+    <b><tt>sudo rm /efi/refind/refind_ia32.efi</tt></b> on a Mac with a
+    64-bit EFI or <b><tt>sudo rm /efi/refind/refind_x64.efi</tt></b> on a
+    Mac with a 32-bit EFI.</li>
 
-<li>If this is your first installation, type <b><tt>sudo mv /efi/refind/refind.conf-sample /efi/refind/refind.conf</tt></b> (adjusting the path as necessary) to rename the sample configuration file so that it will serve as a real configuration file. (Again, you can do this with the Finder, if you prefer.)</li>
+<li>If this is your first installation, type <b><tt>sudo mv
+    /efi/refind/refind.conf-sample /efi/refind/refind.conf</tt></b>
+    (adjusting the path as necessary) to rename the sample configuration
+    file so that it will serve as a real configuration file. (Again, you
+    can do this with the Finder, if you prefer.)</li>
 
-<li>Type <b><tt>sudo bless --setBoot --folder /efi/refind --file /efi/refind/refind_x64.efi</tt></b> to tell the computer to use rEFInd as the primary boot program. (Adjust the path and filename as necessary if you're placing rEFInd somewhere else or using the 32-bit version.) In theory, you can bless a boot file on an ESP by adding <b><tt>--mount <i>/Volumes/mounpoint</i></tt></b> to the command, where <tt><i>/Volumes/mounpoint</i></tt> is the location where you've mounted the partition. In practice, though, I've never gotten this to work. (If you know the trick to blessing a boot program on an ESP, please <a href="mailto:rodsmith@rodsbooks.com">drop me a line</a>.)</li>
+<li>"Bless" rEFInd by typing one of the following two commands:
+    <ul>
+    <li>If you're installing rEFInd to an ordinary HFS+ volume, type <tt
+	class="userinput">sudo bless --setBoot --folder /efi/refind --file
+	/efi/refind/refind_x64.efi</tt>. (Adjust the path and filename as
+	necessary if you're placing rEFInd somewhere else or using the
+	32-bit version.)</li>
+    <li>If you're installing rEFInd on the ESP, type <tt
+	class="userinput">sudo bless --mount /Volumes/esp --setBoot --file
+	/Volumes/esp/efi/refind/refind_x64.efi</tt>, adjusting the mount
+	point and exact path to the file as appropriate for your
+	installation.</li>
+    </ul>
+    As per the Warning earlier, <i>do not</i> use <tt>bless</tt>'s
+    <tt>--info</tt> option to try to confirm the change to the boot status
+    unless you're certain you do <i>not</i> have an Advanced Format hard
+    disk.</li>
 
 </ol>
 
@@ -263,6 +305,13 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
     your hybrid MBR should some other tool convert the MBR to a standard
     protective MBR. You can obtain the file from the <a
     href="http://refit.sourceforge.net">original rEFIt package.</a></li>
+
+<li><b>Drivers</b>&mdash;You can install drivers to extend the capabilities
+    of the EFI. Most notably, filesystem drivers for ext2fs and ReiserFS
+    are available. These can enable you to boot a Linux kernel with EFI
+    stub support from an ext2fs, ext3fs, or ReiserFS partition. See the <a
+    href="drivers.html">Using EFI Drivers</a> page for more on this
+    topic.</li>
 
 </ul>
 

@@ -97,55 +97,132 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <ul>
 
-<li>Testing! rEFIt was complex enough that changes such as the ones I've made have the potential to disrupt the program's operation in unexpected ways. Since the initial 0.2.0 release, I've continued to add features to rEFInd, and every new feature is another way for bugs to get into the program. I can only test on a handful of systems with a limited number of configurations. Therefore, if you try rEFInd and run into bugs, please report them to me!</li>
+<li>Testing! rEFIt was complex enough that changes such as the ones I've
+    made have the potential to disrupt the program's operation in
+    unexpected ways. Since the initial 0.2.0 release, I've continued to add
+    features to rEFInd, and every new feature is another way for bugs to
+    get into the program. I can only test on a handful of systems with a
+    limited number of configurations. Therefore, if you try rEFInd and run
+    into bugs, please report them to me!</li>
 
-<li>Currently, rEFInd can detect whether it's compiled for <i>x</i>86 or <i>x</i>86-64 systems and displays this information in its "About" screen (AboutrEFInd() in main.c). I'd like to add detection for Itanium and ARM systems, but I have no way to test such changes.</li>
+<li>Currently, rEFInd can detect whether it's compiled for <i>x</i>86 or
+    <i>x</i>86-64 systems and displays this information in its "About"
+    screen (AboutrEFInd() in main.c). I'd like to add detection for Itanium
+    and ARM systems, but I have no way to test such changes.</li>
 
-<li>I have little talent with graphics manipulation programs, so rEFInd's boot logo, such as it is, is pretty weak. If you have artistic talent and would like to create a rEFInd logo, please feel free to send it to me. I won't make any final decision about changes until at least June 30 of 2012.</li>
+<li>I have little talent with graphics manipulation programs, so rEFInd's
+    boot logo, such as it is, is pretty weak. If you have artistic talent
+    and would like to create a rEFInd logo, please feel free to send it to
+    me. I won't make any final decision about changes until at least June
+    30 of 2012.</li>
 
 <li>rEFIt's original design, and hence rEFInd's design, enables easy
-theming by replacing icon files. If you'd like to design a new theme for
-rEFInd, feel free to submit it. I might or might not replace the icons it
-uses now (most of which come from the Oxygen Icons package), but I may
-provide a way to make selecting a theme from one of several installed
-themes easy, and provide links to themes on this Web site (or even host
-them on the project's Sourceforge page). For more information on designing themes for rEFInd, see the <a href="themes.html">Theming rEFInd</a> page.</li>
+    theming by replacing icon files. If you'd like to design a new theme
+    for rEFInd, feel free to submit it. I might or might not replace the
+    icons it uses now (most of which come from the Oxygen Icons package),
+    but I may provide a way to make selecting a theme from one of several
+    installed themes easy, and provide links to themes on this Web site (or
+    even host them on the project's Sourceforge page). For more information
+    on designing themes for rEFInd, see the <a href="themes.html">Theming
+    rEFInd</a> page.</li>
 
-<li>The code could be more flexible in its handling of the sizes of various graphical elements, and particularly drawn text. Prior to version 0.2.2, submenu text was invisible on UEFI-based PCs with 800x600 and smaller displays because of an inability to properly crop the graphics fields that hold the text. With version 0.2.2, I've put a band-aid on this problem by reducing the field size so that it now works on 800x600 displays, but smaller displays still suffer from this problem. This is just an example of the inflexibility of certain layout issues within rEFInd.</li>
+<li>The code could be more flexible in its handling of the sizes of various
+    graphical elements, and particularly drawn text. Prior to version
+    0.2.2, submenu text was invisible on UEFI-based PCs with 800x600 and
+    smaller displays because of an inability to properly crop the graphics
+    fields that hold the text. With version 0.2.2, I've put a band-aid on
+    this problem by reducing the field size so that it now works on 800x600
+    displays, but smaller displays still suffer from this problem. This is
+    just an example of the inflexibility of certain layout issues within
+    rEFInd.</li>
 
-<li>Text mode has a known display glitch: Not all loaders are shown until you use the cursor keys to move down the list, effectively "drawing" the "invisible" tags. This obviously needs to be fixed.</li>
+<li>Text mode has a known display glitch: Not all loaders are shown until
+    you use the cursor keys to move down the list, effectively "drawing"
+    the "invisible" tags. This obviously needs to be fixed.</li>
 
-<li>Although the ICNS file format used by rEFInd supports multiple image sizes, if a size that rEFInd needs isn't present in the file, rEFInd can't use the icon. The ability to scale images to the desired size would be useful.</li>
+<li>Although the ICNS file format used by rEFInd supports multiple image
+    sizes, if a size that rEFInd needs isn't present in the file, rEFInd
+    can't use the icon. The ability to scale images to the desired size
+    would be useful.</li>
 
-<li>EFI supports network boots. rEFInd doesn't, but it would be nice if it would.</li>
+<li>EFI supports network boots. rEFInd doesn't, but it would be nice if it
+    would.</li>
 
-<li>I would like to be able to specify the volume on which a boot loader resides using a partition GUID value, but extracting a GUID from the partition data is harder than extracting the volume's label or counting up the filesystem numbers.</li>
+<li>I would like to be able to specify the volume on which a boot loader
+    resides using a partition GUID value, but extracting a GUID from the
+    partition data is harder than extracting the volume's label or counting
+    up the filesystem numbers.</li>
 
-<li>It would be useful to be able to specify paths to boot loaders and/or initial RAM disks relative to the rEFInd directory (or the boot loader's directory, in the case of initrds).</li>
+<li>It would be useful to be able to specify paths to boot loaders and/or
+    initial RAM disks relative to the rEFInd directory (or the boot
+    loader's directory, in the case of initrds).</li>
 
-<li>There's currently no way to create a manual boot stanza for a BIOS-booted OS. This isn't a big priority for me personally, but I can see how it could be for some people.</li>
+<li>There's currently no way to create a manual boot stanza for a
+    BIOS-booted OS. This isn't a big priority for me personally, but I can
+    see how it could be for some people.</li>
 
-<li>I'd like to find a way to get rEFInd to launch BIOS boot loaders on UEFI-based systems. This option currently works only on Macs&mdash;or at least, I've not gotten it to work on any of my UEFI-based PCs. (I have an idea about this, but haven't yet investigated it in detail. If you'd like to help on this, <a href="mailto:rodsmith@rodsbooks.com">e-mail me</a> for my thoughts.)</li>
+<li>I'd like to find a way to get rEFInd to launch BIOS boot loaders on
+    UEFI-based systems. This option currently works only on Macs&mdash;or
+    at least, I've not gotten it to work on any of my UEFI-based PCs. (I
+    have an idea about this, but haven't yet investigated it in detail. If
+    you'd like to help on this, <a
+    href="mailto:rodsmith@rodsbooks.com">e-mail me</a> for my
+    thoughts.)</li>
 
-<li>The <a href="http://www.rodsbooks.com/gb-hybrid-efi/">Gigabyte Hybrid EFI</a> has a bug that causes the allegedly case-insensitive <tt>StriCmp()</tt> function to perform a case-sensitive comparison. This causes any number of bugs in file matching. For instance: Changing the case of icon filename extensions (or various other parts of icon filenames) causes icons to be replaced by ugly "generic" ones; and rEFInd sometimes appears in its own menu (the firmware sometimes returns an all-caps version of the filename, but other times returns the filename with the correct case, causing a mismatch if the path includes lowercase elements). Some of these problems can be overcome by converting both strings to be compared to one case before doing the comparison, but others aren't so easy, since I think <tt>StriCmp()</tt> is being called internally to the EFI. In any event, it'd be nice to fix some of these problems. OTOH, this is a workaround for a bug on just one EFI implementation, and a dismal one at that, so I'm inclined to just let it go.</li>
+<li>The <a href="http://www.rodsbooks.com/gb-hybrid-efi/">Gigabyte Hybrid
+    EFI</a> has a bug that causes the allegedly case-insensitive
+    <tt>StriCmp()</tt> function to perform a case-sensitive comparison.
+    This causes any number of bugs in file matching. For instance: Changing
+    the case of icon filename extensions (or various other parts of icon
+    filenames) causes icons to be replaced by ugly "generic" ones; and
+    rEFInd sometimes appears in its own menu (the firmware sometimes
+    returns an all-caps version of the filename, but other times returns
+    the filename with the correct case, causing a mismatch if the path
+    includes lowercase elements). Some of these problems can be overcome by
+    converting both strings to be compared to one case before doing the
+    comparison, but others aren't so easy, since I think <tt>StriCmp()</tt>
+    is being called internally to the EFI. In any event, it'd be nice to
+    fix some of these problems. OTOH, this is a workaround for a bug on
+    just one EFI implementation, and a dismal one at that, so I'm inclined
+    to just let it go.</li>
 
-<li>I've received queries about rEFInd's ability to work with Apple's whole-disk encryption scheme that's new with OS X 10.7. Unfortunately, I lack the hardware to test this.</li>
+<li>I've received queries about rEFInd's ability to work with Apple's
+    whole-disk encryption scheme that's new with OS X 10.7. Unfortunately,
+    I lack the hardware to test this.</li>
 
-<li>The Page Up and Page Down keys work in a rather strange way&mdash;a result of an admittedly quick fix on my part to a problem with a data structure that makes implementation of scrolling harder than it ought to be.</li>
+<li>The Page Up and Page Down keys work in a rather strange way&mdash;a
+    result of an admittedly quick fix on my part to a problem with a data
+    structure that makes implementation of scrolling harder than it ought
+    to be.</li>
 
-<li>I'd like to find a way to enable users to enter customizations for boot options and then save them to the <tt>refind.conf</tt> file.</li>
+<li>The Shutdown option works correctly on Macs, but not on UEFI-based PCs.
+    On such systems, Shutdown reboots the computer. This should be
+    fixed.</li>
 
-<li>Auto-detected boot loaders are currently displayed in an arbitrary order, aside from the crude internal/external/optical distinctions, which can be affected by the order of options in <tt>scanfor</tt>. I'd like to sort entries by file timestamp within each directory, with the newest entry first. This will be beneficial because using the directory name as the entry in <tt>default_selection</tt> will then return the most recent boot loader in that directory, which is most likely the desired result when you upgrade a Linux kernel with an EFI stub loader. (As it is, to guarantee use of the most recent kernel, you must update <tt>refind.conf</tt>.) There might also be other ways to sort entries to some beneficial end, but I haven't thought of any.</li>
+<li>I'd like to find a way to enable users to enter customizations for boot
+    options and then save them to the <tt>refind.conf</tt> file.</li>
 
-<li>It should be possible to override specific auto-detected boot loader settings&mdash;say, to disable one specific boot loader or change its icon.</li>
+<li>It should be possible to override specific auto-detected boot loader
+    settings&mdash;say, to disable one specific boot loader or change its
+    icon.</li>
 
-<li>A way to read boot options set via <tt>efibootmgr</tt>, <tt>bless</tt>, or similar options from NVRAM to add to the boot set would be useful.</li>
+<li>A way to read boot options set via <tt>efibootmgr</tt>, <tt>bless</tt>,
+    or similar options from NVRAM to add to the boot set would be
+    useful.</li>
 
-<li>A way to examine and change the NVRAM settings could be useful. This would enable a CD-based boot of rEFInd to fix a broken disk boot. Perhaps this could be done via a separate tool that could be launched much like the shell or <tt>gptsync</tt>.</li>
+<li>A way to examine and change the NVRAM settings could be useful. This
+    would enable a CD-based boot of rEFInd to fix a broken disk boot.
+    Perhaps this could be done via a separate tool that could be launched
+    much like the shell or <tt>gptsync</tt>.</li>
 
-<li>I'd like to find a way to have rEFInd re-scan removable media when they're inserted.</li>
+<li>I'd like to find a way to have rEFInd re-scan removable media when
+    they're inserted.</li>
 
-<li>The code is in need of review to search for memory leaks and similar problems.</p>
+<li>I'd like to give the user the ability to set custom options on a
+    per-boot basis, similar to what's possible in GRUB.</li>
+
+<li>The code is in need of review to search for memory leaks and similar
+    problems.</p>
 
 </ul>
 

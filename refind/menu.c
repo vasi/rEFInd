@@ -251,8 +251,7 @@ static INTN FindMenuShortcutEntry(IN REFIT_MENU_SCREEN *Screen, IN CHAR16 *Short
          Shortcut[0] -= ('a' - 'A');
       if (Shortcut[0]) {
          for (i = 0; i < Screen->EntryCount; i++) {
-               if (Screen->Entries[i]->ShortcutDigit == Shortcut[0] ||
-                  Screen->Entries[i]->ShortcutLetter == Shortcut[0]) {
+               if (Screen->Entries[i]->ShortcutDigit == Shortcut[0] || Screen->Entries[i]->ShortcutLetter == Shortcut[0]) {
                   return i;
                } // if
          } // for
@@ -807,10 +806,10 @@ VOID MainMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, IN UINT
 UINTN RunMenu(IN REFIT_MENU_SCREEN *Screen, OUT REFIT_MENU_ENTRY **ChosenEntry)
 {
     MENU_STYLE_FUNC Style = TextMenuStyle;
-    
+
     if (AllowGraphicsMode)
         Style = GraphicsMenuStyle;
-    
+
     return RunGenericMenu(Screen, Style, -1, ChosenEntry);
 }
 
@@ -823,8 +822,7 @@ UINTN RunMainMenu(IN REFIT_MENU_SCREEN *Screen, IN CHAR16* DefaultSelection, OUT
     UINTN DefaultEntryIndex = -1;
 
     if (DefaultSelection != NULL) {
-        // Find a menu entry whose shortcut is the first character of DefaultSelection, or
-        // whose 
+        // Find a menu entry that includes *DefaultSelection as a substring
         DefaultEntryIndex = FindMenuShortcutEntry(Screen, DefaultSelection);
         // If that didn't work, should we scan more characters?  For now, no.
     }
