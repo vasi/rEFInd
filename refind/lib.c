@@ -232,7 +232,7 @@ VOID AddListElement(IN OUT VOID ***ListPtr, IN OUT UINTN *ElementCount, IN VOID 
 VOID FreeList(IN OUT VOID ***ListPtr, IN OUT UINTN *ElementCount)
 {
     UINTN i;
-    
+
     if (*ElementCount > 0) {
         for (i = 0; i < *ElementCount; i++) {
             // TODO: call a user-provided routine for each element here
@@ -265,9 +265,9 @@ VOID ExtractLegacyLoaderPaths(EFI_DEVICE_PATH **PathList, UINTN MaxPaths, EFI_DE
     EFI_LOADED_IMAGE    *LoadedImage;
     EFI_DEVICE_PATH     *DevicePath;
     BOOLEAN             Seen;
-    
+
     MaxPaths--;  // leave space for the terminating NULL pointer
-    
+
     // get all LoadedImage handles
     Status = LibLocateHandle(ByProtocol, &LoadedImageProtocol, NULL,
                              &HandleCount, &Handles);
@@ -281,19 +281,19 @@ VOID ExtractLegacyLoaderPaths(EFI_DEVICE_PATH **PathList, UINTN MaxPaths, EFI_DE
     }
     for (HandleIndex = 0; HandleIndex < HandleCount && PathCount < MaxPaths; HandleIndex++) {
         Handle = Handles[HandleIndex];
-        
+
         Status = refit_call3_wrapper(BS->HandleProtocol, Handle, &LoadedImageProtocol, (VOID **) &LoadedImage);
         if (EFI_ERROR(Status))
             continue;  // This can only happen if the firmware scewed up, ignore it.
-        
+
         Status = refit_call3_wrapper(BS->HandleProtocol, LoadedImage->DeviceHandle, &DevicePathProtocol, (VOID **) &DevicePath);
         if (EFI_ERROR(Status))
             continue;  // This happens, ignore it.
-        
+
         // Only grab memory range nodes
         if (DevicePathType(DevicePath) != HARDWARE_DEVICE_PATH || DevicePathSubType(DevicePath) != HW_MEMMAP_DP)
             continue;
-        
+
         // Check if we have this device path in the list already
         // WARNING: This assumes the first node in the device path is unique!
         Seen = FALSE;
@@ -346,12 +346,12 @@ static VOID ScanVolumeBootcode(IN OUT REFIT_VOLUME *Volume, OUT BOOLEAN *Bootabl
                                  Volume->BlockIO, Volume->BlockIO->Media->MediaId,
                                  Volume->BlockIOOffset, SECTOR_SIZE, SectorBuffer);
     if (!EFI_ERROR(Status)) {
-        
+
         if (*((UINT16 *)(SectorBuffer + 510)) == 0xaa55 && SectorBuffer[0] != 0) {
             *Bootable = TRUE;
             Volume->HasBootCode = TRUE;
         }
-        
+
         // detect specific boot codes
         if (CompareMem(SectorBuffer + 2, "LILO", 4) == 0 ||
             CompareMem(SectorBuffer + 6, "LILO", 4) == 0 ||
@@ -360,12 +360,12 @@ static VOID ScanVolumeBootcode(IN OUT REFIT_VOLUME *Volume, OUT BOOLEAN *Bootabl
             Volume->HasBootCode = TRUE;
             Volume->OSIconName = L"linux";
             Volume->OSName = L"Linux";
-            
+
         } else if (FindMem(SectorBuffer, 512, "Geom\0Hard Disk\0Read\0 Error", 26) >= 0) {   // GRUB
             Volume->HasBootCode = TRUE;
             Volume->OSIconName = L"grub,linux";
             Volume->OSName = L"Linux";
-            
+
         } else if ((*((UINT32 *)(SectorBuffer + 502)) == 0 &&
                     *((UINT32 *)(SectorBuffer + 506)) == 50000 &&
                     *((UINT16 *)(SectorBuffer + 510)) == 0xaa55) ||
@@ -373,51 +373,51 @@ static VOID ScanVolumeBootcode(IN OUT REFIT_VOLUME *Volume, OUT BOOLEAN *Bootabl
             Volume->HasBootCode = TRUE;
             Volume->OSIconName = L"freebsd";
             Volume->OSName = L"FreeBSD";
-            
+
         } else if (FindMem(SectorBuffer, 512, "!Loading", 8) >= 0 ||
                    FindMem(SectorBuffer, SECTOR_SIZE, "/cdboot\0/CDBOOT\0", 16) >= 0) {
             Volume->HasBootCode = TRUE;
             Volume->OSIconName = L"openbsd";
             Volume->OSName = L"OpenBSD";
-            
+
         } else if (FindMem(SectorBuffer, 512, "Not a bootxx image", 18) >= 0 ||
                    *((UINT32 *)(SectorBuffer + 1028)) == 0x7886b6d1) {
             Volume->HasBootCode = TRUE;
             Volume->OSIconName = L"netbsd";
             Volume->OSName = L"NetBSD";
-            
+
         } else if (FindMem(SectorBuffer, SECTOR_SIZE, "NTLDR", 5) >= 0) {
             Volume->HasBootCode = TRUE;
             Volume->OSIconName = L"win";
             Volume->OSName = L"Windows";
-            
+
         } else if (FindMem(SectorBuffer, SECTOR_SIZE, "BOOTMGR", 7) >= 0) {
             Volume->HasBootCode = TRUE;
             Volume->OSIconName = L"winvista,win";
             Volume->OSName = L"Windows";
-            
+
         } else if (FindMem(SectorBuffer, 512, "CPUBOOT SYS", 11) >= 0 ||
                    FindMem(SectorBuffer, 512, "KERNEL  SYS", 11) >= 0) {
             Volume->HasBootCode = TRUE;
             Volume->OSIconName = L"freedos";
             Volume->OSName = L"FreeDOS";
-            
+
         } else if (FindMem(SectorBuffer, 512, "OS2LDR", 6) >= 0 ||
                    FindMem(SectorBuffer, 512, "OS2BOOT", 7) >= 0) {
             Volume->HasBootCode = TRUE;
             Volume->OSIconName = L"ecomstation";
             Volume->OSName = L"eComStation";
-            
+
         } else if (FindMem(SectorBuffer, 512, "Be Boot Loader", 14) >= 0) {
             Volume->HasBootCode = TRUE;
             Volume->OSIconName = L"beos";
             Volume->OSName = L"BeOS";
-            
+
         } else if (FindMem(SectorBuffer, 512, "yT Boot Loader", 14) >= 0) {
             Volume->HasBootCode = TRUE;
             Volume->OSIconName = L"zeta,beos";
             Volume->OSName = L"ZETA";
-            
+
         } else if (FindMem(SectorBuffer, 512, "\x04" "beos\x06" "system\x05" "zbeos", 18) >= 0 ||
                    FindMem(SectorBuffer, 512, "\x06" "system\x0c" "haiku_loader", 20) >= 0) {
             Volume->HasBootCode = TRUE;
@@ -425,19 +425,19 @@ static VOID ScanVolumeBootcode(IN OUT REFIT_VOLUME *Volume, OUT BOOLEAN *Bootabl
             Volume->OSName = L"Haiku";
 
         }
-        
+
         // NOTE: If you add an operating system with a name that starts with 'W' or 'L', you
         //  need to fix AddLegacyEntry in main.c.
-        
+
 #if REFIT_DEBUG > 0
         Print(L"  Result of bootcode detection: %s %s (%s)\n",
               Volume->HasBootCode ? L"bootable" : L"non-bootable",
               Volume->OSName, Volume->OSIconName);
 #endif
-        
+
         if (FindMem(SectorBuffer, 512, "Non-system disk", 15) >= 0)   // dummy FAT boot sector
             Volume->HasBootCode = FALSE;
-        
+
         // check for MBR partition table
         if (*((UINT16 *)(SectorBuffer + 510)) == 0xaa55) {
             MbrTableFound = FALSE;
@@ -968,7 +968,7 @@ BOOLEAN DirIterNext(IN OUT REFIT_DIR_ITER *DirIter, IN UINTN FilterMode, IN CHAR
     do {
         DirIter->LastStatus = DirNextEntry(DirIter->DirHandle, &(DirIter->LastFileInfo), FilterMode);
         if (EFI_ERROR(DirIter->LastStatus))
-            return FALSE;
+           return FALSE;
         if (DirIter->LastFileInfo == NULL)  // end of listing
             return FALSE;
         if (FilePattern != NULL) {
@@ -982,7 +982,7 @@ BOOLEAN DirIterNext(IN OUT REFIT_DIR_ITER *DirIter, IN UINTN FilterMode, IN CHAR
             // else continue loop
         } else
             break;
-    } while (KeepGoing);
+   } while (KeepGoing);
 
     *DirEntry = DirIter->LastFileInfo;
     return TRUE;

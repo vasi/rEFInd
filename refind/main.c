@@ -104,7 +104,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.3.0.2");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.3.1");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -736,6 +736,7 @@ static VOID ScanLoaderDir(IN REFIT_VOLUME *Volume, IN CHAR16 *Path, IN CHAR16 *P
                 SPrint(FileName, 255, L"\\%s\\%s", Path, DirEntry->FileName);
           else
                 SPrint(FileName, 255, L"\\%s", DirEntry->FileName);
+          CleanUpPathNameSlashes(FileName);
           NewLoader = AllocateZeroPool(sizeof(struct LOADER_LIST));
           if (NewLoader != NULL) {
              NewLoader->FileName = StrDuplicate(FileName);
@@ -792,7 +793,7 @@ static VOID ScanEfiFiles(REFIT_VOLUME *Volume) {
       }
 
       // scan the root directory for EFI executables
-      ScanLoaderDir(Volume, NULL, MatchPatterns);
+      ScanLoaderDir(Volume, L"\\", MatchPatterns);
 
       // scan subdirectories of the EFI directory (as per the standard)
       DirIterOpen(Volume->RootDir, L"EFI", &EfiDirIter);

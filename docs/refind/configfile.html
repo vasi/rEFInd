@@ -14,7 +14,8 @@
   <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-  <p>Originally written: 3/14/2012; last Web page update: 4/22/2012, referencing rEFInd 0.3.0</p>
+<p>Originally written: 3/14/2012; last Web page update:
+4/27/2012, referencing rEFInd 0.3.1</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -109,7 +110,7 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <li>You can place a boot loader in a directory with a name that matches one of rEFInd's standard icons, which take names of the form <tt>os_<tt class="variable">name</tt>.icns</tt>. To use this icon, you would place the boot loader in the directory called <tt class="variable">name</tt>.</li>
 
-<li>You can name an icon file after your boot loader, but with an extension of <tt>.icns</tt>. For instance, if you're using <tt class="variable">loader</tt><tt>.efi</tt>, you would name the icon file <tt class="variable">loader</tt><tt>.icns</tt>. These icon files should be 128x128 images in <a href="http://en.wikipedia.org/wiki/Apple_Icon_Image_format">Apple's ICNS format.</a> You can create such files easily in OS X or convert PNG files to ICNS format with <a href="http://icns.sourceforge.net/">libicns.</a> Note that the <tt>scan_all_linux_kernels</tt> option can cause loader-specific icon files for Linux kernels (but not other loaders) to be improperly assigned loader tags, so if you want to use this option, you should not also assign your kernels custom icons in this way.</li>
+<li>You can name an icon file after your boot loader, but with an extension of <tt>.icns</tt>. For instance, if you're using <tt class="variable">loader</tt><tt>.efi</tt>, you would name the icon file <tt class="variable">loader</tt><tt>.icns</tt>. (If you use the <tt>scan_all_linux_kernels</tt> option, you can give an icon for a Linux kernel without a <tt>.efi</tt> extension a name based on the kernel name but with a <tt>.icns</tt> extension&mdash;for instance, <tt>bzImage-3.3.2.icns</tt> will serve as the icon for the <tt>bzImage-3.3.2</tt> kernel.) These icon files should be 128x128 images in <a href="http://en.wikipedia.org/wiki/Apple_Icon_Image_format">Apple's ICNS format.</a> You can create such files easily in OS X or convert PNG files to ICNS format with <a href="http://icns.sourceforge.net/">libicns.</a></li>
 
 <li>If you're booting OS X from its standard boot loader, or if you place a boot loader file in the root directory of a partition, you can create a file called <tt>.VolumeIcon.icns</tt> that holds an icon file. OS X uses this file for its volume icons, so rEFInd picks up these icons automatically, provided they include 128x128 bitmaps.</li>
 
@@ -195,7 +196,7 @@ timeout 20
 <tr>
    <td><tt>scan_all_linux_kernels</tt></td>
    <td>None</td>
-   <td>When set, causes rEFInd to add Linux kernels (files with names that begin with <tt>vmlinuz</tt> or <tt>bzImage</tt>) to the list of EFI boot loaders, even if they lack <tt>.efi</tt> filename extensions. The hope is that this will simplify use of rEFInd on distributions that provide kernels with EFI stub loader support but that don't give those kernels names that end in <tt>.efi</tt>. Of course, the kernels must still be stored on a filesystem that rEFInd can read, and in a directory that it scans. (<a href="drivers.html">Drivers</a> and the <tt>also_scan_dirs</tt> options can help with those issues.) Note that this option can cause unwanted files to be improperly detected and given loader tags, such as older kernels without EFI stub loader support and <tt>.icns</tt> files used to give kernels unique icons. For this reason, it's disabled by default.</td>
+   <td>When set, causes rEFInd to add Linux kernels (files with names that begin with <tt>vmlinuz</tt> or <tt>bzImage</tt>) to the list of EFI boot loaders, even if they lack <tt>.efi</tt> filename extensions. The hope is that this will simplify use of rEFInd on distributions that provide kernels with EFI stub loader support but that don't give those kernels names that end in <tt>.efi</tt>. Of course, the kernels must still be stored on a filesystem that rEFInd can read, and in a directory that it scans. (<a href="drivers.html">Drivers</a> and the <tt>also_scan_dirs</tt> options can help with those issues.) Note that this option can cause unwanted files to be improperly detected and given loader tags, such as older kernels without EFI stub loader support. For this reason, it's disabled by default.</td>
 </tr>
 <tr>
    <td><tt>default_selection</tt></td>
