@@ -366,6 +366,14 @@ static VOID ScanVolumeBootcode(IN OUT REFIT_VOLUME *Volume, OUT BOOLEAN *Bootabl
             Volume->OSIconName = L"grub,linux";
             Volume->OSName = L"Linux";
 
+        // GRUB in BIOS boot partition:
+        } else if (FindMem(SectorBuffer, 512, "Geom\0Read\0 Error", 16) >= 0) {
+            Volume->HasBootCode = TRUE;
+            Volume->OSIconName = L"grub,linux";
+            Volume->OSName = L"Linux";
+            Volume->VolName = L"BIOS Boot Partition";
+            *Bootable = TRUE;
+
         } else if ((*((UINT32 *)(SectorBuffer + 502)) == 0 &&
                     *((UINT32 *)(SectorBuffer + 506)) == 50000 &&
                     *((UINT16 *)(SectorBuffer + 510)) == 0xaa55) ||
@@ -435,7 +443,16 @@ static VOID ScanVolumeBootcode(IN OUT REFIT_VOLUME *Volume, OUT BOOLEAN *Bootabl
               Volume->OSName, Volume->OSIconName);
 #endif
 
-        if (FindMem(SectorBuffer, 512, "Non-system disk", 15) >= 0)   // dummy FAT boot sector
+        // dummy FAT boot sector (created by OS X's newfs_msdos)
+        if (FindMem(SectorBuffer, 512, "Non-system disk", 15) >= 0)
+            Volume->HasBootCode = FALSE;
+
+        // dummy FAT boot sector (created by Linux's mkdosfs)
+        if (FindMem(SectorBuffer, 512, "This is not a bootable disk", 27) >= 0)
+            Volume->HasBootCode = FALSE;
+
+        // dummy FAT boot sector (created by Windows)
+        if (FindMem(SectorBuffer, 512, "Press any key to restart", 24) >= 0)
             Volume->HasBootCode = FALSE;
 
         // check for MBR partition table
@@ -461,7 +478,7 @@ static VOID ScanVolumeBootcode(IN OUT REFIT_VOLUME *Volume, OUT BOOLEAN *Bootabl
     }
 }
 
-// default volume icon based on disk kind
+// default volume badge icon based on disk kind
 static VOID ScanVolumeDefaultIcon(IN OUT REFIT_VOLUME *Volume)
 {
     switch (Volume->DiskKind) {

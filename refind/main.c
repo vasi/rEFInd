@@ -104,7 +104,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.3.1");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.3.1.2");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -1110,7 +1110,7 @@ static VOID ScanLegacyVolume(REFIT_VOLUME *Volume, UINTN VolumeIndex) {
          Volume->BlockIOOffset == 0 &&
          Volume->OSName == NULL)
          // this is a whole disk (MBR) entry; hide if we have entries for partitions
-      HideIfOthersFound = TRUE;
+         HideIfOthersFound = TRUE;
    }
    if (HideIfOthersFound) {
       // check for other bootable entries on the same disk

@@ -103,6 +103,17 @@ remove "local" from those paths, and perhaps change references to "lib" to
 out-of-date GNU-EFI implementations that will not work with rEFInd 0.2.7
 and later.
 
+When I tried to compile rEFInd under Ubuntu 12.04 (i386), even with a
+locally-compiled GNU-EFI 3.0p, I got errors like this:
+
+main.o: In function `StartLegacy.isra.0':
+main.c:(.text+0x8b1): undefined reference to `__stack_chk_fail_local'
+lib.o: In function `ScanVolumeBootcode.part.3':
+lib.c:(.text+0xf2f): undefined reference to `__stack_chk_fail_local'
+lib.o: In function `ScanExtendedPartition.isra.4':
+
+The solution was to recompile GNU-EFI 3.0p with the -fno-stack-protector
+GCC flag. In GNU-EFI, this can be added to the CFLAGS line in Make.common.
 
 Installing rEFInd
 =================
