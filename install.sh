@@ -1,0 +1,255 @@
+#!/bin/bash
+#
+# Linux/MacOS X script to install rEFInd
+#
+# Usage:
+#
+# ./install.sh [esp]
+#
+# The "esp" option is valid only on Mac OS X; it causes
+# installation to the EFI System Partition (ESP) rather than
+# to the current OS X boot partition. Under Linux, this script
+# installs to the ESP by default.
+#
+# This program is copyright (c) 2012 by Roderick W. Smith
+# It is released under the terms of the GNU GPL, version 3,
+# a copy of which should be included in the file COPYING.txt.
+#
+# Revision history:
+#
+# 0.3.2 -- Initial version
+#
+# Note: install.sh version numbers match those of the rEFInd package
+# with which they first appeared.
+
+TargetDir=/EFI/refind
+
+#
+# Functions used by both OS X and Linux....
+#
+
+CopyRefindFiles() {
+   mkdir -p $InstallPart/$TargetDir &> /dev/null
+   if [[ $Platform == 'EFI32' ]] ; then
+      cp $SourceDir/refind_ia32.efi $InstallPart/$TargetDir
+      if [[ $? != 0 ]] ; then
+         Problems=1
+      fi
+      Refind="refind_ia32.efi"
+   elif [[ $Platform == 'EFI64' ]] ; then
+      cp $SourceDir/refind_x64.efi $InstallPart/$TargetDir
+      if [[ $? != 0 ]] ; then
+         Problems=1
+      fi
+      Refind="refind_x64.efi"
+   else
+      echo "Unknown platform! Aborting!"
+      exit 1
+   fi
+   echo "Copied rEFInd binary file $Refind"
+   echo ""
+   if [[ -d $InstallPart/$TargetDir/icons ]] ; then
+      rm -rf $InstallPart/$TargetDir/icons-backup &> /dev/null
+      mv -f $InstallPart/$TargetDir/icons $InstallPart/$TargetDir/icons-backup
+      echo "Notice: Backed up existing icons directory as icons-backup."
+   fi
+   cp -r $SourceDir/icons $InstallPart/$TargetDir
+   if [[ $? != 0 ]] ; then
+      Problems=1
+   fi
+   if [[ -f $InstallPart/$TargetDir/refind.conf ]] ; then
+      echo "Existing refind.conf file found; copying sample file as refind.conf-sample"
+      echo "to avoid collision."
+      echo ""
+      cp -f $SourceDir/refind.conf-sample $InstallPart/$TargetDir
+      if [[ $? != 0 ]] ; then
+         Problems=1
+      fi
+   else
+      echo "Copying sample configuration file as refind.conf; edit this file to configure"
+      echo "rEFInd."
+      echo ""
+      cp -f $SourceDir/refind.conf-sample $InstallPart/$TargetDir/refind.conf
+      if [[ $? != 0 ]] ; then
+         Problems=1
+      fi
+   fi
+} # CopyRefindFiles()
+
+
+#
+# A series of OS X support functions....
+#
+
+# Mount the ESP at /Volumes/ESP or determine its current mount
+# point.
+# Sets InstallPart to the ESP mount point
+# Sets UnmountEsp if we mounted it
+MountOSXESP() {
+   # Identify the ESP. Note: This returns the FIRST ESP found;
+   # if the system has multiple disks, this could be wrong!
+   Temp=`diskutil list | grep EFI`
+   Esp=/dev/`echo $Temp | cut -f 5 -d ' '`
+   # If the ESP is mounted, use its current mount point....
+   Temp=`df | grep $Esp`
+   InstallPart=`echo $Temp | cut -f 6 -d ' '`
+   if [[ $InstallPart == '' ]] ; then
+      mkdir /Volumes/ESP &> /dev/null
+      mount -t msdos $Esp /Volumes/ESP
+      if [[ $? != 0 ]] ; then
+         echo "Unable to mount ESP! Aborting!\n"
+         exit 1
+      fi
+      UnmountEsp=1
+      InstallPart="/Volumes/ESP"
+   fi
+} # MountOSXESP()
+
+InstallOnOSX() {
+   echo "Installing rEFInd on OS X...."
+   if [[ $1 == 'esp' || $1 == 'ESP' ]] ; then
+      MountOSXESP
+   else
+      InstallPart="/"
+   fi
+   echo "Installing rEFInd to the partition mounted at '$InstallPart'"
+   Platform=`ioreg -l -p IODeviceTree | grep firmware-abi | cut -d "\"" -f 4`
+   CopyRefindFiles
+   if [[ $1 == 'esp' || $1 == 'ESP' ]] ; then
+      bless --mount $InstallPart --setBoot --file $InstallPart/$TargetDir/$Refind
+   else
+      bless --setBoot --folder $InstallPart/$TargetDir --file $InstallPart/$TargetDir/$Refind
+   fi
+   if [[ $? != 0 ]] ; then
+      Problems=1
+   fi
+   echo
+   echo "WARNING: If you have an Advanced Format disk, *DO NOT* attempt to check the"
+   echo "bless status with 'bless --info', since this is known to cause disk corruption"
+   echo "on some systems!!"
+   echo
+} # InstallOnOSX()
+
+
+#
+# Now a series of Linux support functions....
+#
+
+FindLinuxESP() {
+   EspLine=`df /boot/efi | grep boot`
+   InstallPart=`echo $EspLine | cut -d " " -f 6`
+   EspFilesystem=`grep $InstallPart /etc/mtab | cut -d " " -f 3`
+   if [[ $EspFilesystem != 'vfat' ]] ; then
+      echo "/boot/efi doesn't seem to be on a VFAT filesystem. The ESP must be mounted at"
+      echo "/boot or /boot/efi and it must be VFAT! Aborting!"
+      exit 1
+   fi
+   echo "ESP was found at $InstallPart using $EspFilesystem"
+} # MountLinuxESP
+
+AddBootEntry() {
+   Efibootmgr=`which efibootmgr 2> /dev/null`
+   if [[ $Efibootmgr ]] ; then
+      modprobe efivars &> /dev/null
+      InstallDisk=`grep $InstallPart /etc/mtab | cut -d " " -f 1 | cut -c 1-8`
+      PartNum=`grep $InstallPart /etc/mtab | cut -d " " -f 1 | cut -c 9-10`
+      EntryFilename=$TargetDir/$Refind
+      EfiEntryFilename=`echo ${EntryFilename//\//\\\}`
+      ExistingEntry=`$Efibootmgr -v | grep $Refind`
+      if [[ $ExistingEntry ]] ; then
+         echo "An existing EFI boot manager entry for rEFInd seems to exist:"
+         echo
+         echo "$ExistingEntry"
+         echo
+         echo "This entry is NOT being modified, and no new entry is being created."
+      else
+         $Efibootmgr -c -l $EfiEntryFilename -L rEFInd -d $InstallDisk -p $PartNum &> /dev/null
+         if [[ $? != 0 ]] ; then
+	    EfibootmgrProblems=1
+            Problems=1
+         fi
+      fi
+   else
+      EfibootmgrProblems=1
+      Problems=1
+   fi
+   if [[ $EfibootmgrProblems ]] ; then
+      echo
+      echo "ALERT: There were problems running the efibootmgr program! You may need to"
+      echo "rename the $Refind binary to the default name (EFI/boot/bootx64.efi"
+      echo "on x86-64 systems or EFI/boot/bootia32.efi on x86 systems) to have it run!"
+      echo
+   fi
+} # AddBootEntry()
+
+InstallOnLinux() {
+   echo "Installing rEFInd on Linux...."
+   FindLinuxESP
+   CpuType=`uname -m`
+   if [[ $CpuType == 'x86_64' ]] ; then
+      Platform="EFI64"
+   elif [[ $CpuType == 'i386' || $CpuType == 'i486' || $CpuType == 'i586' || $CpuType == 'i686' ]] ; then
+      Platform="EFI32"
+      echo
+      echo "CAUTION: This Linux installation uses a 32-bit kernel. 32-bit EFI-based"
+      echo "computers are VERY RARE. If you've installed a 32-bit version of Linux"
+      echo "on a 64-bit computer, you should manually install the 64-bit version of"
+      echo "rEFInd. If you're installing on a Mac, you should do so from OS X. If"
+      echo "you're positive you want to continue with this installation, answer 'Y'"
+      echo "to the following question..."
+      echo
+      echo -n "Are you sure you want to continue (Y/N)? "
+      read ContYN
+      if [[ $ContYN == "Y" || $ContYN == "y" ]] ; then
+         echo "OK; continuing with the installation..."
+      else
+         exit 0
+      fi
+   else
+      echo "Unknown CPU type '$CpuType'; aborting!"
+      exit 1
+   fi
+   CopyRefindFiles
+   AddBootEntry
+} # InstallOnLinux()
+
+# The main part of the script; just checks the OS and calls a
+# function for installing on that platform....
+
+ThisScript=`readlink -f $0`
+if [[ `whoami` != "root" ]] ; then
+   echo "Not running as root; attempting to elevate privileges via sudo...."
+   sudo $ThisScript $1
+   if [[ $? != 0 ]] ; then
+      echo "This script must be run as root (or using sudo). Exiting!"
+      exit 1
+   else
+      exit 0
+   fi
+fi
+OSName=`uname -s`
+SourceDir=`dirname $ThisScript`/refind
+if [[ $OSName == 'Darwin' ]] ; then
+   InstallOnOSX $1
+elif [[ $OSName == 'Linux' ]] ; then
+   InstallOnLinux
+else
+   echo "Running on unknown OS; aborting!"
+fi
+
+if [[ $Problems ]] ; then
+   echo
+   echo "ALERT:"
+   echo "Installation has completed, but problems were detected. Review the output for"
+   echo "error messages and take corrective measures as necessary. You may need to"
+   echo "re-run this script or install manually before rEFInd will work."
+   echo
+else
+   echo
+   echo "Installation has completed successfully."
+   echo
+fi
+
+if [[ $UnmountEsp ]] ; then
+   umount $InstallPart
+fi
