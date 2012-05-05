@@ -17,7 +17,8 @@
 #
 # Revision history:
 #
-# 0.3.2 -- Initial version
+# 0.3.2.1 -- Check for presence of source files; aborts if not present
+# 0.3.2   -- Initial version
 #
 # Note: install.sh version numbers match those of the rEFInd package
 # with which they first appeared.
@@ -28,6 +29,16 @@ TargetDir=/EFI/refind
 # Functions used by both OS X and Linux....
 #
 
+# Abort if the rEFInd files can't be found.
+CheckForFiles() {
+   if [[ ! -f $SourceDir/refind_ia32.efi || ! -f $SourceDir/refind_x64.efi || ! -f $SourceDir/refind.conf-sample || ! -d $SourceDir/icons ]] ; then
+      echo "One or more files missing! Aborting installation!"
+      exit 1
+   fi
+} # CheckForFiles()
+
+# Copy the rEFInd files to the ESP or OS X root partition.
+# Sets Problems=1 if any critical commands fail.
 CopyRefindFiles() {
    mkdir -p $InstallPart/$TargetDir &> /dev/null
    if [[ $Platform == 'EFI32' ]] ; then
@@ -105,6 +116,8 @@ MountOSXESP() {
    fi
 } # MountOSXESP()
 
+# Control the OS X installation.
+# Sets Problems=1 if problems found during the installation.
 InstallOnOSX() {
    echo "Installing rEFInd on OS X...."
    if [[ $1 == 'esp' || $1 == 'ESP' ]] ; then
@@ -135,6 +148,9 @@ InstallOnOSX() {
 # Now a series of Linux support functions....
 #
 
+# Identifies the ESP's location (/boot or /boot/efi); aborts if
+# the ESP isn't mounted at either location.
+# Sets InstallPart to the ESP mount point.
 FindLinuxESP() {
    EspLine=`df /boot/efi | grep boot`
    InstallPart=`echo $EspLine | cut -d " " -f 6`
@@ -147,6 +163,8 @@ FindLinuxESP() {
    echo "ESP was found at $InstallPart using $EspFilesystem"
 } # MountLinuxESP
 
+# Uses efibootmgr to add an entry for rEFInd to the EFI's NVRAM.
+# If this fails, sets Problems=1
 AddBootEntry() {
    Efibootmgr=`which efibootmgr 2> /dev/null`
    if [[ $Efibootmgr ]] ; then
@@ -182,6 +200,8 @@ AddBootEntry() {
    fi
 } # AddBootEntry()
 
+# Controls rEFInd installation under Linux.
+# Sets Problems=1 if something goes wrong.
 InstallOnLinux() {
    echo "Installing rEFInd on Linux...."
    FindLinuxESP
@@ -213,10 +233,16 @@ InstallOnLinux() {
    AddBootEntry
 } # InstallOnLinux()
 
-# The main part of the script; just checks the OS and calls a
-# function for installing on that platform....
+#
+# The main part of the script. Sets a few environment variables,
+# performs a few startup checks, and then calls functions to
+# install under OS X or Linux, depending on the detected platform.
+#
 
 ThisScript=`readlink -f $0`
+OSName=`uname -s`
+SourceDir=`dirname $ThisScript`/refind
+CheckForFiles
 if [[ `whoami` != "root" ]] ; then
    echo "Not running as root; attempting to elevate privileges via sudo...."
    sudo $ThisScript $1
@@ -227,8 +253,6 @@ if [[ `whoami` != "root" ]] ; then
       exit 0
    fi
 fi
-OSName=`uname -s`
-SourceDir=`dirname $ThisScript`/refind
 if [[ $OSName == 'Darwin' ]] ; then
    InstallOnOSX $1
 elif [[ $OSName == 'Linux' ]] ; then
