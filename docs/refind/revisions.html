@@ -14,7 +14,7 @@
 <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-<p>Last Web page update: 4/27/2012</p>
+<p>Last Web page update: 5/4/2012</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -92,6 +92,8 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 <p>The following summarizes changes in rEFInd's public releases:</p>
 
 <ul>
+
+<li><b>0.3.2 (5/4/2012)</b>&mdash;rEFInd's core functionality changes very little with this version; I've tweaked the detection of BIOS-mode boot loaders to keep unbootable FAT partitions created under Linux and Windows out of the boot list, while adding detection of GRUB BIOS Boot Partitions to the list. I've also made a change that improves screen-clearing when launching EFI utilities and OSes in text mode. The major change to this version is the addition of a new Linux/OS X installation script, <tt>install.sh</tt>. In most cases, this makes it possible to install rEFInd simply by typing <tt class="userinput">./install.sh</tt> from the rEFInd package directory; however, you should see the <a href="installing.html">Installing rEFInd</a> page for details. In some cases, manual installation may still be required. Also, you may prefer to copy over the old rEFInd program file with the new one when upgrading.</li>
 
 <li><b>0.3.1 (4/27/2012)</b>&mdash;You'll find a few minor enhancements and bug fixes in this version, none of which affect the configuration files. rEFInd now sorts its boot loader entries <i>within each directory</i> by date, with the newest items first. The intent is that you can specify a directory name as the <tt>default_selection</tt> and the most recent boot loader in that directory will become the default. This may obviate the need to adjust the default after adding a new Linux kernel with EFI stub loader support. I've also improved the handling of <tt>.icns</tt> files for Linux kernels that lack <tt>.efi</tt> extensions; loader-specific icons for these kernels should now take the name of the kernel plus <tt>.icns</tt>&mdash;for instance, <tt>vmlinuz-0.3.2.icns</tt> for <tt>vmlinuz-0.3.2</tt>. rEFInd also now hides all <tt>.icns</tt> files from the boot loader list. Finally, this version fixes a bug, introduced in version 0.3.0, that could cause spurious <tt>Unsupported while scanning the root directory</tt> errors under some conditions on Macs.</li>
 

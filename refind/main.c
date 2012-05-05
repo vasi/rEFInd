@@ -104,7 +104,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.3.1.2");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.3.2");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -1173,10 +1173,10 @@ static VOID ScanLegacyExternal(VOID)
 
 static VOID StartTool(IN LOADER_ENTRY *Entry)
 {
-    BeginExternalScreen(Entry->UseGraphicsMode, Entry->me.Title + 6);  // assumes "Start <title>" as assigned below
-    StartEFIImage(Entry->DevicePath, Entry->LoadOptions, Basename(Entry->LoaderPath),
-                  Basename(Entry->LoaderPath), NULL, TRUE);
-    FinishExternalScreen();
+   BeginExternalScreen(Entry->UseGraphicsMode, Entry->me.Title + 6);  // assumes "Start <title>" as assigned below
+   StartEFIImage(Entry->DevicePath, Entry->LoadOptions, Basename(Entry->LoaderPath),
+                 Basename(Entry->LoaderPath), NULL, TRUE);
+   FinishExternalScreen();
 } /* static VOID StartTool() */
 
 static LOADER_ENTRY * AddToolEntry(IN CHAR16 *LoaderPath, IN CHAR16 *LoaderTitle, IN EG_IMAGE *Image,

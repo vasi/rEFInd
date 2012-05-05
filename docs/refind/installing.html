@@ -15,7 +15,7 @@
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <p>Originally written: 3/14/2012; last Web page update:
-4/27/2012, referencing rEFInd 0.3.1</p>
+5/4/2012, referencing rEFInd 0.3.2</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -92,7 +92,11 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <p class="sidebar"><b>Important:</b> A rEFInd zip file, when uncompressed, creates a directory called <tt>refind-<i>version</i></tt>, where <tt><i>version</i></tt> is the version number. This directory includes a subdirectory called <tt>refind</tt> that holds the boot loader, along with another that holds documentation, as well as miscellaneous files in <tt>refind-<i>version</i></tt> itself. When I refer to "the <tt>refind</tt> directory" on this page, I mean the directory with that precise name, not the <tt>refind-<i>version</i></tt> directory that is its parent.</p>
 
-<p>Once you've uncompressed a rEFInd binary zip file, you can copy the entire <tt>refind</tt> directory into your EFI System Partition's (ESP's) <tt>EFI</tt> directory on UEFI-based PCs, so that rEFInd resides in <tt>EFI/refind</tt>. If you've tried rEFInd using a CD-R image file, you can copy the files from the <tt>EFI/refind</tt> directory on the CD to create an equivalent directory on the ESP. To avoid confusion, though, you should delete the rEFInd binary file for the CPU type your computer does <i>not</i> use. To the best of my knowledge, all UEFI-based PCs use 64-bit CPUs, so you should keep the <tt>refind_x64.efi</tt> binary and delete the <tt>refind_ia32.efi</tt> binary. Most Intel-based Macs also have 64-bit EFI implementations, so you should do the same thing; but very early Intel-based Macs have 32-bit EFIs (and sometimes 32-bit CPUs), which require the <tt>refind_ia32.efi</tt> file. You can determine whether your Mac needs the <i>x</i>86-64 or IA32 build by typing the following command in a Mac Terminal window:</p>
+<p>Once you've uncompressed a rEFInd binary zip file, you must install it to your computer's ESP (or conceivably to some other location). The details of how you to this depend on your OS and your computer (UEFI-based PC vs. Macintosh). The upcoming sections provide details. For Linux and Mac OS X, you can use the installation script, <a href="#installsh"><tt>install.sh</tt>,</a> which provides easy one-command installation on most systems. Occasionally this script will fail, though, so I also provide explicit instructions for <a href="#linux">Linux</a> and <a href="#osx">Mac OS X.</a> Installation under <a href="#windows">Windows</a> also must be done manually. In some cases, you'll have to deviate from the default naming conventions, as described in <a href="#naming">a section on this topic.</a> If you're upgrading rEFInd, see the <a href="#upgrading">section on upgrading.</a> Finally, I describe how to install some <a href="#addons">additional components</a> you might find useful.</a></p>
+
+<!--
+
+can copy the entire <tt>refind</tt> directory into your EFI System Partition's (ESP's) <tt>EFI</tt> directory on UEFI-based PCs, so that rEFInd resides in <tt>EFI/refind</tt>. If you've tried rEFInd using a CD-R image file, you can copy the files from the <tt>EFI/refind</tt> directory on the CD to create an equivalent directory on the ESP. To avoid confusion, though, you should delete the rEFInd binary file for the CPU type your computer does <i>not</i> use. To the best of my knowledge, all UEFI-based PCs use 64-bit CPUs, so you should keep the <tt>refind_x64.efi</tt> binary and delete the <tt>refind_ia32.efi</tt> binary. Most Intel-based Macs also have 64-bit EFI implementations, so you should do the same thing; but very early Intel-based Macs have 32-bit EFIs (and sometimes 32-bit CPUs), which require the <tt>refind_ia32.efi</tt> file. You can determine whether your Mac needs the <i>x</i>86-64 or IA32 build by typing the following command in a Mac Terminal window:</p>
 
 <pre class="listing">
 $ <b>ioreg -l -p IODeviceTree | grep firmware-abi</b>
@@ -102,11 +106,97 @@ $ <b>ioreg -l -p IODeviceTree | grep firmware-abi</b>
 
 <p>Of course, before you can install the files, you must be able to access the ESP. The details of this task vary from one OS to another. If you have a choice, I recommend using <a href="#linux">Linux</a> for rEFInd installation on UEFI PCs and <a href="#osx">OS X</a> on Macs. (On Macs, you can optionally use OS X's main partition rather than the ESP for this purpose.) <a href="#windows">Windows</a> provides relatively primitive tools for accessing the ESP and manipulating the EFI's boot list. I also describe some <a href="#naming">options for naming rEFInd</a> that may be useful on some systems. Finally, I describe how to install some <a href="#addons">extra tools</a> that you may find useful but that are not included with rEFInd.</p>
 
+-->
+
+<a name="installsh">
+<h2>Installing rEFInd Using <tt>install.sh</tt> under Linux or Mac OS X</h2>
+
+<p class="sidebar"><b>Warning:</b> If you're using a Macintosh, you should run <tt>install.sh</tt> from Mac OS X rather than from Linux. If run from Linux, rEFInd is unlikely to be fully installed. Worse, it's conceivable that running <tt>install.sh</tt> from Linux will damage your firmware, requiring that it be re-flashed. The reason is that Apple uses non-standard methods to enable a boot loader, and the Linux functions in <tt>install.sh</tt> assume standard EFI installation methods.</p>
+
+<p>If you're using Linux or Mac OS X, the easiest way to install rEFInd is to use the <tt>install.sh</tt> script. Under Linux, this script installs rEFInd to your disk's ESP. Under Mac OS X, the script installs rEFInd to your current OS X boot partition by default; but you can install to your ESP instead by passing the script the <tt>esp</tt> option.</p>
+
+<p>Before running this script under Linux, you should ensure that your ESP is mounted at <tt>/boot</tt> or <tt>/boot/efi</tt>, as described in more detail in the <a href="#linux">Installing rEFInd Manually Using Linux</a> section. (If you installed Linux in EFI mode, chances are your ESP is properly mounted.) This precaution isn't necessary under OS X.</p>
+
+<p>A sample run under Linux looks something like this:</p>
+
+<pre class="listing">
+# <tt class="userinput">./install.sh</tt>
+Installing rEFInd on Linux....
+ESP was found at /boot/efi using vfat
+Copied rEFInd binary file refind_x64.efi
+
+Copying sample configuration file as refind.conf; edit this file to configure
+rEFInd.
+
+
+Installation has completed successfully.</pre>
+
+<p>The output under OS X is a bit different:</p>
+
+<pre class="listing">
+$ <tt class="userinput">./install.sh</tt>
+Not running as root; attempting to elevate privileges via sudo....
+Password:
+Installing rEFInd on OS X....
+Installing rEFInd to the partition mounted at '/'
+Copied rEFInd binary file refind_ia32.efi
+
+Copying sample configuration file as refind.conf; edit this file to configure
+rEFInd.
+
+
+WARNING: If you have an Advanced Format disk, *DO NOT* attempt to check the
+bless status with 'bless --info', since this is known to cause disk corruption
+on some systems!!
+
+
+Installation has completed successfully.</pre>
+
+<p>In either case, the details of the output differ depending on your existing configuration and how you ran the program. Some details that can affect how the script runs include the following:</p>
+
+<ul>
+
+<li>If you run the script as an ordinary user, it attempts to acquire
+    <tt>root</tt> privileges by using the <tt>sudo</tt> command. This works
+    on Mac OS X and some Linux installations (such as under Ubuntu or if
+    you've added yourself to the <tt>sudo</tt> users list), but on some
+    Linux installations this will fail. On such systems, you should run
+    <tt>install.sh</tt> as <tt>root</tt>.</li>
+
+<li>Under OS X, you can run the script with a mouse by opening a Terminal
+    session and then dragging-and-dropping the <tt>install.sh</tt> file to
+    the Terminal window. You'll need to press the Return or Enter key to
+    run the script.</li>
+
+<li>Under OS X, passing the "esp" option causes the script to install
+    rEFInd to the ESP. The script finds the first ESP that's identified by
+    the <tt>diskutil</tt> program and, if it's not already mounted, mounts
+    it to install rEFInd. Thus, it's conceivable that <tt>install.sh</tt>
+    will install rEFInd to the wrong partition if you have multiple disks
+    or if a disk has multiple ESPs. If you believe this has happened, you
+    may need to re-install manually.</li>
+
+<li>If you're using OS X 10.7's Whole Disk Encryption (WDE) feature, you
+    <i>must</i> install rEFInd to the ESP, so the <tt>esp</tt> option to
+    <tt>install.sh</tt> is required. I'm still a little bit foggy about
+    what's required to boot the system once this is done; see <a
+    href="https://sourceforge.net/p/refind/discussion/general/thread/5c7d0195/">this
+    forum thread</a> for a discussion of the topic.</li>
+
+<li>If you're using OS X and an Advanced Format disk, heed the warning that
+    <tt>install.sh</tt> displays and <i><b>do not</b></i> use <tt>bless
+    --info</tt> to check your installation status; this combination has
+    been reported to cause disk corruption on some Macs!</li>
+
+</ul>
+
+<p>In any event, you should peruse the script's output to ensure that everything looks OK. <tt>install.sh</tt> displays error messages when it encounters errors, such as if the ESP is mounted read-only or if you run out of disk space. You may need to correct such problems manually and re-run the script. In some cases you may need to fall back on manual installation, which gives you better control over details such as which partition to use for installation.</p>
+
 <a name="linux">
-<h2>Installing rEFInd Using Linux</h2>
+<h2>Installing rEFInd Manually Using Linux</h2>
 </a>
 
-<p>Accessing the ESP is easiest from Linux: The ESP is usually mounted at <tt>/boot/efi</tt>. You can verify that this is the case by using the <tt>df</tt> command:</p>
+<p>On a UEFI-based PC, you'll normally install rEFInd to the ESP, which is usually mounted at <tt>/boot/efi</tt>. You can verify that this is the case by using the <tt>df</tt> command:</p>
 
 <pre class="listing">
 $ <b>df /boot/efi</b>
@@ -114,9 +204,9 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 /dev/sda1         191284 16604    174681   9% /boot/efi
 </pre>
 
-<p class="sidebar"><b>Warning:</b> If you're running Linux on a Mac, I recommend you install rEFInd under OS X. The Mac's boot process deviates a bit from EFI standards, so you'll probably have to use a tool called <tt>bless</tt> under MacOS to do the job. Alternatively, there's a new Linux program, <tt>hfs-bless</tt>, part of the <a href="http://www.codon.org.uk/~mjg59/mactel-boot/"><tt>mactel-boot</tt></a> package, that's supposed to work with <tt>efibootmgr</tt> to make a Mac HFS partition bootable. I've not yet tried it, though. There are also reports that the <tt>efibootmgr</tt> tool used under Linux can corrupt some Macs' firmware. Although I've seen some vague suggestions that this problem has been fixed under 3.<i>x</i> kernels, I haven't tested this claim.</p>
+<p class="sidebar"><b>Warning:</b> If you're running Linux on a Mac, I recommend you install rEFInd under OS X. The Mac's boot process deviates a bit from EFI standards, so you'll probably have to use a tool called <tt>bless</tt> under Mac OS to do the job. Alternatively, there's a new Linux program, <tt>hfs-bless</tt>, part of the <a href="http://www.codon.org.uk/~mjg59/mactel-boot/"><tt>mactel-boot</tt></a> package, that's supposed to work with <tt>efibootmgr</tt> to make a Mac HFS partition bootable. I've not yet tried it, though. There are also reports that the <tt>efibootmgr</tt> tool used under Linux can corrupt some Macs' firmware. Although I've seen some vague suggestions that this problem has been fixed under 3.<i>x</i> kernels, I haven't tested this claim.</p>
 
-<p>This example shows that <tt>/dev/sda1</tt> is mounted at <tt>/boot/efi</tt>, which is a typical configuration. (The ESP can be on another disk or partition, but <tt>/dev/sda1</tt> is the most common place for an ESP.) If your output shows <tt>/boot</tt> or <tt>/</tt> under the <tt>Mounted on</tt> column, then your ESP isn't mounted. If you get a <tt>df: `/boot/efi': No such file or directory</tt> error message, then the <tt>/boot/efi</tt> directory doesn't even exist. In such cases, you may need to jump through some extra hoops, as described on my <a href="http://www.rodsbooks.com/efi-bootloaders/installation.html">EFI Boot Loader Installation</a> page.</p>
+<p>This example shows that <tt>/dev/sda1</tt> is mounted at <tt>/boot/efi</tt>, which is a typical configuration. (The ESP can be on another disk or partition, but <tt>/dev/sda1</tt> is the most common place for an ESP.) If your output shows <tt>/boot</tt> or <tt>/</tt> under the <tt>Mounted on</tt> column, then your ESP isn't mounted. (An exception is if you're mounting the ESP at <tt>/boot</tt>. This is an unusual configuration. If you're using it, you can proceed, making suitable adjustments to subsequent commands.) If you get a <tt>df: `/boot/efi': No such file or directory</tt> error message, then the <tt>/boot/efi</tt> directory doesn't even exist. In such cases, you may need to jump through some extra hoops, as described on my <a href="http://www.rodsbooks.com/efi-bootloaders/installation.html">EFI Boot Loader Installation</a> page.</p>
 
 <p>Assuming the ESP is mounted at <tt>/boot/efi</tt>, you can install the rEFInd files as follows (you must be <tt>root</tt> to issue these commands, or precede each of them with <tt><b>sudo</b></tt>):</p>
 
@@ -126,7 +216,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 
 <li>Type <tt><b>cd /boot/efi/EFI/refind</b></tt> to change into rEFInd's new directory on the ESP.</li>
 
-<li>Type <tt><b>rm refind_ia32.efi</b></tt> to remove the IA32 binary if you're using an <i>x</i>86-64 (64-bit) system; or type <tt><b>rm refind_x64.efi</b></tt> to remove the <i>x</i>86-64 binary if you're using an <i>x</i>86 (32-bit) system. You can optionally rename the binary you keep as <tt>refind.efi</tt>, but this isn't required.</li>
+<li>Type <tt><b>rm refind_ia32.efi</b></tt> to remove the IA32 binary if you're using an <i>x</i>86-64 (64-bit) system; or type <tt><b>rm refind_x64.efi</b></tt> to remove the <i>x</i>86-64 binary if you're using an <i>x</i>86 (32-bit) system. You can optionally rename the binary you keep as <tt>refind.efi</tt>, but this isn't required. (Note that you must keep the version that's the correct bit width for your EFI; if you've installed a 32-bit Linux on a 64-bit PC with a 64-bit EFI, you'd keep <tt>refind_x64.efi</tt>.</li>
 
 <li>Rename the configuration file by typing <tt><b>mv refind.conf-sample refind.conf</b></tt>. Consult the <a href="configfile.html">Editing the rEFInd Configuration File</a> page for information on how to adjust your options.</li>
 
@@ -143,10 +233,18 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 <p>On some systems, <tt>efibootmgr</tt> won't do what you expect. On such systems, you may have better luck renaming the rEFInd files, as described in the <a href="#naming">Alternative Naming Options</a> section.</p>
 
 <a name="osx">
-<h2>Installing rEFInd Using Mac OS X</h2>
+<h2>Installing rEFInd Manually Using Mac OS X</h2>
 </a>
 
-<p class="sidebar"><b>Warning:</b> One of the reasons I've abandoned rEFIt's GUI installation tools for Mac OS X is that there are several bug reports (such as <a href="https://sourceforge.net/tracker/index.php?func=detail&aid=3147364&group_id=161917&atid=821764">this one</a> and <a href="https://sourceforge.net/tracker/?func=detail&aid=3218104&group_id=161917&atid=821764">this one</a>) that the rEFIt installer may be causing filesystem corruption on disks over about 500 MiB. <a href="https://sourceforge.net/tracker/?func=detail&aid=3218104&group_id=161917&atid=821764">This</a> report on the problem, and particularly the post by mic-marchen, suggests that the problem is related to a bug in OS X's <tt>bless</tt> utility, and particularly its <tt>--info</tt> option, that causes it to corrupt data on disks with 4 KiB sectors. These <i>Advanced Format</i> disks are becoming increasingly common, particularly at larger disk sizes. Therefore, I <i>strongly</i> recommend that you <i>not</i> type <tt class="userinput">sudo bless --info</tt> to check the status of your installation if you have such a disk, or even if you suspect you might have such a disk. (I've seen Advanced Format disks as small as 320 GB.)</p>
+<p>Before installing rEFInd on a Mac, you must determine whether it uses a 32-bit or 64-bit EFI implementation. Most Intel-based Macs have 64-bit EFIs, so you should use the <tt>refind_x64.efi</tt> file with them; but very early Intel-based Macs have 32-bit EFIs (and sometimes 32-bit CPUs), which require the <tt>refind_ia32.efi</tt> file. You can determine whether your Mac needs the <i>x</i>86-64 or IA32 build by typing the following command in a Mac Terminal window:</p>
+
+<pre class="listing">
+$ <b>ioreg -l -p IODeviceTree | grep firmware-abi</b>
+</pre>
+
+<p>The result should include either <tt>EFI32</tt> or <tt>EFI64</tt>, indicating that you should use the <tt>refind_ia32.efi</tt> or <tt>refind_x64.efi</tt> binary, respectively.</p>
+
+<p class="sidebar"><b>Warning:</b> Numerous rEFIt bug reports indicate disk corruption problems on disks over about 500 GiB. <a href="https://sourceforge.net/tracker/?func=detail&aid=3218104&group_id=161917&atid=821764">This</a> report on the problem, and particularly the post by mic-marchen, suggests that the problem is related to a bug in OS X's <tt>bless</tt> utility, and particularly its <tt>--info</tt> option, that causes it to corrupt data on disks with 4 KiB sectors. These <i>Advanced Format</i> disks are becoming increasingly common, particularly at larger disk sizes. Therefore, I <i>strongly</i> recommend that you <i>not</i> type <tt class="userinput">sudo bless --info</tt> to check the status of your installation if you have such a disk, or even if you suspect you might have such a disk. (I've seen Advanced Format disks as small as 320 GB.)</p>
 
 <p>The procedure for installing rEFInd on a Mac is similar to that for installing it under Linux, except that you can (and probably should) install it to OS X's system partition or some other HFS+ partition rather than to the ESP, and you must use the <tt>bless</tt> utility rather than <tt>efibootmgr</tt>. To be precise, you should follow these steps:</p>
 
@@ -217,7 +315,7 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 <p>If you want to remove rEFInd from your system, you can delete its files. The Mac will revert to booting using whatever standard boot loader it can find. Alternatively, you can use <tt>bless</tt> to bless another EFI boot loader. The GUI Startup Disk utility in System Preferences provides a simplified interface that enables you to select which OS X installation to boot, but it doesn't look for non-Apple boot loaders, so you can't use it to enable rEFInd.</p>
 
 <a name="windows">
-<h2>Installing rEFInd Using Windows</h2>
+<h2>Installing rEFInd Manually Using Windows</h2>
 </a>
 
 <p>To install rEFInd under Windows, you must first find a way to access the ESP, which Windows normally hides from view. One way to accomplish this goal, and to proceed forward once the ESP is accessible, is as follows:</p>
@@ -279,6 +377,42 @@ Filesystem     1K-blocks  Used Available Use% Mounted on
 </ol>
 
 <p>When you reboot, rEFInd should come up. With any luck, it will detect your old boot loader as an option, if one was installed before.</p>
+
+<a name="upgrading">
+<h2>Upgrading rEFInd</h2>
+</a>
+
+<p>If you've installed an earlier version of rEFInd, you can upgrade a bit more easily than you can install directly:</p>
+
+<ul>
+
+<li>On a UEFI-based PC, under any OS, you should be able to replace your
+    old rEFInd file with the new one. Make sure that the new rEFInd has the
+    same name as the old one, and that it's for the correct CPU type. Since
+    UEFI launches boot programs by filename, a simple file replacement will
+    suffice to launch the new version. If the new version includes new
+    icons, you may want to copy some or all of them.</li>
+
+<li>On a Mac, you can copy over the old rEFInd binary file <i>from
+    Linux</i> and it will usually work, provided you copy <i>directly</i>
+    over the old file (rather than rename or delete the old file and then
+    copy the new one in its place). The same caveats about icons as apply
+    to UEFI-based PCs apply in this case. This method requires an extra
+    step in Mac OS X, though....</li>
+
+<li>In OS X, if you copy over the original file with the new one, you'll
+    probably have to re-bless it to make it work.</li>
+
+<li>Under Linux or OS X, you can re-run the <tt>install.sh</tt> script. In
+    most cases this works fine, but you'll end up with a duplicate of the
+    icons directory (<tt>icons-backup</tt>, which holds the original icons,
+    whereas <tt>icons</tt> holds the icons from the new package). Normally
+    this just wastes some disk space; but if you've customized your icons,
+    you'll need to copy your altered icons back.</li>
+
+</ul>
+
+<p>In all cases, if the new version includes new or altered configuration file options, you may need to manually update your configuration file. Alternatively, if you've used the default configuration file, you can replace your working <tt>refind.conf</tt> with <tt>refind.conf-sample</tt> from the rEFInd zip file. (When using <tt>install.sh</tt>, this file will be copied to rEFInd's installation directory under its original name, so you can rename it within that directory to replace the old file.</p>
 
 <a name="addons">
 <h2>Installing Additional Components</h2>

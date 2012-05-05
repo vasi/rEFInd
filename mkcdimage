@@ -86,6 +86,7 @@ mv refind-bin-$Version refind-flashdrive-$Version
 zip -9r ../refind-flashdrive-$Version.zip \
     refind-flashdrive-$Version/refind-flashdrive-$Version.img \
     refind-flashdrive-$Version/docs refind-flashdrive-$Version/LICENSE.txt \
+    refind-flashdrive-$Version/install.sh \
     refind-flashdrive-$Version/COPYING.txt \
     refind-flashdrive-$Version/CREDITS.txt \
     refind-flashdrive-$Version/README.txt \

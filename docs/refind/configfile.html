@@ -15,7 +15,7 @@
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <p>Originally written: 3/14/2012; last Web page update:
-4/27/2012, referencing rEFInd 0.3.1</p>
+5/4/2012, referencing rEFInd 0.3.2</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -309,15 +309,28 @@ menuentry Gentoo {
     initrd \kernels\initrd-3.3.0-rc7.img
     options "root=/dev/sda3 ro"
 }
+
+menuentry "Windows via shell script" {
+    icon \EFI\refind\icons\os_win.icns
+    loader \EFI\tools\shell.efi
+    options "fs0:\EFI\tools\launch_windows.nsh"
+}
 </pre>
 
-<p>This example sets up two entries: one for Ubuntu Linux and one for Gentoo Linux. Note that the two entries use different directory separators, simply to demonstrate the fact that it's possible. The Ubuntu entry sets no icon, since rEFInd will note that the boot loader is stored in the <tt>ubuntu</tt> directory, and it will automatically find the appropriate Ubuntu icon (<tt>os_ubuntu.icns</tt>). This option is, however, disabled, so no matching icon will appear when you reboot unless you first comment out or delete the <tt>disabled</tt> line.</p>
+<p>This example sets up three entries: one for Ubuntu Linux, one for Gentoo Linux, and one to launch a shell script. Note that the first two entries use different directory separators, simply to demonstrate the fact that it's possible. The Ubuntu entry sets no icon, since rEFInd will note that the boot loader is stored in the <tt>ubuntu</tt> directory, and it will automatically find the appropriate Ubuntu icon (<tt>os_ubuntu.icns</tt>). This option is, however, disabled, so no matching icon will appear when you reboot unless you first comment out or delete the <tt>disabled</tt> line.</p>
 
 <p class="sidebar"><b>Tip:</b> Under Linux, you can learn a filesystem's label by using <tt>blkid</tt>, as in <tt class="userinput">blkid /dev/sda1</tt>. The filesystem's label, if set, is identified by the keyword <tt>LABEL</tt> in the output.</p>
 
 <p>The Gentoo entry begins with an icon specification to be sure that the icon is loaded from the same volume as rEFInd. (If the icon were stored on the same filesystem as the kernel, you'd place the <tt>icon</tt> line after the <tt>volume</tt> line.) This entry uses the <tt>volume</tt> token to tell rEFInd to load the kernel and initial RAM disk file from the filesystem called <tt>G_KERNELS</tt>. It passes the filename for an initial RAM disk using the <tt>initrd</tt> line and free-form options using the <tt>options</tt> line. Note that the kernel filename does <i>not</i> include a <tt>.efi</tt> extension, which keeps rEFInd from picking up the kernel file in its auto-scans.</p>
 
-<p>You can combine these OS stanzas with the global <tt>refind.conf</tt> options presented earlier. The result would contain just one entry on the rEFInd boot menu, unless rEFInd found other boot options on an external or optical disk.</p>
+<p>The <tt>Windows via shell script</tt> entry may seem puzzling, but its purpose is to launch an OS (Windows in this case) after performing additional pre-boot initialization, which is handled by an EFI shell script. This works because you can pass the name of a shell script to an EFI shell&mdash;the script is named on the stanza's <tt>options</tt> line, using EFI file notation. The shell script, in turn, does whatever it needs to do and then launches the OS's boot loader:</p>
+
+<pre class="listing">mm 0003003E 8 -pci
+fs0:\EFI\Microsoft\Boot\bootmgfw.efi</pre>
+
+<p>This example writes data to the computer's PCI bus via the EFI shell's <tt>mm</tt> command and then launches Windows. Chances are you won't need to engage in such operations, and I do <i>not</i> recommend you try this exact example unless you know what you're doing! This command was required to activate the video hardware on a computer of a person with whom I corresponded prior to booting Windows, but such needs are rare.</p>
+
+<p>You can combine these OS stanzas with the global <tt>refind.conf</tt> options presented earlier. The result would contain just two entries on the rEFInd boot menu (for Gentoo and Windows, since the Ubuntu entry is disabled), unless rEFInd found other boot options on an external or optical disk.</p>
 
 <h2>Creating Submenu Entries</h2>
 

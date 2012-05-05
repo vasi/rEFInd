@@ -1,5 +1,16 @@
-0.3.2 (?/??/2012):
-------------------
+0.3.2 (5/4/2012):
+-----------------
+
+- Added the install.sh script to install rEFInd on Linux and Mac OS X
+  systems. This script must be run as root (or via sudo). It requires
+  no options, but on Mac OS X, passing it the "esp" option causes it
+  to install rEFInd on the computer's ESP rather than the default of the
+  currently OS X boot partition. (Under Linux, the default is to install to
+  the ESP.) Note that there may be some unusual cases in which this script
+  will fail to work.
+
+- Does a better job of clearing the screen when launching OSes in text
+  mode.
 
 - Added detection "recipe" for GRUB 2's BIOS Boot Partition.
 

@@ -167,13 +167,17 @@ VOID FinishTextScreen(IN BOOLEAN WaitAlways)
 
 VOID BeginExternalScreen(IN BOOLEAN UseGraphicsMode, IN CHAR16 *Title)
 {
+    EG_PIXEL DarkBackgroundPixel  = { 0x0, 0x0, 0x0, 0 };
+
     if (!AllowGraphicsMode)
         UseGraphicsMode = FALSE;
 
     if (UseGraphicsMode) {
         SwitchToGraphics();
         BltClearScreen(FALSE);
-    }
+    } else {
+       egClearScreen(&DarkBackgroundPixel);
+    } // if/else
 
     // show the header
     DrawScreenHeader(Title);
