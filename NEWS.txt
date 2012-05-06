@@ -1,6 +1,14 @@
 0.3.3 (?/?/2012):
 -----------------
 
+- Improved menu navigation:
+  - In graphics mode, left & right arrow keys move left & right, while up &
+    down arrows move between rows.
+  - Page Up and Page Down now move through chunks of visible tags (in both
+    text & graphics modes), jumping from one row to another only when at
+    the edge of the row. In text mode, the "rows" are broken down as in
+    graphics mode, but they aren't visibly distinguished on the screen.
+
 - Improved text-mode use: Now displays the proper number of entries when
   first started and scrolling is done sensibly when too many entries exist
   to fit on the screen.

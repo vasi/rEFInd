@@ -64,8 +64,10 @@
 // scrolling definitions
 
 typedef struct {
-   INTN CurrentSelection, LastSelection, MaxIndex;
+   INTN CurrentSelection, PreviousSelection, MaxIndex;
    INTN FirstVisible, LastVisible, MaxVisible;
+   INTN FinalRow0, InitialRow1;
+   INTN ScrollMode;
    BOOLEAN PaintAll, PaintSelection;
 } SCROLL_STATE;
 
@@ -76,6 +78,11 @@ typedef struct {
 #define SCROLL_FIRST      (4)
 #define SCROLL_LAST       (5)
 #define SCROLL_NONE       (6)
+#define SCROLL_LINE_RIGHT (7)
+#define SCROLL_LINE_LEFT  (8)
+
+#define SCROLL_MODE_TEXT  (0) /* Used in text mode & for GUI submenus */
+#define SCROLL_MODE_ICONS (1) /* Used for main GUI menu */
 
 struct _refit_menu_screen;
 

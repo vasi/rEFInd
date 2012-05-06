@@ -163,12 +163,12 @@ static VOID InitSelection(VOID)
 
 static VOID InitScroll(OUT SCROLL_STATE *State, IN UINTN ItemCount, IN UINTN VisibleSpace)
 {
-    State->LastSelection = State->CurrentSelection = 0;
+    State->PreviousSelection = State->CurrentSelection = 0;
     State->MaxIndex = (INTN)ItemCount - 1;
     State->FirstVisible = 0;
-    if (AllowGraphicsMode)
+    if (AllowGraphicsMode) {
        State->MaxVisible = UGAWidth / (ROW0_TILESIZE + TILE_XSPACING) - 1;
-    else
+    } else
        State->MaxVisible = ConHeight - 4;
     if ((VisibleSpace > 0) && (VisibleSpace < State->MaxVisible))
         State->MaxVisible = (INTN)VisibleSpace;
@@ -197,23 +197,66 @@ static VOID AdjustScrollState(/* IN REFIT_MENU_SCREEN *Screen, */ IN SCROLL_STAT
 
 static VOID UpdateScroll(IN OUT SCROLL_STATE *State, IN UINTN Movement)
 {
-    State->LastSelection = State->CurrentSelection;
+    State->PreviousSelection = State->CurrentSelection;
 
     switch (Movement) {
-        case SCROLL_LINE_UP:
+        case SCROLL_LINE_LEFT:
             if (State->CurrentSelection > 0) {
                 State->CurrentSelection --;
             }
             break;
 
-        case SCROLL_LINE_DOWN:
+        case SCROLL_LINE_RIGHT:
             if (State->CurrentSelection < State->MaxIndex) {
                 State->CurrentSelection ++;
             }
             break;
 
-        // TODO: Better handling of SCROLL_PAGE_UP & SCROLL_PAGE_DOWN
+        case SCROLL_LINE_UP:
+            if (State->ScrollMode == SCROLL_MODE_ICONS) {
+               if (State->CurrentSelection >= State->InitialRow1) {
+                  if (State->MaxIndex > State->InitialRow1) { // avoid division by 0!
+                     State->CurrentSelection = State->FirstVisible + (State->LastVisible - State->FirstVisible) *
+                                               (State->CurrentSelection - State->InitialRow1) /
+                                               (State->MaxIndex - State->InitialRow1);
+                  } else {
+                     State->CurrentSelection = State->FirstVisible;
+                  } // if/else
+               } // if in second row
+            } else {
+               if (State->CurrentSelection > 0)
+                  State->CurrentSelection--;
+            } // if/else
+            break;
+
+        case SCROLL_LINE_DOWN:
+           if (State->ScrollMode == SCROLL_MODE_ICONS) {
+               if (State->CurrentSelection <= State->FinalRow0) {
+                  if (State->LastVisible > State->FirstVisible) { // avoid division by 0!
+                     State->CurrentSelection = State->InitialRow1 + (State->MaxIndex - State->InitialRow1) *
+                                               (State->CurrentSelection - State->FirstVisible) /
+                                               (State->LastVisible - State->FirstVisible);
+                  } else {
+                     State->CurrentSelection = State->InitialRow1;
+                  } // if/else
+               } // if in first row
+            } else {
+               if (State->CurrentSelection < State->MaxIndex)
+                  State->CurrentSelection++;
+            } // if/else
+            break;
+
         case SCROLL_PAGE_UP:
+           if (State->CurrentSelection <= State->FinalRow0)
+              State->CurrentSelection -= State->MaxVisible;
+           else if (State->CurrentSelection == State->InitialRow1)
+              State->CurrentSelection = State->FinalRow0;
+           else
+              State->CurrentSelection = State->InitialRow1;
+           if (State->CurrentSelection < 0)
+              State->CurrentSelection = 0;
+           break;
+
         case SCROLL_FIRST:
            if (State->CurrentSelection > 0) {
               State->PaintAll = TRUE;
@@ -222,6 +265,19 @@ static VOID UpdateScroll(IN OUT SCROLL_STATE *State, IN UINTN Movement)
            break;
 
         case SCROLL_PAGE_DOWN:
+           if (State->CurrentSelection < State->FinalRow0) {
+              State->CurrentSelection += State->MaxVisible;
+              if (State->CurrentSelection > State->FinalRow0)
+                 State->CurrentSelection = State->FinalRow0;
+           } else if (State->CurrentSelection == State->FinalRow0) {
+              State->CurrentSelection++;
+           } else {
+              State->CurrentSelection = State->MaxIndex;
+           }
+           if (State->CurrentSelection > State->MaxIndex)
+              State->CurrentSelection = State->MaxIndex;
+           break;
+
         case SCROLL_LAST:
            if (State->CurrentSelection < State->MaxIndex) {
               State->PaintAll = TRUE;
@@ -233,10 +289,10 @@ static VOID UpdateScroll(IN OUT SCROLL_STATE *State, IN UINTN Movement)
             break;
 
     }
-    if (!AllowGraphicsMode)
+    if (State->ScrollMode == SCROLL_MODE_TEXT)
        AdjustScrollState(State);
 
-    if (!State->PaintAll && State->CurrentSelection != State->LastSelection)
+    if (!State->PaintAll && State->CurrentSelection != State->PreviousSelection)
         State->PaintSelection = TRUE;
     State->LastVisible = State->FirstVisible + State->MaxVisible - 1;
 }
@@ -287,10 +343,28 @@ static INTN FindMenuShortcutEntry(IN REFIT_MENU_SCREEN *Screen, IN CHAR16 *Short
     return -1;
 }
 
+// Identify the end of row 0 and the beginning of row 1; store the results in the
+// appropriate fields in State. Also reduce MaxVisible if that value is greater
+// than the total number of row-0 tags and if we're in an icon-based screen
+static VOID IdentifyRows(IN SCROLL_STATE *State, IN REFIT_MENU_SCREEN *Screen) {
+   UINTN i;
+
+   State->FinalRow0 = 0;
+   State->InitialRow1 = State->MaxIndex;
+   for (i = 0; i < State->MaxIndex; i++) {
+      if (Screen->Entries[i]->Row == 0) {
+         State->FinalRow0 = i;
+      } else if ((Screen->Entries[i]->Row == 1) && (State->InitialRow1 > i)) {
+         State->InitialRow1 = i;
+      } // if/else
+   } // for
+   if ((State->ScrollMode == SCROLL_MODE_ICONS) && (State->MaxVisible > (State->FinalRow0 + 1)))
+      State->MaxVisible = State->FinalRow0 + 1;
+} // static VOID IdentifyRows()
+
 //
 // generic menu function
 //
-
 static UINTN RunGenericMenu(IN REFIT_MENU_SCREEN *Screen, IN MENU_STYLE_FUNC StyleFunc, IN INTN DefaultEntryIndex, OUT REFIT_MENU_ENTRY **ChosenEntry)
 {
     SCROLL_STATE State;
@@ -311,6 +385,7 @@ static UINTN RunGenericMenu(IN REFIT_MENU_SCREEN *Screen, IN MENU_STYLE_FUNC Sty
     MenuExit = 0;
 
     StyleFunc(Screen, &State, MENU_FUNCTION_INIT, NULL);
+    IdentifyRows(&State, Screen);
     // override the starting selection with the default index, if any
     if (DefaultEntryIndex >= 0 && DefaultEntryIndex <= State.MaxIndex) {
         State.CurrentSelection = DefaultEntryIndex;
@@ -356,12 +431,16 @@ static UINTN RunGenericMenu(IN REFIT_MENU_SCREEN *Screen, IN MENU_STYLE_FUNC Sty
         // react to key press
         switch (key.ScanCode) {
             case SCAN_UP:
-            case SCAN_LEFT:
                 UpdateScroll(&State, SCROLL_LINE_UP);
                 break;
+            case SCAN_LEFT:
+                UpdateScroll(&State, SCROLL_LINE_LEFT);
+                break;
             case SCAN_DOWN:
-            case SCAN_RIGHT:
                 UpdateScroll(&State, SCROLL_LINE_DOWN);
+                break;
+            case SCAN_RIGHT:
+                UpdateScroll(&State, SCROLL_LINE_RIGHT);
                 break;
             case SCAN_HOME:
                 UpdateScroll(&State, SCROLL_FIRST);
@@ -426,6 +505,7 @@ static VOID TextMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, 
     static CHAR16 **DisplayStrings;
     CHAR16 *TimeoutMessage;
 
+    State->ScrollMode = SCROLL_MODE_TEXT;
     switch (Function) {
 
         case MENU_FUNCTION_INIT:
@@ -503,9 +583,9 @@ static VOID TextMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, 
 
         case MENU_FUNCTION_PAINT_SELECTION:
             // redraw selection cursor
-            refit_call3_wrapper(ST->ConOut->SetCursorPosition, ST->ConOut, 2, MenuPosY + (State->LastSelection - State->FirstVisible));
+            refit_call3_wrapper(ST->ConOut->SetCursorPosition, ST->ConOut, 2, MenuPosY + (State->PreviousSelection - State->FirstVisible));
             refit_call2_wrapper(ST->ConOut->SetAttribute, ST->ConOut, ATTR_CHOICE_BASIC);
-            refit_call2_wrapper(ST->ConOut->OutputString, ST->ConOut, DisplayStrings[State->LastSelection]);
+            refit_call2_wrapper(ST->ConOut->OutputString, ST->ConOut, DisplayStrings[State->PreviousSelection]);
             refit_call3_wrapper(ST->ConOut->SetCursorPosition, ST->ConOut, 2, MenuPosY + (State->CurrentSelection - State->FirstVisible));
             refit_call2_wrapper(ST->ConOut->SetAttribute, ST->ConOut, ATTR_CHOICE_CURRENT);
             refit_call2_wrapper(ST->ConOut->OutputString, ST->ConOut, DisplayStrings[State->CurrentSelection]);
@@ -537,8 +617,6 @@ static VOID TextMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, 
 
 static VOID DrawMenuText(IN CHAR16 *Text, IN UINTN SelectedWidth, IN UINTN XPos, IN UINTN YPos)
 {
-//    Print(L"Entering DrawMenuText(); Text is '%s', SelectedWidth is %d, XPos is %d, YPos is %d\n",
-//          Text, SelectedWidth, XPos, YPos);
     if (TextBuffer == NULL)
         TextBuffer = egCreateImage(LAYOUT_TEXT_WIDTH, TEXT_LINE_HEIGHT, FALSE);
 
@@ -561,6 +639,7 @@ static VOID GraphicsMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *Sta
     UINTN ItemWidth;
     static UINTN MenuWidth, EntriesPosX, EntriesPosY, TimeoutPosY;
 
+    State->ScrollMode = SCROLL_MODE_TEXT;
     switch (Function) {
 
         case MENU_FUNCTION_INIT:
@@ -620,8 +699,8 @@ static VOID GraphicsMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *Sta
 
         case MENU_FUNCTION_PAINT_SELECTION:
             // redraw selection cursor
-            DrawMenuText(Screen->Entries[State->LastSelection]->Title, 0,
-                         EntriesPosX, EntriesPosY + State->LastSelection * TEXT_LINE_HEIGHT);
+            DrawMenuText(Screen->Entries[State->PreviousSelection]->Title, 0,
+                         EntriesPosX, EntriesPosY + State->PreviousSelection * TEXT_LINE_HEIGHT);
             DrawMenuText(Screen->Entries[State->CurrentSelection]->Title, MenuWidth,
                          EntriesPosX, EntriesPosY + State->CurrentSelection * TEXT_LINE_HEIGHT);
             break;
@@ -675,11 +754,14 @@ static VOID PaintAll(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, UINTN
       AdjustScrollState(State);
    for (i = State->FirstVisible; i <= State->MaxIndex; i++) {
       if (Screen->Entries[i]->Row == 0) {
+         State->FinalRow0 = i;
          if (i <= State->LastVisible) {
             DrawMainMenuEntry(Screen->Entries[i], (i == State->CurrentSelection) ? TRUE : FALSE,
                               itemPosX[i - State->FirstVisible], row0PosY);
          } // if
       } else {
+         if (State->InitialRow1 > i)
+            State->InitialRow1 = i;
          DrawMainMenuEntry(Screen->Entries[i], (i == State->CurrentSelection) ? TRUE : FALSE,
                            itemPosX[i], row1PosY);
       }
@@ -693,9 +775,9 @@ static VOID PaintAll(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, UINTN
 static VOID PaintSelection(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, UINTN *itemPosX,
                            UINTN row0PosY, UINTN row1PosY, UINTN textPosY) {
    if ((State->CurrentSelection < State->LastVisible) && (State->CurrentSelection >= State->FirstVisible)) {
-      DrawMainMenuEntry(Screen->Entries[State->LastSelection], FALSE,
-                        itemPosX[State->LastSelection - State->FirstVisible],
-                        (Screen->Entries[State->LastSelection]->Row == 0) ? row0PosY : row1PosY);
+      DrawMainMenuEntry(Screen->Entries[State->PreviousSelection], FALSE,
+                        itemPosX[State->PreviousSelection - State->FirstVisible],
+                        (Screen->Entries[State->PreviousSelection]->Row == 0) ? row0PosY : row1PosY);
       DrawMainMenuEntry(Screen->Entries[State->CurrentSelection], TRUE,
                         itemPosX[State->CurrentSelection - State->FirstVisible],
                         (Screen->Entries[State->CurrentSelection]->Row == 0) ? row0PosY : row1PosY);
@@ -736,6 +818,7 @@ VOID MainMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, IN UINT
     static UINTN *itemPosX;
     static UINTN row0PosY, textPosY;
 
+    State->ScrollMode = SCROLL_MODE_ICONS;
     switch (Function) {
 
         case MENU_FUNCTION_INIT:
