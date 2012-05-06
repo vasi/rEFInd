@@ -1,6 +1,10 @@
 0.3.3 (?/?/2012):
 -----------------
 
+- Improved text-mode use: Now displays the proper number of entries when
+  first started and scrolling is done sensibly when too many entries exist
+  to fit on the screen.
+
 0.3.2 (5/4/2012):
 -----------------
 
