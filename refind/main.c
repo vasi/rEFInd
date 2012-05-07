@@ -104,7 +104,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.3.2.2");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.3.3");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -604,6 +604,9 @@ VOID SetLoaderDefaults(LOADER_ENTRY *Entry, CHAR16 *LoaderPath, IN REFIT_VOLUME 
       Entry->OSType = 'E';
       if (ShortcutLetter == 0)
          ShortcutLetter = 'L';
+   } else if (StriSubCmp(L"grub", FileName)) {
+      Entry->OSType = 'G';
+      ShortcutLetter = 'G';
    } else if (StriCmp(FileName, L"cdboot.efi") == 0 ||
               StriCmp(FileName, L"bootmgr.efi") == 0 ||
               StriCmp(FileName, L"Bootmgfw.efi") == 0) {
@@ -635,7 +638,6 @@ LOADER_ENTRY * AddLoaderEntry(IN CHAR16 *LoaderPath, IN CHAR16 *LoaderTitle, IN 
    Entry = InitializeLoaderEntry(NULL);
    if (Entry != NULL) {
       Entry->Title = StrDuplicate((LoaderTitle != NULL) ? LoaderTitle : LoaderPath);
-//      Entry->Title = StrDuplicate(LoaderTitle);
       Entry->me.Title = PoolPrint(L"Boot %s from %s", (LoaderTitle != NULL) ? LoaderTitle : LoaderPath, Volume->VolName);
       Entry->me.Row = 0;
       Entry->me.BadgeImage = Volume->VolBadgeImage;
@@ -1407,7 +1409,7 @@ static VOID ScanForTools(VOID) {
             j = 0;
             while ((FileName = FindCommaDelimited(SHELL_NAMES, j++)) != NULL) {
                if (FileExists(SelfRootDir, FileName)) {
-                  AddToolEntry(FileName, L"EFI Shell", BuiltinIcon(BUILTIN_ICON_TOOL_SHELL), 'E', FALSE);
+                  AddToolEntry(FileName, L"EFI Shell", BuiltinIcon(BUILTIN_ICON_TOOL_SHELL), 'S', FALSE);
                }
             } // while
             break;
@@ -1437,6 +1439,7 @@ efi_main (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
     BOOLEAN MainLoopRunning = TRUE;
     REFIT_MENU_ENTRY *ChosenEntry;
     UINTN MenuExit;
+    CHAR16 *Selection;
 
     // bootstrap
     InitializeLib(ImageHandle, SystemTable);
@@ -1459,8 +1462,9 @@ efi_main (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
     ScanForBootloaders();
     ScanForTools();
 
+    Selection = StrDuplicate(GlobalConfig.DefaultSelection);
     while (MainLoopRunning) {
-        MenuExit = RunMainMenu(&MainMenu, GlobalConfig.DefaultSelection, &ChosenEntry);
+        MenuExit = RunMainMenu(&MainMenu, Selection, &ChosenEntry);
 
         // We don't allow exiting the main menu with the Escape key.
         if (MenuExit == MENU_EXIT_ESCAPE) {
@@ -1508,8 +1512,10 @@ efi_main (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
                 return EFI_SUCCESS;
                 break;
 
-        }
-    }
+        } // switch()
+        FreePool(Selection);
+        Selection = StrDuplicate(ChosenEntry->Title);
+    } // while()
 
     // If we end up here, things have gone wrong. Try to reboot, and if that
     // fails, go into an endless loop.

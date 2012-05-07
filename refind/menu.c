@@ -754,16 +754,12 @@ static VOID PaintAll(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, UINTN
       AdjustScrollState(State);
    for (i = State->FirstVisible; i <= State->MaxIndex; i++) {
       if (Screen->Entries[i]->Row == 0) {
-         State->FinalRow0 = i;
          if (i <= State->LastVisible) {
             DrawMainMenuEntry(Screen->Entries[i], (i == State->CurrentSelection) ? TRUE : FALSE,
                               itemPosX[i - State->FirstVisible], row0PosY);
          } // if
       } else {
-         if (State->InitialRow1 > i)
-            State->InitialRow1 = i;
-         DrawMainMenuEntry(Screen->Entries[i], (i == State->CurrentSelection) ? TRUE : FALSE,
-                           itemPosX[i], row1PosY);
+         DrawMainMenuEntry(Screen->Entries[i], (i == State->CurrentSelection) ? TRUE : FALSE, itemPosX[i], row1PosY);
       }
    }
    if (!(GlobalConfig.HideUIFlags & HIDEUI_FLAG_LABEL))
@@ -774,10 +770,17 @@ static VOID PaintAll(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, UINTN
 // Move the selection to State->CurrentSelection, adjusting icon row if necessary...
 static VOID PaintSelection(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, UINTN *itemPosX,
                            UINTN row0PosY, UINTN row1PosY, UINTN textPosY) {
+   UINTN XSelect, YPos;
+
    if ((State->CurrentSelection < State->LastVisible) && (State->CurrentSelection >= State->FirstVisible)) {
-      DrawMainMenuEntry(Screen->Entries[State->PreviousSelection], FALSE,
-                        itemPosX[State->PreviousSelection - State->FirstVisible],
-                        (Screen->Entries[State->PreviousSelection]->Row == 0) ? row0PosY : row1PosY);
+      if (Screen->Entries[State->PreviousSelection]->Row == 0) {
+         XSelect = State->PreviousSelection - State->FirstVisible;
+         YPos = row0PosY;
+      } else {
+         XSelect = State->PreviousSelection;
+         YPos = row1PosY;
+      } // if/else
+      DrawMainMenuEntry(Screen->Entries[State->PreviousSelection], FALSE, itemPosX[XSelect], YPos);
       DrawMainMenuEntry(Screen->Entries[State->CurrentSelection], TRUE,
                         itemPosX[State->CurrentSelection - State->FirstVisible],
                         (Screen->Entries[State->CurrentSelection]->Row == 0) ? row0PosY : row1PosY);

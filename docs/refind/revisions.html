@@ -14,7 +14,7 @@
 <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-<p>Last Web page update: 5/4/2012</p>
+<p>Last Web page update: 5/6/2012</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -92,6 +92,8 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 <p>The following summarizes changes in rEFInd's public releases:</p>
 
 <ul>
+
+<li><b>0.3.3 (5/6/2012)</b>&mdash;I've focused on user interface improvements for this release. The biggest improvement is in the text-mode interface, which suffered from assorted display glitches in previous releases. These have now been fixed, so the text-mode interface should be more usable. I've also fine-tuned the use of keyboard keys, particularly in graphical mode. The up and down arrow keys now move between the two rows of the display, and Page Up and Page Down scroll the first row if it's too big for the display. (They'll also move between rows, but only when at the end of the first row or the start of the second.) Returning from a failed loader or a tool or built-in function now renders that tag as the currently-selected item, rather than setting the default loader as active, as happened with previous versions.</li>
 
 <li><b>0.3.2 (5/4/2012)</b>&mdash;rEFInd's core functionality changes very little with this version; I've tweaked the detection of BIOS-mode boot loaders to keep unbootable FAT partitions created under Linux and Windows out of the boot list, while adding detection of GRUB BIOS Boot Partitions to the list. I've also made a change that improves screen-clearing when launching EFI utilities and OSes in text mode. The major change to this version is the addition of a new Linux/OS X installation script, <tt>install.sh</tt>. In most cases, this makes it possible to install rEFInd simply by typing <tt class="userinput">./install.sh</tt> from the rEFInd package directory; however, you should see the <a href="installing.html">Installing rEFInd</a> page for details. In some cases, manual installation may still be required. Also, you may prefer to copy over the old rEFInd program file with the new one when upgrading.</li>
 

@@ -1,4 +1,4 @@
-0.3.3 (?/?/2012):
+0.3.3 (5/6/2012):
 -----------------
 
 - Improved menu navigation:
@@ -9,9 +9,9 @@
     the edge of the row. In text mode, the "rows" are broken down as in
     graphics mode, but they aren't visibly distinguished on the screen.
 
-- Improved text-mode use: Now displays the proper number of entries when
-  first started and scrolling is done sensibly when too many entries exist
-  to fit on the screen.
+- Improved text-mode use: rEFInd now displays the proper number of entries
+  when first started in text mode and scrolling is done sensibly when too
+  many entries exist to fit on the screen.
 
 0.3.2 (5/4/2012):
 -----------------

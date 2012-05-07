@@ -15,7 +15,7 @@
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <p>Originally written: 3/14/2012; last Web page update:
-5/4/2012, referencing rEFInd 0.3.2</p>
+5/6/2012, referencing rEFInd 0.3.3</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -102,9 +102,9 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <p>If you don't press any key before the timeout (shown on the last line) expires, the default boot loader will launch. This is normally the first item in the menu, but you can adjust the default by editing the configuration file. (In this example, it's the SUSE loader, which is further identified by text above the timeout as <i>Linux 3.3.0-rc7 from ESP.</i>)</p>
 
-<p>This display is dominated by the central set of icons, which in this example includes icons for OS X, Windows, Ubuntu, a generic Linux installation (ELILO, in fact), SUSE, and an unkown boot loader. All but the last of these are on hard disks, but the unknown boot loader is on an optical disc, as revealed by the small icons (known as <i>badges</i>) in the lower-right corner of the OS icons.</p>
+<p>This display is dominated by the central set of OS <i>tags</i> (icons), which in this example includes icons for OS X, Windows, Ubuntu, a generic Linux installation (ELILO, in fact), SUSE, and an unkown boot loader. All but the last of these are on hard disks, but the unknown boot loader is on an optical disc, as revealed by the small icons (known as <i>badges</i>) in the lower-right corner of the OS icons.</p>
 
-<p>In this example, the SUSE tag is selected. You can move the selection left by pressing the left or down arrow key and right by pressing the right or up arrow key. If your system has many boot loaders, an arrow icon will appear to the right of the boot loader list, indicating that the boot loader list will scroll when you move off the right edge. If you do this, an arrow icon will appear to the left of the icon list, indicating that you can scroll back in a similar manner. Moving past the final selection or using the Page Down key moves the selection to the second row of small icons, which launch ancillary programs or perform special actions. In this figure, these five icons are present:</p>
+<p>In this example, the SUSE tag is selected. You can move the selection left by pressing the left arrow key and right by pressing the right arrow key. If your system has many boot loaders, an arrow icon will appear to the right of the boot loader list, indicating that the boot loader list will scroll when you move off the right edge. If you do this, an arrow icon will appear to the left of the icon list, indicating that you can scroll back in a similar manner. You can scroll the list by one line full of icons by using the Page Up or Page Down keys to move left and right, respectively. Moving past the final selection or using the down arrow key moves the selection to the second row of small icons, which launch ancillary programs or perform special actions. If you've moved the selection cursor to the second row, pressing the up arrow key or scrolling past the left edge of the second row moves the cursor to the top row. In this figure, these five icons are present:</p>
 
 <ul>
 
@@ -141,19 +141,35 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
    <th>Explanation</th>
 </tr>
 <tr>
-   <td><i>left arrow</i> or <i>up arrow</i></td>
+   <td><i>left arrow</i></td>
    <td>Moves the selection one icon to the left (or up the list in text mode)</td>
 </tr>
 <tr>
-   <td><i>right arrow</i> or <i>down arrow</i></td>
+   <td><i>right arrow</i></td>
    <td>Moves the selection one icon to the right (or down the list in text mode)</td>
 </tr>
 <tr>
-   <td><i>Page Up</i> or <i>Home</i></td>
+   <td><i>up arrow</i></td>
+   <td>Moves the selection from the utilities row to the OS row (in text mode, moves up one entry)</td>
+</tr>
+<tr>
+   <td><i>down arrow</i></td>
+   <td>Moves the selection from the OS row to the utilities row (in text mode, moves down one entry)</td>
+</tr>
+<tr>
+   <td><i>Page Up</i></td>
+   <td>Scrolls the visible set of tags to the left (or up in text mode)</td>
+</tr>
+<tr>
+   <td><i>Page Down</i></td>
+   <td>Scrolls the visible set of tags to the right (or down in text mode)</td>
+</tr>
+<tr>
+   <td><i>Home</i></td>
    <td>Moves the selection to the first item on the OS row</td>
 </tr>
 <tr>
-   <td><i>Page Down</i> or <i>End</i></td>
+   <td><i>End</i></td>
    <td>Moves the selection to the last item on the utilities row</td>
 </tr>
 <tr>
@@ -173,28 +189,36 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
    <td>Launches the currently-selected OS, utility, or built-in feature</td>
 </tr>
 <tr>
-   <td><i>0</i></td>
-   <td>Launches the Linux rescue entry</td>
-</tr>
-<tr>
    <td><i>1</i> through <i>9</i></td>
    <td>Launches the specified boot loader by number</td>
 </tr>
 <tr>
+   <td><i>A</i></td>
+   <td>Displays the "About rEFInd" information</td>
+</tr>
+<tr>
    <td><i>E</i></td>
-   <td>Launches the EFI shell</td>
+   <td>Launches the first instance of ELILO in the boot list</td>
+</tr>
+<tr>
+   <td><i>G</i></td>
+   <td>Launches the first instance of GRUB in the boot list</td>
 </tr>
 <tr>
    <td><i>L</i></td>
-   <td>Launches the first Linux ELILO boot loader</td>
+   <td>Launches the first Linux kernel in the boot list</td>
 </tr>
 <tr>
    <td><i>M</i></td>
-   <td>Launches the first Mac OS boot loader</td>
+   <td>Launches the first Mac OS boot loader in the boot list</td>
 </tr>
 <tr>
    <td><i>P</i></td>
    <td>Launches <tt>gptsync</tt></td>
+</tr>
+<tr>
+   <td><i>S</i></td>
+   <td>Launches an EFI shell, if available</td>
 </tr>
 <tr>
    <td><i>U</i></td>
@@ -210,7 +234,7 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 </tr>
 </table>
 
-<p>rEFInd assigns shortcut letters to most OS entries based on the first letter of the directory in which the OS's boot loader is stored. For instance, if you have a boot loader called <tt>/EFI/debian/elilo.efi</tt>, rEFInd attempts to assign it a shortcut letter of <i>D</i>. rEFInd overrides this default for Mac OS X, Windows, and for Linux ELILO boot loaders if the distribution can't be more precisely identified, as noted in the preceding table. This method works well for many installations, but it can produce conflicts. For instance, if you have a Macintosh that holds both Mac OS X and Mandriva, both OSes would normally use the <tt>M</tt> shortcut key. In practice, which works depends on the order in which rEFInd detects the OSes.</p>
+<p>rEFInd assigns shortcut letters to most OS entries based on the first letter of the directory in which the OS's boot loader is stored. For instance, if you have a boot loader called <tt>/EFI/debian/elilo.efi</tt>, rEFInd attempts to assign it a shortcut letter of <i>D</i>. rEFInd overrides this default for Mac OS X, Windows, and for Linux's GRUB, ELILO, and EFI stub boot loaders if the distribution can't be more precisely identified, as noted in the preceding table. This method works well for many installations, but it can produce conflicts. For instance, if you have a Macintosh that holds both Mac OS X and Mandriva, both OSes would normally use the <tt>M</tt> shortcut key. In practice, which works depends on the order in which rEFInd detects the OSes.</p>
 
 <hr />
 
