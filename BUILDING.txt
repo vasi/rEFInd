@@ -82,7 +82,8 @@ With your development system set up, you can compile rEFInd as follows:
    "refind", "libeg", and "include".
 
 4) Type "make". With any luck, rEFInd will compile without error, leaving
-   the "refind.efi" file in the "refind" subdirectory.
+   the "refind_ia32.efi" or "refind_x64.efi" file, depending on your
+   platform, in the "refind" subdirectory.
 
 If rEFInd doesn't compile correctly, you'll need to track down the source
 of the problem. Double-check that you've got all the necessary development
@@ -118,22 +119,24 @@ flag. In GNU-EFI, this can be added to the CFLAGS line in Make.defaults.
 Installing rEFInd
 =================
 
-With rEFInd compiled, you can install it. On a UEFI-based system, you'll
-want to copy files on the ESP as follows:
+With rEFInd compiled, you can install it. The easiest way to do this is
+with the install.sh script, which works on both Linux and Mac OS X.
+Alternatively, you can type "make install" to install using this script.
+Note that this installation copies files to the ESP and uses "efibootmgr"
+(on Linux) or "bless" (on OS X) to add rEFInd to the firmware's boot loader
+list. The docs/refind/installing.html file provides more details on this
+script and its use.
+
+If install.sh doesn't work for you or if you prefer to do the job manually,
+you may. On a UEFI-based system, you'll want to copy files on the ESP as
+follows:
 
 * Create a directory for rEFInd, such as EFI/refind.
-* Copy refind/refind.efi to the ESP's EFI/refind directory.
+* Copy refind/refind_ia32.efi or refind_x64.efi to the ESP's EFI/refind
+  directory.
 * Copy refind.conf-sample to the EFI/refind directory as refind.conf.
 * Copy the icons subdirectory, including all its files, to EFI/refind.
 
 You'll then need to activate rEFInd in your EFI. This can be done with
 tools such as "efibootmgr" under Linux or "bless" under OS X. See the
-docs/installing.html file for details.
-
-You may have noticed an install.sh script in the source package. This
-script is intended for distribution with my own binary packages of rEFInd,
-and it copies files from the "refind" subdirectory (relative to the
-script's location) -- namely refind_x64.efi or refind_ia32.efi,
-refind.conf-sample, and an icons subdirectory. You can rearrange your files
-to provide this layout, but it's no more work to copy the files as just
-described.
+docs/refind/installing.html file for details.

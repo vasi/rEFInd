@@ -94,20 +94,6 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <p>Once you've uncompressed a rEFInd binary zip file, you must install it to your computer's ESP (or conceivably to some other location). The details of how you to this depend on your OS and your computer (UEFI-based PC vs. Macintosh). The upcoming sections provide details. For Linux and Mac OS X, you can use the installation script, <a href="#installsh"><tt>install.sh</tt>,</a> which provides easy one-command installation on most systems. Occasionally this script will fail, though, so I also provide explicit instructions for <a href="#linux">Linux</a> and <a href="#osx">Mac OS X.</a> Installation under <a href="#windows">Windows</a> also must be done manually. In some cases, you'll have to deviate from the default naming conventions, as described in <a href="#naming">a section on this topic.</a> If you're upgrading rEFInd, see the <a href="#upgrading">section on upgrading.</a> Finally, I describe how to install some <a href="#addons">additional components</a> you might find useful.</a></p>
 
-<!--
-
-can copy the entire <tt>refind</tt> directory into your EFI System Partition's (ESP's) <tt>EFI</tt> directory on UEFI-based PCs, so that rEFInd resides in <tt>EFI/refind</tt>. If you've tried rEFInd using a CD-R image file, you can copy the files from the <tt>EFI/refind</tt> directory on the CD to create an equivalent directory on the ESP. To avoid confusion, though, you should delete the rEFInd binary file for the CPU type your computer does <i>not</i> use. To the best of my knowledge, all UEFI-based PCs use 64-bit CPUs, so you should keep the <tt>refind_x64.efi</tt> binary and delete the <tt>refind_ia32.efi</tt> binary. Most Intel-based Macs also have 64-bit EFI implementations, so you should do the same thing; but very early Intel-based Macs have 32-bit EFIs (and sometimes 32-bit CPUs), which require the <tt>refind_ia32.efi</tt> file. You can determine whether your Mac needs the <i>x</i>86-64 or IA32 build by typing the following command in a Mac Terminal window:</p>
-
-<pre class="listing">
-$ <b>ioreg -l -p IODeviceTree | grep firmware-abi</b>
-</pre>
-
-<p>The result should read either <tt>EFI32</tt> or <tt>EFI64</tt>, indicating that you should use the <tt>refind_ia32.efi</tt> or <tt>refind_x64.efi</tt> binary, respectively.</p>
-
-<p>Of course, before you can install the files, you must be able to access the ESP. The details of this task vary from one OS to another. If you have a choice, I recommend using <a href="#linux">Linux</a> for rEFInd installation on UEFI PCs and <a href="#osx">OS X</a> on Macs. (On Macs, you can optionally use OS X's main partition rather than the ESP for this purpose.) <a href="#windows">Windows</a> provides relatively primitive tools for accessing the ESP and manipulating the EFI's boot list. I also describe some <a href="#naming">options for naming rEFInd</a> that may be useful on some systems. Finally, I describe how to install some <a href="#addons">extra tools</a> that you may find useful but that are not included with rEFInd.</p>
-
--->
-
 <a name="installsh">
 <h2>Installing rEFInd Using <tt>install.sh</tt> under Linux or Mac OS X</h2>
 
