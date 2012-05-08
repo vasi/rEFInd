@@ -48,14 +48,14 @@ To compile rEFInd, you'll need the following:
 
 * A standard set of Linux development tools, based on GCC.
 
-* The GNU-EFI package (http://sourceforge.net/projects/gnu-efi/). You
-  can install this from a package called "gnu-efi"; however, rEFInd relies
-  on features that were added somewhere between GNU-EFI 3.0i and 3.0p to
-  provide driver-loading capabilities. As of 4/2012, most Linux
-  distributions seem to deliver rather elderly versions of GNU-EFI, so you
-  may need to download the latest source code, compile it, and install it
-  locally. Since rEFInd version 0.2.7, the Makefiles assume this (see
-  below).
+* The GNU-EFI package (http://sourceforge.net/projects/gnu-efi/). You can
+  install this from a package called "gnu-efi"; however, rEFInd relies on
+  features that were added in (I think) 3.0l to provide driver-loading
+  capabilities. The versions I've used and that work are 3.0p and 3.0q. As
+  of 5/2012, most Linux distributions seem to deliver rather elderly
+  versions of GNU-EFI, so you may need to download the latest source code,
+  compile it, and install it locally. Since rEFInd version 0.2.7, the
+  Makefiles assume this (see below).
 
 It's possible that you could use a non-Linux platform to compile rEFInd. To
 the best of my knowledge, the rEFInd code doesn't rely on anything
@@ -99,12 +99,12 @@ EFICRT0         = /usr/local/lib
 
 If you've installed GNU-EFI from a distribution's package, you may need to
 remove "local" from those paths, and perhaps change references to "lib" to
-"lib64". As noted earlier, though, as of 4/2012, most distributions provide
+"lib64". As noted earlier, though, as of 5/2012, most distributions provide
 out-of-date GNU-EFI implementations that will not work with rEFInd 0.2.7
 and later.
 
 When I tried to compile rEFInd under Ubuntu 12.04 (i386), even with a
-locally-compiled GNU-EFI 3.0p, I got errors like this:
+locally-compiled GNU-EFI 3.0p or 3.0q, I got errors like this:
 
 main.o: In function `StartLegacy.isra.0':
 main.c:(.text+0x8b1): undefined reference to `__stack_chk_fail_local'
@@ -112,8 +112,8 @@ lib.o: In function `ScanVolumeBootcode.part.3':
 lib.c:(.text+0xf2f): undefined reference to `__stack_chk_fail_local'
 lib.o: In function `ScanExtendedPartition.isra.4':
 
-The solution was to recompile GNU-EFI 3.0p with the -fno-stack-protector
-GCC flag. In GNU-EFI, this can be added to the CFLAGS line in Make.common.
+The solution was to recompile GNU-EFI with the -fno-stack-protector GCC
+flag. In GNU-EFI, this can be added to the CFLAGS line in Make.defaults.
 
 Installing rEFInd
 =================

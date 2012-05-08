@@ -17,4 +17,7 @@ all:
 clean:
 	make -C $(LIB_DIR) clean
 	make -C $(LOADER_DIR) clean
+
+install:
+	./install.sh
 # DO NOT DELETE

@@ -770,24 +770,30 @@ static VOID PaintAll(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, UINTN
 // Move the selection to State->CurrentSelection, adjusting icon row if necessary...
 static VOID PaintSelection(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, UINTN *itemPosX,
                            UINTN row0PosY, UINTN row1PosY, UINTN textPosY) {
-   UINTN XSelect, YPos;
+   UINTN XSelectPrev, XSelectCur, YPosPrev, YPosCur;
 
-   if ((State->CurrentSelection < State->LastVisible) && (State->CurrentSelection >= State->FirstVisible)) {
+   if (((State->CurrentSelection < State->LastVisible) && (State->CurrentSelection >= State->FirstVisible)) ||
+       (State->CurrentSelection >= State->InitialRow1) ) {
       if (Screen->Entries[State->PreviousSelection]->Row == 0) {
-         XSelect = State->PreviousSelection - State->FirstVisible;
-         YPos = row0PosY;
+         XSelectPrev = State->PreviousSelection - State->FirstVisible;
+         YPosPrev = row0PosY;
       } else {
-         XSelect = State->PreviousSelection;
-         YPos = row1PosY;
+         XSelectPrev = State->PreviousSelection;
+         YPosPrev = row1PosY;
       } // if/else
-      DrawMainMenuEntry(Screen->Entries[State->PreviousSelection], FALSE, itemPosX[XSelect], YPos);
-      DrawMainMenuEntry(Screen->Entries[State->CurrentSelection], TRUE,
-                        itemPosX[State->CurrentSelection - State->FirstVisible],
-                        (Screen->Entries[State->CurrentSelection]->Row == 0) ? row0PosY : row1PosY);
+      if (Screen->Entries[State->CurrentSelection]->Row == 0) {
+         XSelectCur = State->CurrentSelection - State->FirstVisible;
+         YPosCur = row0PosY;
+      } else {
+         XSelectCur = State->CurrentSelection;
+         YPosCur = row1PosY;
+      } // if/else
+      DrawMainMenuEntry(Screen->Entries[State->PreviousSelection], FALSE, itemPosX[XSelectPrev], YPosPrev);
+      DrawMainMenuEntry(Screen->Entries[State->CurrentSelection], TRUE, itemPosX[XSelectCur], YPosCur);
       if (!(GlobalConfig.HideUIFlags & HIDEUI_FLAG_LABEL))
          DrawMainMenuText(Screen->Entries[State->CurrentSelection]->Title,
                           (UGAWidth - LAYOUT_TEXT_WIDTH) >> 1, textPosY);
-   } else {
+   } else { // Current selection not visible; must redraw the menu....
       MainMenuStyle(Screen, State, MENU_FUNCTION_PAINT_ALL, NULL);
    }
 } // static VOID MoveSelection(VOID)

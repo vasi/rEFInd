@@ -1,3 +1,9 @@
+0.3.4 (?/??/2012):
+------------------
+
+- Improved screen redraws to produce less flicker when moving among the
+  second-row tags.
+
 0.3.3 (5/6/2012):
 -----------------
 

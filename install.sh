@@ -17,6 +17,7 @@
 #
 # Revision history:
 #
+# 0.3.3.1 -- Fixed OS X 10.7 bug; also works as make target
 # 0.3.2.1 -- Check for presence of source files; aborts if not present
 # 0.3.2   -- Initial version
 #
@@ -30,11 +31,35 @@ TargetDir=/EFI/refind
 #
 
 # Abort if the rEFInd files can't be found.
+# Also sets $ConfFile to point to the configuration file, and
+# $IconsDir to point to the icons directory
 CheckForFiles() {
-   if [[ ! -f $SourceDir/refind_ia32.efi || ! -f $SourceDir/refind_x64.efi || ! -f $SourceDir/refind.conf-sample || ! -d $SourceDir/icons ]] ; then
-      echo "One or more files missing! Aborting installation!"
+   # Note: This check is satisfied if EITHER the 32- or the 64-bit version
+   # is found, even on the wrong platform. This is because the platform
+   # hasn't yet been determined. This could obviously be improved, but it
+   # would mean restructuring lots more code....
+   if [[ ! -f $RefindDir/refind_ia32.efi && ! -f $RefindDir/refind_x64.efi ]] ; then
+      echo "The rEFInd binary file is missing! Aborting installation!"
       exit 1
    fi
+
+   if [[ -f $RefindDir/refind.conf-sample ]] ; then
+      ConfFile=$RefindDir/refind.conf-sample
+   elif [[ -f $ThisDir/refind.conf-sample ]] ; then
+      ConfFile=$ThisDir/refind.conf-sample
+   else
+      echo "The sample configuration file is missing! Aborting installation!"
+      exit 1
+   fi
+
+   if [[ -d $RefindDir/icons ]] ; then
+      IconsDir=$RefindDir/icons
+   elif [[ -d $ThisDir/icons ]] ; then
+      IconsDir=$ThisDir/icons
+   else
+      echo "The icons directory is missing! Aborting installation!"
+   fi
+#|| ! -f $RefindDir/refind.conf-sample || ! -d $RefindDir/icons
 } # CheckForFiles()
 
 # Copy the rEFInd files to the ESP or OS X root partition.
@@ -42,13 +67,13 @@ CheckForFiles() {
 CopyRefindFiles() {
    mkdir -p $InstallPart/$TargetDir &> /dev/null
    if [[ $Platform == 'EFI32' ]] ; then
-      cp $SourceDir/refind_ia32.efi $InstallPart/$TargetDir
+      cp $RefindDir/refind_ia32.efi $InstallPart/$TargetDir
       if [[ $? != 0 ]] ; then
          Problems=1
       fi
       Refind="refind_ia32.efi"
    elif [[ $Platform == 'EFI64' ]] ; then
-      cp $SourceDir/refind_x64.efi $InstallPart/$TargetDir
+      cp $RefindDir/refind_x64.efi $InstallPart/$TargetDir
       if [[ $? != 0 ]] ; then
          Problems=1
       fi
@@ -64,7 +89,7 @@ CopyRefindFiles() {
       mv -f $InstallPart/$TargetDir/icons $InstallPart/$TargetDir/icons-backup
       echo "Notice: Backed up existing icons directory as icons-backup."
    fi
-   cp -r $SourceDir/icons $InstallPart/$TargetDir
+   cp -r $IconsDir $InstallPart/$TargetDir
    if [[ $? != 0 ]] ; then
       Problems=1
    fi
@@ -72,7 +97,7 @@ CopyRefindFiles() {
       echo "Existing refind.conf file found; copying sample file as refind.conf-sample"
       echo "to avoid collision."
       echo ""
-      cp -f $SourceDir/refind.conf-sample $InstallPart/$TargetDir
+      cp -f $ConfFile $InstallPart/$TargetDir
       if [[ $? != 0 ]] ; then
          Problems=1
       fi
@@ -80,7 +105,7 @@ CopyRefindFiles() {
       echo "Copying sample configuration file as refind.conf; edit this file to configure"
       echo "rEFInd."
       echo ""
-      cp -f $SourceDir/refind.conf-sample $InstallPart/$TargetDir/refind.conf
+      cp -f $ConfFile $InstallPart/$TargetDir/refind.conf
       if [[ $? != 0 ]] ; then
          Problems=1
       fi
@@ -239,9 +264,10 @@ InstallOnLinux() {
 # install under OS X or Linux, depending on the detected platform.
 #
 
-ThisScript=`readlink -f $0`
 OSName=`uname -s`
-SourceDir=`dirname $ThisScript`/refind
+ThisDir="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+RefindDir="$ThisDir/refind"
+ThisScript="$ThisDir/`basename $0`"
 CheckForFiles
 if [[ `whoami` != "root" ]] ; then
    echo "Not running as root; attempting to elevate privileges via sudo...."
