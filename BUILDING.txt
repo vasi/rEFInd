@@ -140,3 +140,14 @@ follows:
 You'll then need to activate rEFInd in your EFI. This can be done with
 tools such as "efibootmgr" under Linux or "bless" under OS X. See the
 docs/refind/installing.html file for details.
+
+Note to Distribution Maintainers
+================================
+
+The install.sh script, and therefore the "install" target in the Makefile,
+installs the program directly to the ESP and it modifies the *CURRENT
+COMPUTER's* NVRAM. Thus, you should *NOT* use this target as part of the
+build process for your binary packages (RPMs, Debian packages, etc.).
+(Gentoo could use it in an ebuild, though....) You COULD, however, copy the
+files to a directory somewhere (/usr/share/refind or whatever) and then
+call install.sh as part of the binary package installation process.

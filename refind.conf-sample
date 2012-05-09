@@ -21,6 +21,13 @@ timeout 20
 #hideui singleuser
 #hideui all
 
+# Set the name of a subdirectory in which icons are stored. Icons must
+# have the same names they have in the standard directory. The directory
+# name is specified relative to the main rEFInd binary's directory.
+# Default is "icons".
+#
+#icons_dir myicons
+
 # Use a custom title banner instead of the rEFInd icon and name. The file
 # path is relative to the directory where refind.efi is located. The color
 # in the top left corner of the image is used as the background color

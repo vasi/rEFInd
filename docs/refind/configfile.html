@@ -149,6 +149,11 @@ timeout 20
    <td>Removes the specified user interface features. <tt>banner</tt> removes the banner graphic, <tt>label</tt> removes the text description of each tag, <tt>singleuser</tt> removes the single-user option from the Mac OS sub-menu, <tt>hwtest</tt> removes the Mac OS hardware test option, <tt>arrows</tt> removes the arrows to the right or left of the OS tags when rEFInd finds too many OSes to display simultaneously, and <tt>all</tt> removes all of these options. You can specify multiple parameters with this option. The default is to set none of these values.</td>
 </tr>
 <tr>
+   <td><tt>icons_dir</tt></td>
+   <td>directory name</td>
+   <td>Specifies a directory in which custom icons may be found. This directory should contain files with the same names as the files in the standard <tt>icons</tt> directory. The directory name is specified relative to the directory in which the rEFInd binary resides.</td>
+</tr>
+<tr>
    <td><tt>banner</tt></td>
    <td>filename</td>
    <td>Specifies a custom banner file to replaced the rEFInd banner image. The file should be a BMP image with a color depth of 24, 8, 4, or 1 bits. The file path is relative to the directory where <tt>refind.efi</tt> is stored.</td>

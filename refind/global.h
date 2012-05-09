@@ -66,6 +66,7 @@
 
 #define NUM_SCAN_OPTIONS 10
 
+#define DEFAULT_ICONS_DIR L"icons"
 
 //
 // global definitions
@@ -164,6 +165,7 @@ typedef struct {
    CHAR16      *DefaultSelection;
    CHAR16      *AlsoScan;
    CHAR16      *DriverDirs;
+   CHAR16      *IconsDir;
    UINTN       ShowTools[NUM_TOOLS];
    CHAR8       ScanFor[NUM_SCAN_OPTIONS]; // codes of types of loaders for which to scan
 } REFIT_CONFIG;

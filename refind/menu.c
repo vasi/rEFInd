@@ -85,9 +85,6 @@ static EG_IMAGE *SelectionImages[4] = { NULL, NULL, NULL, NULL };
 static EG_PIXEL SelectionBackgroundPixel = { 0xff, 0xff, 0xff, 0 };
 static EG_IMAGE *TextBuffer = NULL;
 
-// Used in MainMenuStyle(), but must be persistent....
-UINTN row0PosX = 0, row0PosXRunning = 0, row1PosY = 0, row0Loaders = 0;
-
 //
 // Graphics helper functions
 //
@@ -180,7 +177,7 @@ static VOID InitScroll(OUT SCROLL_STATE *State, IN UINTN ItemCount, IN UINTN Vis
 
 // Adjust variables relating to the scrolling of tags, for when a selected icon isn't
 // visible given the current scrolling condition....
-static VOID AdjustScrollState(/* IN REFIT_MENU_SCREEN *Screen, */ IN SCROLL_STATE *State) {
+static VOID AdjustScrollState(IN SCROLL_STATE *State) {
    if (State->CurrentSelection > State->LastVisible) {
       State->LastVisible = State->CurrentSelection;
       State->FirstVisible = 1 + State->CurrentSelection - State->MaxVisible;
@@ -295,7 +292,7 @@ static VOID UpdateScroll(IN OUT SCROLL_STATE *State, IN UINTN Movement)
     if (!State->PaintAll && State->CurrentSelection != State->PreviousSelection)
         State->PaintSelection = TRUE;
     State->LastVisible = State->FirstVisible + State->MaxVisible - 1;
-}
+} // static VOID UpdateScroll()
 
 //
 // menu helper functions
@@ -772,7 +769,7 @@ static VOID PaintSelection(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State,
                            UINTN row0PosY, UINTN row1PosY, UINTN textPosY) {
    UINTN XSelectPrev, XSelectCur, YPosPrev, YPosCur;
 
-   if (((State->CurrentSelection < State->LastVisible) && (State->CurrentSelection >= State->FirstVisible)) ||
+   if (((State->CurrentSelection <= State->LastVisible) && (State->CurrentSelection >= State->FirstVisible)) ||
        (State->CurrentSelection >= State->InitialRow1) ) {
       if (Screen->Entries[State->PreviousSelection]->Row == 0) {
          XSelectPrev = State->PreviousSelection - State->FirstVisible;
@@ -822,10 +819,11 @@ static VOID PaintIcon(IN EG_EMBEDDED_IMAGE *BuiltInIcon, IN CHAR16 *ExternalFile
 VOID MainMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, IN UINTN Function, IN CHAR16 *ParamText)
 {
     INTN i;
-    extern UINTN row0PosX, row0PosXRunning, row1PosY, row0Loaders;
+    static UINTN row0PosX, row0PosXRunning, row1PosY, row0Loaders;
     UINTN row0Count, row1Count, row1PosX, row1PosXRunning;
     static UINTN *itemPosX;
     static UINTN row0PosY, textPosY;
+    CHAR16 FileName[256];
 
     State->ScrollMode = SCROLL_MODE_ICONS;
     switch (Function) {
@@ -882,13 +880,17 @@ VOID MainMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, IN UINT
             // For PaintIcon() calls, the starting Y position is moved to the midpoint
             // of the surrounding row; PaintIcon() adjusts this back up by half the
             // icon's height to properly center it.
-            if ((State->FirstVisible > 0) && (!(GlobalConfig.HideUIFlags & HIDEUI_FLAG_ARROWS)))
-               PaintIcon(&egemb_arrow_left, L"icons\\arrow_left.icns", row0PosX - TILE_XSPACING,
+            if ((State->FirstVisible > 0) && (!(GlobalConfig.HideUIFlags & HIDEUI_FLAG_ARROWS))) {
+               SPrint(FileName, 255, L"%s\\arrow_left.icns", GlobalConfig.IconsDir ? GlobalConfig.IconsDir : DEFAULT_ICONS_DIR);
+               PaintIcon(&egemb_arrow_left, FileName, row0PosX - TILE_XSPACING,
                          row0PosY + (ROW0_TILESIZE / 2), ALIGN_RIGHT);
-            if ((State->LastVisible < (row0Loaders - 1)) && (!(GlobalConfig.HideUIFlags & HIDEUI_FLAG_ARROWS)))
-               PaintIcon(&egemb_arrow_right, L"icons\\arrow_right.icns",
+            } // if
+            if ((State->LastVisible < (row0Loaders - 1)) && (!(GlobalConfig.HideUIFlags & HIDEUI_FLAG_ARROWS))) {
+               SPrint(FileName, 255, L"%s\\arrow_left.icns", GlobalConfig.IconsDir ? GlobalConfig.IconsDir : DEFAULT_ICONS_DIR);
+               PaintIcon(&egemb_arrow_right, FileName,
                          (UGAWidth + (ROW0_TILESIZE + TILE_XSPACING) * State->MaxVisible) / 2 + TILE_XSPACING,
                          row0PosY + (ROW0_TILESIZE / 2), ALIGN_LEFT);
+            } // if
             break;
 
         case MENU_FUNCTION_PAINT_SELECTION:

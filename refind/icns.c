@@ -45,30 +45,35 @@
 
 typedef struct {
     EG_IMAGE    *Image;
-    CHAR16      *Path;
+    CHAR16      *FileName;
     UINTN       PixelSize;
 } BUILTIN_ICON;
 
 BUILTIN_ICON BuiltinIconTable[BUILTIN_ICON_COUNT] = {
-    { NULL, L"icons\\func_about.icns", 48 },
-    { NULL, L"icons\\func_reset.icns", 48 },
-    { NULL, L"icons\\func_shutdown.icns", 48 },
-    { NULL, L"icons\\func_exit.icns", 48 },
-    { NULL, L"icons\\tool_shell.icns", 48 },
-    { NULL, L"icons\\tool_part.icns", 48 },
-    { NULL, L"icons\\tool_rescue.icns", 48 },
-    { NULL, L"icons\\vol_internal.icns", 32 },
-    { NULL, L"icons\\vol_external.icns", 32 },
-    { NULL, L"icons\\vol_optical.icns", 32 },
+   { NULL, L"func_about.icns", 48 },
+   { NULL, L"func_reset.icns", 48 },
+   { NULL, L"func_shutdown.icns", 48 },
+   { NULL, L"func_exit.icns", 48 },
+   { NULL, L"tool_shell.icns", 48 },
+   { NULL, L"tool_part.icns", 48 },
+   { NULL, L"tool_rescue.icns", 48 },
+   { NULL, L"vol_internal.icns", 32 },
+   { NULL, L"vol_external.icns", 32 },
+   { NULL, L"vol_optical.icns", 32 },
 };
 
 EG_IMAGE * BuiltinIcon(IN UINTN Id)
 {
+    CHAR16 FileName[256];
+
     if (Id >= BUILTIN_ICON_COUNT)
         return NULL;
 
-    if (BuiltinIconTable[Id].Image == NULL)
-        BuiltinIconTable[Id].Image = LoadIcnsFallback(SelfDir, BuiltinIconTable[Id].Path, BuiltinIconTable[Id].PixelSize);
+    if (BuiltinIconTable[Id].Image == NULL) {
+        SPrint(FileName, 255, L"%s\\%s", GlobalConfig.IconsDir ? GlobalConfig.IconsDir : DEFAULT_ICONS_DIR,
+               BuiltinIconTable[Id].FileName);
+        BuiltinIconTable[Id].Image = LoadIcnsFallback(SelfDir, FileName, BuiltinIconTable[Id].PixelSize);
+    } // if
 
     return BuiltinIconTable[Id].Image;
 }
@@ -90,7 +95,8 @@ EG_IMAGE * LoadOSIcon(IN CHAR16 *OSIconName OPTIONAL, IN CHAR16 *FallbackIconNam
 
     // try the names from OSIconName
     while ((CutoutName = FindCommaDelimited(OSIconName, Index++)) != NULL) {
-        SPrint(FileName, 255, L"icons\\%s_%s.icns", BootLogo ? L"boot" : L"os", CutoutName);
+       SPrint(FileName, 255, L"%s\\%s_%s.icns", GlobalConfig.IconsDir ? GlobalConfig.IconsDir : DEFAULT_ICONS_DIR,
+              BootLogo ? L"boot" : L"os", CutoutName);
 
         // try to load it
         Image = egLoadIcon(SelfDir, FileName, 128);
@@ -100,7 +106,8 @@ EG_IMAGE * LoadOSIcon(IN CHAR16 *OSIconName OPTIONAL, IN CHAR16 *FallbackIconNam
     } // while
 
     // try the fallback name
-    SPrint(FileName, 255, L"icons\\%s_%s.icns", BootLogo ? L"boot" : L"os", FallbackIconName);
+    SPrint(FileName, 255, L"%s\\%s_%s.icns", GlobalConfig.IconsDir ? GlobalConfig.IconsDir : DEFAULT_ICONS_DIR,
+           BootLogo ? L"boot" : L"os", FallbackIconName);
     Image = egLoadIcon(SelfDir, FileName, 128);
     if (Image != NULL)
         return Image;

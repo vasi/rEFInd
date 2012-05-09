@@ -350,6 +350,11 @@ VOID ReadConfig(VOID)
                 }
             }
 
+        } else if ((StriCmp(TokenList[0], L"icons_dir") == 0) && (TokenCount == 2)) {
+           if (GlobalConfig.IconsDir != NULL)
+              FreePool(GlobalConfig.IconsDir);
+           GlobalConfig.IconsDir = StrDuplicate(TokenList[1]);
+
         } else if (StriCmp(TokenList[0], L"scanfor") == 0) {
            for (i = 0; i < NUM_SCAN_OPTIONS; i++) {
               if (i < TokenCount)

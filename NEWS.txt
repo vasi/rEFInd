@@ -1,8 +1,22 @@
 0.3.4 (?/??/2012):
 ------------------
 
+- Added new configuration file option: "icons_dir", which sets the name
+  of the subdirectory in which icons are found. See the documentation or
+  sample configuration file for a full description.
+
+- Modified Makefile to generate rEFInd binary that includes architecture
+  code -- refind_ia32.efi or refind_x64.efi, rather than the generic
+  refind.efi. This is done mainly to help the install.sh script. The
+  program can be named anything you like on the disk. (The generic name
+  refind.efi is used on unknown architectures.)
+
+- Improved install.sh script: Fixed bug on OS X 10.7 and enable it to be
+  used after building from source code (or via new "make install" Makefile
+  target).
+
 - Improved screen redraws to produce less flicker when moving among the
-  second-row tags.
+  second-row tags or to the last tag on the first row.
 
 0.3.3 (5/6/2012):
 -----------------

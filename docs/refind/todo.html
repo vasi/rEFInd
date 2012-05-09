@@ -121,11 +121,14 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
     theming by replacing icon files. If you'd like to design a new theme
     for rEFInd, feel free to submit it. I might or might not replace the
     icons it uses now (most of which come from the Oxygen Icons package),
-    but I may provide a way to make selecting a theme from one of several
-    installed themes easy, and provide links to themes on this Web site (or
-    even host them on the project's Sourceforge page). For more information
-    on designing themes for rEFInd, see the <a href="themes.html">Theming
-    rEFInd</a> page.</li>
+    but I may provide links to themes on this Web site (or even host them
+    on the project's Sourceforge page). For more information on designing
+    themes for rEFInd, see the <a href="themes.html">Theming rEFInd</a>
+    page.</li>
+
+<li>If the <tt>icons_dir</tt> option points to a non-existent directory,
+    the program displays ugly "icon-missing" icons. It would be better to
+    drop back to the default icon set.</li>
 
 <li>The code could be more flexible in its handling of the sizes of various
     graphical elements, and particularly drawn text. Prior to version

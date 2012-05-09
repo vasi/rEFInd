@@ -83,6 +83,7 @@ VOID ExtractLegacyLoaderPaths(EFI_DEVICE_PATH **PathList, UINTN MaxPaths, EFI_DE
 VOID ScanVolumes(VOID);
 
 BOOLEAN FileExists(IN EFI_FILE *BaseDir, IN CHAR16 *RelativePath);
+BOOLEAN DirectoryExists(IN EFI_FILE *BaseDir, IN CHAR16 *RelativePath);
 
 EFI_STATUS DirNextEntry(IN EFI_FILE *Directory, IN OUT EFI_FILE_INFO **DirEntry, IN UINTN FilterMode);
 
