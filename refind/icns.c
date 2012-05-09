@@ -160,7 +160,7 @@ EG_IMAGE * DummyImage(IN UINTN PixelSize)
         }
         YPtr += LineOffset;
     }
-    
+
     return Image;
 }
 

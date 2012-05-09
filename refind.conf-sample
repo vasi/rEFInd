@@ -23,7 +23,10 @@ timeout 20
 
 # Set the name of a subdirectory in which icons are stored. Icons must
 # have the same names they have in the standard directory. The directory
-# name is specified relative to the main rEFInd binary's directory.
+# name is specified relative to the main rEFInd binary's directory. If
+# an icon can't be found in the specified directory, an attempt is made
+# to load it from the default directory; thus, you can replace just some
+# icons in your own directory and rely on the default for others.
 # Default is "icons".
 #
 #icons_dir myicons

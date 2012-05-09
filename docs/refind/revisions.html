@@ -14,7 +14,7 @@
 <p class="subhead">by Roderick W. Smith, <a
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
-<p>Last Web page update: 5/6/2012</p>
+<p>Last Web page update: 5/9/2012</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -92,6 +92,8 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 <p>The following summarizes changes in rEFInd's public releases:</p>
 
 <ul>
+
+<li><b>0.3.4 (5/9/2012)</b>&mdash;The biggest change to this version is the addition of the <tt>icons_dir</tt> configuration file token, which enables you to specify a directory that holds icons that override those in the default <tt>icons</tt> subdirectory. See the <a href="themes.html">Theming rEFInd</a> and <a href="configfile.html">Configuring the Boot Manager</a> pages for details. This version also reduces flicker when moving your selection around the screen and modifies the <tt>install.sh</tt> script so that it can be used directly after building rEFInd from source code. Related to this, building from source now creates a binary that includes an architecture code&mdash;<tt>refind_ia32.efi</tt> or <tt>refind_x64.efi</tt> rather than <tt>refind.efi</tt>.</li>
 
 <li><b>0.3.3 (5/6/2012)</b>&mdash;I've focused on user interface improvements for this release. The biggest improvement is in the text-mode interface, which suffered from assorted display glitches in previous releases. These have now been fixed, so the text-mode interface should be more usable. I've also fine-tuned the use of keyboard keys, particularly in graphical mode. The up and down arrow keys now move between the two rows of the display, and Page Up and Page Down scroll the first row if it's too big for the display. (They'll also move between rows, but only when at the end of the first row or the start of the second.) Returning from a failed loader or a tool or built-in function now renders that tag as the currently-selected item, rather than setting the default loader as active, as happened with previous versions.</li>
 

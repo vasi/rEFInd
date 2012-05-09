@@ -151,3 +151,6 @@ build process for your binary packages (RPMs, Debian packages, etc.).
 (Gentoo could use it in an ebuild, though....) You COULD, however, copy the
 files to a directory somewhere (/usr/share/refind or whatever) and then
 call install.sh as part of the binary package installation process.
+Placing the files in /boot/efi/EFI/{distname}/refind and then having a
+post-install script call efibootmgr is probably the better way to go,
+though.

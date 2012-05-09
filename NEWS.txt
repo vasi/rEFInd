@@ -1,5 +1,5 @@
-0.3.4 (?/??/2012):
-------------------
+0.3.4 (5/9/2012):
+-----------------
 
 - Added new configuration file option: "icons_dir", which sets the name
   of the subdirectory in which icons are found. See the documentation or

@@ -15,7 +15,7 @@
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <p>Originally written: 4/19/2012; last Web page update:
-5/6/2012, referencing rEFInd 0.3.4</p>
+5/9/2012, referencing rEFInd 0.3.4</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -96,7 +96,7 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <ul>
 
-<li>You can create new icons, place them in a subdirectory rEFInd's main directory, and tell the program to use the new icons by setting the <tt>icons_dir</tt> token in <tt>refind.conf</tt>. This will affect the appearance of the OS tags, the utility tags, and so on. The names of these icons should match those in the <tt>icons</tt> subdirectory, and are fairly self-explanatory. Be aware that rEFInd expects its icons to be in Apple's <a href="http://en.wikipedia.org/wiki/Icns">icon image format (ICNS).</a> You can generate such files easily in various Apple programs, or by using the <a href="http://icns.sourceforge.net/">libicns</a> library (and in particular its <tt>png2icns</tt> program) in Linux.</li>
+<li>You can create new icons, place them in a subdirectory of rEFInd's main directory, and tell the program to use the new icons by setting the <tt>icons_dir</tt> token in <tt>refind.conf</tt>. This will affect the appearance of the OS tags, the utility tags, and so on. The names of these icons should match those in the <tt>icons</tt> subdirectory, and are fairly self-explanatory. If an icon is missing from the directory specified by <tt>icons_dir</tt>, rEFInd falls back to the icon from the standard <tt>icons</tt> subdirectory; thus, you can replace just a subset of the standard icons. Be aware that rEFInd expects its icons to be in Apple's <a href="http://en.wikipedia.org/wiki/Icns">icon image format (ICNS).</a> You can generate such files easily in various Apple programs, or by using the <a href="http://icns.sourceforge.net/">libicns</a> library (and in particular its <tt>png2icns</tt> program) in Linux.</li>
 
 <li>You can do as above, but place your new icons in the default <tt>icons</tt> subdirectory. This method is discouraged because using the <tt>install.sh</tt> script to upgrade rEFInd will replace your customized icons.</li>
 

@@ -15,7 +15,7 @@
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <p>Originally written: 3/14/2012; last Web page update:
-5/6/2012, referencing rEFInd 0.3.3</p>
+5/9/2012, referencing rEFInd 0.3.4</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -151,7 +151,7 @@ timeout 20
 <tr>
    <td><tt>icons_dir</tt></td>
    <td>directory name</td>
-   <td>Specifies a directory in which custom icons may be found. This directory should contain files with the same names as the files in the standard <tt>icons</tt> directory. The directory name is specified relative to the directory in which the rEFInd binary resides.</td>
+   <td>Specifies a directory in which custom icons may be found. This directory should contain files with the same names as the files in the standard <tt>icons</tt> directory. The directory name is specified relative to the directory in which the rEFInd binary resides. The standard <tt>icons</tt> directory is searched if an icon can't be found in the one specified by <tt>icons_dir</tt>, so you can use this location to redefine just some icons.</td>
 </tr>
 <tr>
    <td><tt>banner</tt></td>
@@ -270,7 +270,7 @@ default_selection elilo
 <tr>
    <td><tt>icon</tt></td>
    <td>filename</td>
-   <td>Sets the filename for an icon for the menu. If you omit this item, a default icon will be used, based on rEFInd's auto-detection algorithms.</td>
+   <td>Sets the filename for an icon for the menu. If you omit this item, a default icon will be used, based on rEFInd's auto-detection algorithms. The filename should be a complete path from the root of the current directory, not relative to the default icons subdirectory or the one set via <tt>icons_dir</tt>.</td>
 </tr>
 <tr>
    <td><tt>ostype</tt></td>

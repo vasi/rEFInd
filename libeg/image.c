@@ -35,6 +35,8 @@
  */
 
 #include "libegint.h"
+#include "../refind/global.h"
+#include "../refind/lib.h"
 #include "refit_call_wrapper.h"
 
 #define MAX_FILE_SIZE (1024*1024*1024)
@@ -46,7 +48,7 @@
 EG_IMAGE * egCreateImage(IN UINTN Width, IN UINTN Height, IN BOOLEAN HasAlpha)
 {
     EG_IMAGE        *NewImage;
-    
+
     NewImage = (EG_IMAGE *) AllocatePool(sizeof(EG_IMAGE));
     if (NewImage == NULL)
         return NULL;
@@ -55,7 +57,7 @@ EG_IMAGE * egCreateImage(IN UINTN Width, IN UINTN Height, IN BOOLEAN HasAlpha)
         FreePool(NewImage);
         return NULL;
     }
-    
+
     NewImage->Width = Width;
     NewImage->Height = Height;
     NewImage->HasAlpha = HasAlpha;
@@ -65,11 +67,11 @@ EG_IMAGE * egCreateImage(IN UINTN Width, IN UINTN Height, IN BOOLEAN HasAlpha)
 EG_IMAGE * egCreateFilledImage(IN UINTN Width, IN UINTN Height, IN BOOLEAN HasAlpha, IN EG_PIXEL *Color)
 {
     EG_IMAGE        *NewImage;
-    
+
     NewImage = egCreateImage(Width, Height, HasAlpha);
     if (NewImage == NULL)
         return NULL;
-    
+
     egFillImage(NewImage, Color);
     return NewImage;
 }
@@ -111,14 +113,12 @@ EFI_STATUS egLoadFile(IN EFI_FILE* BaseDir, IN CHAR16 *FileName,
 
     Status = refit_call5_wrapper(BaseDir->Open, BaseDir, &FileHandle, FileName, EFI_FILE_MODE_READ, 0);
     if (EFI_ERROR(Status)) {
-//        Print(L"Returning %d from egLoadFile() because of an error on open!\n", Status);
         return Status;
     }
 
     FileInfo = LibFileInfo(FileHandle);
     if (FileInfo == NULL) {
         refit_call1_wrapper(FileHandle->Close, FileHandle);
-//        Print(L"LibFileInfo() returned NULL!\n");
         return EFI_NOT_FOUND;
     }
     ReadSize = FileInfo->FileSize;
@@ -132,7 +132,7 @@ EFI_STATUS egLoadFile(IN EFI_FILE* BaseDir, IN CHAR16 *FileName,
         refit_call1_wrapper(FileHandle->Close, FileHandle);
         return EFI_OUT_OF_RESOURCES;
     }
-    
+
     Status = refit_call3_wrapper(FileHandle->Read, FileHandle, &BufferSize, Buffer);
     refit_call1_wrapper(FileHandle->Close, FileHandle);
     if (EFI_ERROR(Status)) {
@@ -142,7 +142,6 @@ EFI_STATUS egLoadFile(IN EFI_FILE* BaseDir, IN CHAR16 *FileName,
 
     *FileData = Buffer;
     *FileDataLength = BufferSize;
-//    Print(L"In egLoadFile(), Returning EFI_SUCCESS\n");
     return EFI_SUCCESS;
 }
 
@@ -247,32 +246,40 @@ EG_IMAGE * egLoadImage(IN EFI_FILE* BaseDir, IN CHAR16 *FileName, IN BOOLEAN Wan
     return NewImage;
 }
 
-EG_IMAGE * egLoadIcon(IN EFI_FILE* BaseDir, IN CHAR16 *FileName, IN UINTN IconSize)
+// Load an icon from (BaseDir)/Path, extracting the icon of size IconSize x IconSize.
+// If the initial attempt is unsuccessful, try again, replacing the directory
+// component of Path with DEFAULT_ICONS_DIR.
+// Note: The assumption is that BaseDir points to rEFInd's home directory and Path
+// includes one subdirectory level. If this changes in future revisions, it may be
+// necessary to alter the code that tries again with DEFAULT_ICONS_DIR.
+// Returns a pointer to the image data, or NULL if the icon could not be loaded.
+EG_IMAGE * egLoadIcon(IN EFI_FILE* BaseDir, IN CHAR16 *Path, IN UINTN IconSize)
 {
     EFI_STATUS      Status;
     UINT8           *FileData;
     UINTN           FileDataLength;
+    CHAR16          *FileName, FileName2[256];
     EG_IMAGE        *NewImage;
 
-    if (BaseDir == NULL || FileName == NULL)
+    if (BaseDir == NULL || Path == NULL)
         return NULL;
 
     // load file
-    Status = egLoadFile(BaseDir, FileName, &FileData, &FileDataLength);
+    Status = egLoadFile(BaseDir, Path, &FileData, &FileDataLength);
     if (EFI_ERROR(Status)) {
-//        Print(L"In egLoadIcon(), Status = %d after egLoadFile(); aborting load!\n", Status);
-        return NULL;
+        FileName = Basename(Path); // Note: FileName is a pointer within Path; DON'T FREE IT!
+        SPrint(FileName2, 255, L"%s\\%s", DEFAULT_ICONS_DIR, FileName);
+        Status = egLoadFile(BaseDir, FileName2, &FileData, &FileDataLength);
+        if (EFI_ERROR(Status))
+           return NULL;
     }
 
     // decode it
-    NewImage = egDecodeAny(FileData, FileDataLength, egFindExtension(FileName), IconSize, TRUE);
-//    Print(L"Done with egDecodeAny(), used extension '%s'\n", egFindExtension(FileName));
-//    if (NewImage == NULL)
-//       Print(L"Returning NULL from egLoadIcon()\n");
+    NewImage = egDecodeAny(FileData, FileDataLength, egFindExtension(Path), IconSize, TRUE);
     FreePool(FileData);
 
     return NewImage;
-}
+} // EG_IMAGE *egLoadIcon()
 
 EG_IMAGE * egDecodeImage(IN UINT8 *FileData, IN UINTN FileDataLength, IN CHAR16 *Format, IN BOOLEAN WantAlpha)
 {
@@ -285,26 +292,26 @@ EG_IMAGE * egPrepareEmbeddedImage(IN EG_EMBEDDED_IMAGE *EmbeddedImage, IN BOOLEA
     UINT8               *CompData;
     UINTN               CompLen;
     UINTN               PixelCount;
-    
+
     // sanity check
     if (EmbeddedImage->PixelMode > EG_MAX_EIPIXELMODE ||
         (EmbeddedImage->CompressMode != EG_EICOMPMODE_NONE && EmbeddedImage->CompressMode != EG_EICOMPMODE_RLE))
         return NULL;
-    
+
     // allocate image structure and pixel buffer
     NewImage = egCreateImage(EmbeddedImage->Width, EmbeddedImage->Height, WantAlpha);
     if (NewImage == NULL)
         return NULL;
-    
+
     CompData = (UINT8 *)EmbeddedImage->Data;   // drop const
     CompLen  = EmbeddedImage->DataLength;
     PixelCount = EmbeddedImage->Width * EmbeddedImage->Height;
-    
+
     // FUTURE: for EG_EICOMPMODE_EFICOMPRESS, decompress whole data block here
-    
+
     if (EmbeddedImage->PixelMode == EG_EIPIXELMODE_GRAY ||
         EmbeddedImage->PixelMode == EG_EIPIXELMODE_GRAY_ALPHA) {
-        
+
         // copy grayscale plane and expand
         if (EmbeddedImage->CompressMode == EG_EICOMPMODE_RLE) {
             egDecompressIcnsRLE(&CompData, &CompLen, PLPTR(NewImage, r), PixelCount);
@@ -314,10 +321,10 @@ EG_IMAGE * egPrepareEmbeddedImage(IN EG_EMBEDDED_IMAGE *EmbeddedImage, IN BOOLEA
         }
         egCopyPlane(PLPTR(NewImage, r), PLPTR(NewImage, g), PixelCount);
         egCopyPlane(PLPTR(NewImage, r), PLPTR(NewImage, b), PixelCount);
-        
+
     } else if (EmbeddedImage->PixelMode == EG_EIPIXELMODE_COLOR ||
                EmbeddedImage->PixelMode == EG_EIPIXELMODE_COLOR_ALPHA) {
-        
+
         // copy color planes
         if (EmbeddedImage->CompressMode == EG_EICOMPMODE_RLE) {
             egDecompressIcnsRLE(&CompData, &CompLen, PLPTR(NewImage, r), PixelCount);
@@ -331,20 +338,20 @@ EG_IMAGE * egPrepareEmbeddedImage(IN EG_EMBEDDED_IMAGE *EmbeddedImage, IN BOOLEA
             egInsertPlane(CompData, PLPTR(NewImage, b), PixelCount);
             CompData += PixelCount;
         }
-        
+
     } else {
-        
+
         // set color planes to black
         egSetPlane(PLPTR(NewImage, r), 0, PixelCount);
         egSetPlane(PLPTR(NewImage, g), 0, PixelCount);
         egSetPlane(PLPTR(NewImage, b), 0, PixelCount);
-        
+
     }
-    
+
     if (WantAlpha && (EmbeddedImage->PixelMode == EG_EIPIXELMODE_GRAY_ALPHA ||
                       EmbeddedImage->PixelMode == EG_EIPIXELMODE_COLOR_ALPHA ||
                       EmbeddedImage->PixelMode == EG_EIPIXELMODE_ALPHA)) {
-        
+
         // copy alpha plane
         if (EmbeddedImage->CompressMode == EG_EICOMPMODE_RLE) {
             egDecompressIcnsRLE(&CompData, &CompLen, PLPTR(NewImage, a), PixelCount);
@@ -352,11 +359,11 @@ EG_IMAGE * egPrepareEmbeddedImage(IN EG_EMBEDDED_IMAGE *EmbeddedImage, IN BOOLEA
             egInsertPlane(CompData, PLPTR(NewImage, a), PixelCount);
             CompData += PixelCount;
         }
-        
+
     } else {
         egSetPlane(PLPTR(NewImage, a), WantAlpha ? 255 : 0, PixelCount);
     }
-    
+
     return NewImage;
 }
 
