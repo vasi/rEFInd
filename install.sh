@@ -59,7 +59,6 @@ CheckForFiles() {
    else
       echo "The icons directory is missing! Aborting installation!"
    fi
-#|| ! -f $RefindDir/refind.conf-sample || ! -d $RefindDir/icons
 } # CheckForFiles()
 
 # Copy the rEFInd files to the ESP or OS X root partition.

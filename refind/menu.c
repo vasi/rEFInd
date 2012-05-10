@@ -813,7 +813,7 @@ static VOID PaintIcon(IN EG_EMBEDDED_IMAGE *BuiltInIcon, IN CHAR16 *ExternalFile
          PosX -= Icon->Width;
       BltImageAlpha(Icon, PosX, PosY - (Icon->Height / 2), &MenuBackgroundPixel);
    }
-} // static VOID PaintArrow()
+} // static VOID PaintIcon()
 
 // Display main menu in graphics mode
 VOID MainMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, IN UINTN Function, IN CHAR16 *ParamText)
@@ -886,7 +886,7 @@ VOID MainMenuStyle(IN REFIT_MENU_SCREEN *Screen, IN SCROLL_STATE *State, IN UINT
                          row0PosY + (ROW0_TILESIZE / 2), ALIGN_RIGHT);
             } // if
             if ((State->LastVisible < (row0Loaders - 1)) && (!(GlobalConfig.HideUIFlags & HIDEUI_FLAG_ARROWS))) {
-               SPrint(FileName, 255, L"%s\\arrow_left.icns", GlobalConfig.IconsDir ? GlobalConfig.IconsDir : DEFAULT_ICONS_DIR);
+               SPrint(FileName, 255, L"%s\\arrow_right.icns", GlobalConfig.IconsDir ? GlobalConfig.IconsDir : DEFAULT_ICONS_DIR);
                PaintIcon(&egemb_arrow_right, FileName,
                          (UGAWidth + (ROW0_TILESIZE + TILE_XSPACING) * State->MaxVisible) / 2 + TILE_XSPACING,
                          row0PosY + (ROW0_TILESIZE / 2), ALIGN_LEFT);
