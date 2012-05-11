@@ -1,3 +1,16 @@
+0.3.5 (?/??/2012):
+------------------
+
+- Added re-scan feature: Press the Esc key to have rEFInd re-read its 
+  configuration file, tell the EFI to scan for new filesystems, and re-scan
+  those filesystems for boot loaders. The main purpose is to enable
+  scanning a new removable medium that you insert after launching rEFInd;
+  however, it can also be used to immediately implement changes to the
+  configuration file or new drivers you load from an EFI shell.
+
+- Fixed a bug that could cause the scroll-right arrow to be replaced by the
+  scroll-left arrow under some circumstances.
+
 0.3.4 (5/9/2012):
 -----------------
 

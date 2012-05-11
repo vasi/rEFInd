@@ -238,4 +238,5 @@ menuentry "Windows via shell script" {
 	icon \EFI\refind\icons\os_win.icns
 	loader \EFI\tools\shell.efi
 	options "fs0:\EFI\tools\launch_windows.nsh"
+	disabled
 }

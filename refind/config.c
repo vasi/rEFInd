@@ -138,18 +138,18 @@ static CHAR16 *ReadLine(REFIT_FILE *File)
 {
     CHAR16  *Line, *q;
     UINTN   LineLength;
-    
+
     if (File->Buffer == NULL)
         return NULL;
-    
+
     if (File->Encoding == ENCODING_ISO8859_1 || File->Encoding == ENCODING_UTF8) {
-        
+
         CHAR8 *p, *LineStart, *LineEnd;
-        
+
         p = File->Current8Ptr;
         if (p >= File->End8Ptr)
             return NULL;
-        
+
         LineStart = p;
         for (; p < File->End8Ptr; p++)
             if (*p == 13 || *p == 10)
@@ -159,12 +159,12 @@ static CHAR16 *ReadLine(REFIT_FILE *File)
             if (*p != 13 && *p != 10)
                 break;
         File->Current8Ptr = p;
-        
+
         LineLength = (UINTN)(LineEnd - LineStart) + 1;
         Line = AllocatePool(LineLength * sizeof(CHAR16));
         if (Line == NULL)
             return NULL;
-        
+
         q = Line;
         if (File->Encoding == ENCODING_ISO8859_1) {
             for (p = LineStart; p < LineEnd; )
@@ -267,40 +267,36 @@ VOID FreeTokenLine(IN OUT CHAR16 ***TokenList, IN OUT UINTN *TokenCount)
     FreeList((VOID ***)TokenList, TokenCount);
 }
 
-//
 // handle a parameter with a single integer argument
-//
-
 static VOID HandleInt(IN CHAR16 **TokenList, IN UINTN TokenCount, OUT UINTN *Value)
 {
-    if (TokenCount < 2) {
-        return;
-    }
-    if (TokenCount > 2) {
-        return;
-    }
-    *Value = Atoi(TokenList[1]);
+    if (TokenCount == 2)
+       *Value = Atoi(TokenList[1]);
 }
 
-//
 // handle a parameter with a single string argument
-//
+static VOID HandleString(IN CHAR16 **TokenList, IN UINTN TokenCount, OUT CHAR16 **Target) {
+   if (TokenCount == 2) {
+      if (*Target != NULL)
+         FreePool(*Target);
+      *Target = StrDuplicate(TokenList[1]);
+   } // if
+} // static VOID HandleString()
 
-static VOID HandleString(IN CHAR16 **TokenList, IN UINTN TokenCount, OUT CHAR16 **Value)
-{
-    if (TokenCount < 2) {
-        return;
-    }
-    if (TokenCount > 2) {
-        return;
-    }
-    *Value = StrDuplicate(TokenList[1]);
-}
+// Handle a parameter with a series of string arguments, to be added to a comma-delimited
+// list
+static VOID HandleStrings(IN CHAR16 **TokenList, IN UINTN TokenCount, OUT CHAR16 **Target) {
+   UINTN i;
 
-//
+   if (*Target != NULL) {
+      FreePool(*Target);
+      *Target = NULL;
+   } // if
+    for (i = 1; i < TokenCount; i++)
+       MergeStrings(Target, TokenList[i], L',');
+} // static VOID HandleStrings()
+
 // read config file
-//
-
 VOID ReadConfig(VOID)
 {
     EFI_STATUS      Status;
@@ -326,11 +322,7 @@ VOID ReadConfig(VOID)
         if (StriCmp(TokenList[0], L"timeout") == 0) {
             HandleInt(TokenList, TokenCount, &(GlobalConfig.Timeout));
 
-        // Note: I'm using "disable" as equivalent to "hideui" for the moment (as of rEFInd 0.2.4)
-        // because I've folded two options into one and removed some values, so I want to catch
-        // existing configurations as much as possible. The "disable" equivalency to "hideui" will
-        // be removed sooner or later, leaving only "hideui".
-        } else if ((StriCmp(TokenList[0], L"hideui") == 0) || (StriCmp(TokenList[0], L"disable") == 0)) {
+        } else if (StriCmp(TokenList[0], L"hideui") == 0) {
             for (i = 1; i < TokenCount; i++) {
                 FlagName = TokenList[i];
                 if (StriCmp(FlagName, L"banner") == 0) {
@@ -350,10 +342,8 @@ VOID ReadConfig(VOID)
                 }
             }
 
-        } else if ((StriCmp(TokenList[0], L"icons_dir") == 0) && (TokenCount == 2)) {
-           if (GlobalConfig.IconsDir != NULL)
-              FreePool(GlobalConfig.IconsDir);
-           GlobalConfig.IconsDir = StrDuplicate(TokenList[1]);
+        } else if (StriCmp(TokenList[0], L"icons_dir") == 0) {
+           HandleString(TokenList, TokenCount, &(GlobalConfig.IconsDir));
 
         } else if (StriCmp(TokenList[0], L"scanfor") == 0) {
            for (i = 0; i < NUM_SCAN_OPTIONS; i++) {
@@ -364,20 +354,10 @@ VOID ReadConfig(VOID)
            }
 
         } else if (StriCmp(TokenList[0], L"also_scan_dirs") == 0) {
-           if (GlobalConfig.AlsoScan != NULL) {
-              FreePool(GlobalConfig.AlsoScan);
-              GlobalConfig.AlsoScan = NULL;
-           } // if
-           for (i = 1; i < TokenCount; i++)
-              MergeStrings(&GlobalConfig.AlsoScan, TokenList[i], L',');
+            HandleStrings(TokenList, TokenCount, &(GlobalConfig.AlsoScan));
 
         } else if (StriCmp(TokenList[0], L"scan_driver_dirs") == 0) {
-           if (GlobalConfig.DriverDirs != NULL) {
-              FreePool(GlobalConfig.DriverDirs);
-              GlobalConfig.DriverDirs = NULL;
-           } // if
-           for (i = 1; i < TokenCount; i++)
-              MergeStrings(&GlobalConfig.DriverDirs, TokenList[i], L',');
+            HandleStrings(TokenList, TokenCount, &(GlobalConfig.DriverDirs));
 
         } else if (StriCmp(TokenList[0], L"showtools") == 0) {
             SetMem(GlobalConfig.ShowTools, NUM_TOOLS * sizeof(UINTN), 0);
@@ -396,21 +376,21 @@ VOID ReadConfig(VOID)
                 } else if (StriCmp(FlagName, L"shutdown") == 0) {
                    GlobalConfig.ShowTools[i - 1] = TAG_SHUTDOWN;
                 } else {
-                    Print(L" unknown showtools flag: '%s'\n", FlagName);
+                   Print(L" unknown showtools flag: '%s'\n", FlagName);
                 }
             } // showtools options
 
         } else if (StriCmp(TokenList[0], L"banner") == 0) {
-            HandleString(TokenList, TokenCount, &(GlobalConfig.BannerFileName));
+           HandleString(TokenList, TokenCount, &(GlobalConfig.BannerFileName));
 
         } else if (StriCmp(TokenList[0], L"selection_small") == 0) {
-            HandleString(TokenList, TokenCount, &(GlobalConfig.SelectionSmallFileName));
+           HandleString(TokenList, TokenCount, &(GlobalConfig.SelectionSmallFileName));
 
         } else if (StriCmp(TokenList[0], L"selection_big") == 0) {
-            HandleString(TokenList, TokenCount, &(GlobalConfig.SelectionBigFileName));
+           HandleString(TokenList, TokenCount, &(GlobalConfig.SelectionBigFileName));
 
         } else if (StriCmp(TokenList[0], L"default_selection") == 0) {
-            HandleString(TokenList, TokenCount, &(GlobalConfig.DefaultSelection));
+           HandleString(TokenList, TokenCount, &(GlobalConfig.DefaultSelection));
 
         } else if (StriCmp(TokenList[0], L"textonly") == 0) {
             GlobalConfig.TextOnly = TRUE;
@@ -422,8 +402,8 @@ VOID ReadConfig(VOID)
         } else if (StriCmp(TokenList[0], L"scan_all_linux_kernels") == 0) {
            GlobalConfig.ScanAllLinux = TRUE;
 
-        } else if ((StriCmp(TokenList[0], L"max_tags") == 0) && (TokenCount > 1)) {
-           GlobalConfig.MaxTags = Atoi(TokenList[1]);
+        } else if (StriCmp(TokenList[0], L"max_tags") == 0) {
+           HandleInt(TokenList, TokenCount, &(GlobalConfig.MaxTags));
         }
 
         FreeTokenLine(&TokenList, &TokenCount);

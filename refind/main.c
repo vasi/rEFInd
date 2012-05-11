@@ -104,7 +104,7 @@ static VOID AboutrEFInd(VOID)
 {
     if (AboutMenu.EntryCount == 0) {
         AboutMenu.TitleImage = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.3.4.1");
+        AddMenuInfoLine(&AboutMenu, L"rEFInd Version 0.3.4.3");
         AddMenuInfoLine(&AboutMenu, L"");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2006-2010 Christoph Pfisterer");
         AddMenuInfoLine(&AboutMenu, L"Copyright (c) 2012 Roderick W. Smith");
@@ -295,6 +295,66 @@ LOADER_ENTRY * AddPreparedLoaderEntry(LOADER_ENTRY *Entry) {
 
    return(Entry);
 } // LOADER_ENTRY * AddPreparedLoaderEntry()
+
+// Creates a copy of a menu screen.
+// Returns a pointer to the copy of the menu screen.
+static REFIT_MENU_SCREEN* CopyMenuScreen(REFIT_MENU_SCREEN *Entry) {
+   REFIT_MENU_SCREEN *NewEntry;
+   UINTN i;
+
+   NewEntry = AllocateZeroPool(sizeof(REFIT_MENU_SCREEN));
+   if ((Entry != NULL) && (NewEntry != NULL)) {
+      CopyMem(NewEntry, Entry, sizeof(REFIT_MENU_SCREEN));
+      NewEntry->Title = StrDuplicate(Entry->Title);
+      NewEntry->TimeoutText = StrDuplicate(Entry->TimeoutText);
+      if (Entry->TitleImage != NULL) {
+         NewEntry->TitleImage = AllocatePool(sizeof(EG_IMAGE));
+         if (NewEntry->TitleImage != NULL)
+            CopyMem(NewEntry->TitleImage, Entry->TitleImage, sizeof(EG_IMAGE));
+      } // if
+      NewEntry->InfoLines = (CHAR16**) AllocateZeroPool(Entry->InfoLineCount * (sizeof(CHAR16*)));
+      for (i = 0; i < Entry->InfoLineCount && NewEntry->InfoLines; i++) {
+         NewEntry->InfoLines[i] = StrDuplicate(Entry->InfoLines[i]);
+      } // for
+      NewEntry->Entries = (REFIT_MENU_ENTRY**) AllocateZeroPool(Entry->EntryCount * (sizeof (REFIT_MENU_ENTRY*)));
+      for (i = 0; i < Entry->EntryCount && NewEntry->Entries; i++) {
+         AddMenuEntry(NewEntry, Entry->Entries[i]);
+      } // for
+   } // if
+   return (NewEntry);
+} // static REFIT_MENU_SCREEN* CopyMenuScreen()
+
+// Creates a copy of a menu entry. Intended to enable moving a stack-based
+// menu entry (such as the ones for the "reboot" and "exit" functions) to
+// to the heap. This enables easier deletion of the whole set of menu
+// entries when re-scanning.
+// Returns a pointer to the copy of the menu entry.
+static REFIT_MENU_ENTRY* CopyMenuEntry(REFIT_MENU_ENTRY *Entry) {
+   REFIT_MENU_ENTRY *NewEntry;
+
+   NewEntry = AllocateZeroPool(sizeof(REFIT_MENU_ENTRY));
+   if ((Entry != NULL) && (NewEntry != NULL)) {
+      CopyMem(NewEntry, Entry, sizeof(REFIT_MENU_ENTRY));
+      NewEntry->Title = StrDuplicate(Entry->Title);
+      if (Entry->BadgeImage != NULL) {
+         NewEntry->BadgeImage = AllocatePool(sizeof(EG_IMAGE));
+         if (NewEntry->BadgeImage != NULL)
+            CopyMem(NewEntry->BadgeImage, Entry->BadgeImage, sizeof(EG_IMAGE));
+      }
+      if (Entry->Image != NULL) {
+         NewEntry->Image = AllocatePool(sizeof(EG_IMAGE));
+         if (NewEntry->Image != NULL)
+            CopyMem(NewEntry->Image, Entry->Image, sizeof(EG_IMAGE));
+      }
+      if (Entry->SubScreen != NULL) {
+         NewEntry->SubScreen = CopyMenuScreen(Entry->SubScreen);
+//          NewEntry->SubScreen = AllocatePool(sizeof(REFIT_MENU_SCREEN));
+//          if (NewEntry->SubScreen != NULL)
+//             CopyMem(NewEntry->SubScreen, Entry->SubScreen, sizeof(REFIT_MENU_SCREEN));
+      }
+   } // if
+   return (NewEntry);
+} // REFIT_MENU_ENTRY* CopyMenuEntry()
 
 // Creates a new LOADER_ENTRY data structure and populates it with
 // default values from the specified Entry, or NULL values if Entry
@@ -1385,25 +1445,30 @@ static VOID ScanForBootloaders(VOID) {
 // reboot, etc.)
 static VOID ScanForTools(VOID) {
    CHAR16 *FileName = NULL;
+   REFIT_MENU_ENTRY *TempMenuEntry;
    UINTN i, j;
 
    for (i = 0; i < NUM_TOOLS; i++) {
       switch(GlobalConfig.ShowTools[i]) {
          case TAG_SHUTDOWN:
-            MenuEntryShutdown.Image = BuiltinIcon(BUILTIN_ICON_FUNC_SHUTDOWN);
-            AddMenuEntry(&MainMenu, &MenuEntryShutdown);
+            TempMenuEntry = CopyMenuEntry(&MenuEntryShutdown);
+            TempMenuEntry->Image = BuiltinIcon(BUILTIN_ICON_FUNC_SHUTDOWN);
+            AddMenuEntry(&MainMenu, TempMenuEntry);
             break;
          case TAG_REBOOT:
-            MenuEntryReset.Image = BuiltinIcon(BUILTIN_ICON_FUNC_RESET);
-            AddMenuEntry(&MainMenu, &MenuEntryReset);
+            TempMenuEntry = CopyMenuEntry(&MenuEntryReset);
+            TempMenuEntry->Image = BuiltinIcon(BUILTIN_ICON_FUNC_RESET);
+            AddMenuEntry(&MainMenu, TempMenuEntry);
             break;
          case TAG_ABOUT:
-            MenuEntryAbout.Image = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
-            AddMenuEntry(&MainMenu, &MenuEntryAbout);
+            TempMenuEntry = CopyMenuEntry(&MenuEntryAbout);
+            TempMenuEntry->Image = BuiltinIcon(BUILTIN_ICON_FUNC_ABOUT);
+            AddMenuEntry(&MainMenu, TempMenuEntry);
             break;
          case TAG_EXIT:
-            MenuEntryExit.Image = BuiltinIcon(BUILTIN_ICON_FUNC_EXIT);
-            AddMenuEntry(&MainMenu, &MenuEntryExit);
+            TempMenuEntry = CopyMenuEntry(&MenuEntryExit);
+            TempMenuEntry->Image = BuiltinIcon(BUILTIN_ICON_FUNC_EXIT);
+            AddMenuEntry(&MainMenu, TempMenuEntry);
             break;
          case TAG_SHELL:
             j = 0;
@@ -1435,11 +1500,11 @@ EFI_STATUS
 EFIAPI
 efi_main (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
 {
-    EFI_STATUS Status;
-    BOOLEAN MainLoopRunning = TRUE;
-    REFIT_MENU_ENTRY *ChosenEntry;
-    UINTN MenuExit;
-    CHAR16 *Selection;
+    EFI_STATUS         Status;
+    BOOLEAN            MainLoopRunning = TRUE;
+    REFIT_MENU_ENTRY   *ChosenEntry;
+    UINTN              MenuExit;
+    CHAR16             *Selection;
 
     // bootstrap
     InitializeLib(ImageHandle, SystemTable);
@@ -1468,12 +1533,14 @@ efi_main (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
 
         // We don't allow exiting the main menu with the Escape key.
         if (MenuExit == MENU_EXIT_ESCAPE) {
-           // Commented-out below: Was part of an attempt to get rEFInd to
-           // re-scan disk devices on pressing Esc; but doesn't work (yet), so
-           // removed....
-//             ReadConfig();
-//             ScanForBootloaders();
-//             SetupScreen();
+            FreeList((VOID ***) &(MainMenu.Entries), &MainMenu.EntryCount);
+            MainMenu.Entries = NULL;
+            MainMenu.EntryCount = 0;
+            ReadConfig();
+            ConnectAllDriversToAllControllers();
+            ScanForBootloaders();
+            ScanForTools();
+            SetupScreen();
             continue;
         }
 
