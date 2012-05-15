@@ -15,7 +15,7 @@
 href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <p>Originally written: 3/14/2012; last Web page update:
-5/9/2012, referencing rEFInd 0.3.4</p>
+5/15/2012, referencing rEFInd 0.3.5</p>
 
 
 <p>I'm a technical writer and consultant specializing in Linux technologies. This Web page is provided free of charge and with no annoying outside ads; however, I did take time to prepare it, and Web hosting does cost money. If you find this Web page useful, please consider making a small donation to help keep this site up and running. Thanks!</p>
@@ -159,9 +159,9 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <li>I'd like to find a way to get rEFInd to launch BIOS boot loaders on
     UEFI-based systems. This option currently works only on Macs&mdash;or
-    at least, I've not gotten it to work on any of my UEFI-based PCs. (I
-    have an idea about this, but haven't yet investigated it in detail. If
-    you'd like to help on this, <a
+    at least, I've not gotten it to work on any of my UEFI-based PCs. (I've
+    done some experiments to try to get this to work, but so far without
+    success. If you'd like to help on this, <a
     href="mailto:rodsmith@rodsbooks.com">e-mail me</a> for my
     thoughts.)</li>
 
@@ -184,7 +184,11 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
 
 <li>I've received queries about rEFInd's ability to work with Apple's
     whole-disk encryption scheme that's new with OS X 10.7. Unfortunately,
-    I lack the hardware to test this.</li>
+    I lack the hardware to test this, but my understanding is that it will
+    work correctly <i>if</i> rEFInd is installed in the ESP rather than on
+    the Mac OS X root partition. See <a
+    href="https://sourceforge.net/p/refind/discussion/general/thread/5c7d0195/">this
+    forum thread</a> for more information.</li>
 
 <li>The Shutdown option works correctly on Macs, but not on UEFI-based PCs.
     On such systems, Shutdown reboots the computer. This should be
@@ -206,13 +210,10 @@ href="mailto:rodsmith@rodsbooks.com">rodsmith@rodsbooks.com</a></p>
     Perhaps this could be done via a separate tool that could be launched
     much like the shell or <tt>gptsync</tt>.</li>
 
-<li>I'd like to find a way to have rEFInd re-scan removable media when
-    they're inserted.</li>
-
 <li>Enabling users to eject removable media would be useful.</li>
 
 <li>I'd like to give the user the ability to set custom options on a
-    per-boot basis, similar to what's possible in GRUB.</li>
+    single-boot basis, similar to what's possible in GRUB.</li>
 
 <li>The code is in need of review to search for memory leaks and similar
     problems.</p>

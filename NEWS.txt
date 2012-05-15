@@ -1,5 +1,8 @@
-0.3.5 (?/??/2012):
+0.3.5 (5/15/2012):
 ------------------
+
+- Removed the GRUB 2 detection "reciped" added with 0.3.2, since I've
+  received reports that it's not working as intended.
 
 - Added re-scan feature: Press the Esc key to have rEFInd re-read its 
   configuration file, tell the EFI to scan for new filesystems, and re-scan

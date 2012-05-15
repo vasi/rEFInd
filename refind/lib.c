@@ -366,13 +366,14 @@ static VOID ScanVolumeBootcode(IN OUT REFIT_VOLUME *Volume, OUT BOOLEAN *Bootabl
             Volume->OSIconName = L"grub,linux";
             Volume->OSName = L"Linux";
 
-        // GRUB in BIOS boot partition:
-        } else if (FindMem(SectorBuffer, 512, "Geom\0Read\0 Error", 16) >= 0) {
-            Volume->HasBootCode = TRUE;
-            Volume->OSIconName = L"grub,linux";
-            Volume->OSName = L"Linux";
-            Volume->VolName = L"BIOS Boot Partition";
-            *Bootable = TRUE;
+//         // Below doesn't produce a bootable entry, so commented out for the moment....
+//         // GRUB in BIOS boot partition:
+//         } else if (FindMem(SectorBuffer, 512, "Geom\0Read\0 Error", 16) >= 0) {
+//             Volume->HasBootCode = TRUE;
+//             Volume->OSIconName = L"grub,linux";
+//             Volume->OSName = L"Linux";
+//             Volume->VolName = L"BIOS Boot Partition";
+//             *Bootable = TRUE;
 
         } else if ((*((UINT32 *)(SectorBuffer + 502)) == 0 &&
                     *((UINT32 *)(SectorBuffer + 506)) == 50000 &&
