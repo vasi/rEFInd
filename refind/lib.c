@@ -367,13 +367,13 @@ static VOID ScanVolumeBootcode(IN OUT REFIT_VOLUME *Volume, OUT BOOLEAN *Bootabl
             Volume->OSName = L"Linux";
 
 //         // Below doesn't produce a bootable entry, so commented out for the moment....
-//         // GRUB in BIOS boot partition:
-//         } else if (FindMem(SectorBuffer, 512, "Geom\0Read\0 Error", 16) >= 0) {
-//             Volume->HasBootCode = TRUE;
-//             Volume->OSIconName = L"grub,linux";
-//             Volume->OSName = L"Linux";
-//             Volume->VolName = L"BIOS Boot Partition";
-//             *Bootable = TRUE;
+         // GRUB in BIOS boot partition:
+         } else if (FindMem(SectorBuffer, 512, "Geom\0Read\0 Error", 16) >= 0) {
+             Volume->HasBootCode = TRUE;
+             Volume->OSIconName = L"grub,linux";
+             Volume->OSName = L"Linux";
+             Volume->VolName = L"BIOS Boot Partition";
+             *Bootable = TRUE;
 
         } else if ((*((UINT32 *)(SectorBuffer + 502)) == 0 &&
                     *((UINT32 *)(SectorBuffer + 506)) == 50000 &&
@@ -1276,3 +1276,29 @@ CHAR16 *FindCommaDelimited(IN CHAR16 *InString, IN UINTN Index) {
    } // if
    return (FoundString);
 } // CHAR16 *FindCommaDelimited()
+
+static UINTN DevicePathNodeCount(IN EFI_DEVICE_PATH *DevicePath) {
+  UINTN   Count = 0;
+  for (; !IsDevicePathEnd(DevicePath); ++Count)
+    DevicePath = NextDevicePathNode(DevicePath);
+  return Count;
+}
+
+static EFI_DEVICE_PATH *DevicePathNodeIndex(IN EFI_DEVICE_PATH *DevicePath, INTN Index) {
+  if (Index < 0)
+    Index = DevicePathNodeCount(DevicePath) + Index;
+  for (; Index > 0 && !IsDevicePathEnd(DevicePath); --Index)
+    DevicePath = NextDevicePathNode(DevicePath);
+  
+  if (IsDevicePathEnd(DevicePath))
+    return NULL;
+  return DevicePath;
+}
+
+UINT64 PartitionLBA(IN EFI_DEVICE_PATH *DevicePath) {
+  DevicePath = DevicePathNodeIndex(DevicePath, -1);
+  if (DevicePathType(DevicePath) != MEDIA_DEVICE_PATH || DevicePathSubType(DevicePath) != MEDIA_HARDDRIVE_DP)
+    return 0;
+  
+  return ((HARDDRIVE_DEVICE_PATH*)DevicePath)->PartitionStart;
+}

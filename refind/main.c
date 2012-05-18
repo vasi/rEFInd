@@ -918,7 +918,7 @@ static VOID ScanOptical(VOID) {
 // legacy boot functions
 //
 
-static EFI_STATUS ActivateMbrPartition(IN EFI_BLOCK_IO *BlockIO, IN UINTN PartitionIndex)
+static EFI_STATUS ActivateMbrPartition(IN EFI_BLOCK_IO *BlockIO, IN UINTN PartitionIndex, UINT64 GrubOffset)
 {
     EFI_STATUS          Status;
     UINT8               SectorBuffer[512];
@@ -943,10 +943,16 @@ static EFI_STATUS ActivateMbrPartition(IN EFI_BLOCK_IO *BlockIO, IN UINTN Partit
             break;
         }
     }
-    if (!HaveBootCode) {
+    if (1 || !HaveBootCode) { // FIXME: Only override our own boot code 
         // no boot code found in the MBR, add the syslinux MBR code
         SetMem(SectorBuffer, MBR_BOOTCODE_SIZE, 0);
-        CopyMem(SectorBuffer, syslinux_mbr, SYSLINUX_MBR_SIZE);
+		if (GrubOffset) {
+			Print(L"Writing grub MBR\n");
+			CopyMem(SectorBuffer, grub_mbr, MBR_BOOTCODE_SIZE);
+			*(UINT64*)(SectorBuffer + 0x5c) = GrubOffset;
+		} else {
+			CopyMem(SectorBuffer, syslinux_mbr, SYSLINUX_MBR_SIZE);
+		}
     }
 
     // set the partition active
@@ -1078,6 +1084,7 @@ static VOID StartLegacy(IN LEGACY_ENTRY *Entry)
     EG_IMAGE            *BootLogoImage;
     UINTN               ErrorInStep = 0;
     EFI_DEVICE_PATH     *DiscoveredPathList[MAX_DISCOVERED_PATHS];
+    UINT64              GrubOffset = 0;
 
     BeginExternalScreen(TRUE, L"Booting Legacy OS");
 
@@ -1088,8 +1095,15 @@ static VOID StartLegacy(IN LEGACY_ENTRY *Entry)
                       (UGAHeight - BootLogoImage->Height) >> 1,
                       &StdBackgroundPixel);
 
-    if (Entry->Volume->IsMbrPartition)
-        ActivateMbrPartition(Entry->Volume->WholeDiskBlockIO, Entry->Volume->MbrPartitionIndex);
+    // FIXME: Stupid comparison
+    if (StrCmp(Entry->Volume->VolName, L"BIOS Boot Partition") == 0) {
+        GrubOffset = PartitionLBA(Entry->Volume->DevicePath);
+        Print(L"Booting GRUB BBP: %d\n", GrubOffset);
+    }
+    
+    if (Entry->Volume->IsMbrPartition || GrubOffset)
+        ActivateMbrPartition(Entry->Volume->WholeDiskBlockIO, Entry->Volume->MbrPartitionIndex,
+			GrubOffset);
 
     ExtractLegacyLoaderPaths(DiscoveredPathList, MAX_DISCOVERED_PATHS, LegacyLoaderList);
 
