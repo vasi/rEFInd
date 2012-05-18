@@ -1290,7 +1290,6 @@ VOID EjectMedia(VOID) {
 
   Status = LibLocateHandle(ByProtocol, &AppleRemovableMediaGuid,
       NULL, &HandleCount, &Handles);
-  Print(L"Found %d ejectables\n", HandleCount);
   if (EFI_ERROR(Status) || HandleCount == 0)
       return; // probably not an Apple system
 
@@ -1300,7 +1299,7 @@ VOID EjectMedia(VOID) {
     if (EFI_ERROR(Status))
       continue;
     Status = refit_call1_wrapper(Ejectable->Eject, Ejectable);
-    Print(L"Tried ejecting #%d: status %d\n", HandleIndex, Status);
+	// ignore errors
   }
   FreePool(Handles);
 } // VOID EjectMedia()

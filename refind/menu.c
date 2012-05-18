@@ -85,6 +85,9 @@ static EG_IMAGE *SelectionImages[4] = { NULL, NULL, NULL, NULL };
 static EG_PIXEL SelectionBackgroundPixel = { 0xff, 0xff, 0xff, 0 };
 static EG_IMAGE *TextBuffer = NULL;
 
+// Eject key on Macs, same as F12
+#define SCAN_EJECT 0x16
+
 //
 // Graphics helper functions
 //
@@ -461,7 +464,7 @@ static UINTN RunGenericMenu(IN REFIT_MENU_SCREEN *Screen, IN MENU_STYLE_FUNC Sty
             case SCAN_F10:
                 egScreenShot();
                 break;
-			case 0x0016: // F12
+			case SCAN_EJECT:
 				EjectMedia();
 				break;
         }
