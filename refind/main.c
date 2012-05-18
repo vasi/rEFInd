@@ -693,6 +693,7 @@ VOID SetLoaderDefaults(LOADER_ENTRY *Entry, CHAR16 *LoaderPath, IN REFIT_VOLUME 
 // for icons, options, etc.
 LOADER_ENTRY * AddLoaderEntry(IN CHAR16 *LoaderPath, IN CHAR16 *LoaderTitle, IN REFIT_VOLUME *Volume) {
    LOADER_ENTRY      *Entry;
+   CHAR16            WithSlash[256];
 
    CleanUpPathNameSlashes(LoaderPath);
    Entry = InitializeLoaderEntry(NULL);
@@ -703,7 +704,8 @@ LOADER_ENTRY * AddLoaderEntry(IN CHAR16 *LoaderPath, IN CHAR16 *LoaderTitle, IN 
       Entry->me.BadgeImage = Volume->VolBadgeImage;
       Entry->LoaderPath = StrDuplicate(LoaderPath);
       Entry->VolName = Volume->VolName;
-      Entry->DevicePath = FileDevicePath(Volume->DeviceHandle, Entry->LoaderPath);
+      SPrint(WithSlash, 255, L"\\%s", Entry->LoaderPath);
+      Entry->DevicePath = FileDevicePath(Volume->DeviceHandle, WithSlash);
       SetLoaderDefaults(Entry, LoaderPath, Volume);
       GenerateSubScreen(Entry, Volume);
       AddMenuEntry(&MainMenu, (REFIT_MENU_ENTRY *)Entry);
